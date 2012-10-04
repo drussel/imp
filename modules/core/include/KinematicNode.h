@@ -1,10 +1,26 @@
+/**
+ *  \file IMP/core/KinematicNode.h
+ *  \brief functionality for defining nodes on a kinematic chain
+ *  \authors Dina Schneidman, Barak Raveh
+ *
+ *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ */
+
+#ifndef IMPCORE_KINEMATIC_NODE_H
+#define IMPCORE_KINEMATIC_NODE_H
+
+
+
+
 #ifndef IMP_PROTEINCHAIN_H
 #define IMP_PROTEINCHAIN_H
 
-#include "DOFVector.h"
-#include "CollisionDetector.h"
-#include "RotatableAngle.h"
-#include "RigidPart.h"
+#include <IMP/core/rigid_bodies.h>
+#include <IMP/exception.h>
+
+
+IMPCORE_BEGIN_NAMESPACE
+
 // TODO needs a mechanism to notify the joint if the particles in it have
 //       changed position
 // TODO: what can be moved to Model fast indexing system
@@ -39,6 +55,12 @@ public:
     static Joint setup_particle(Particle*p,
                                 Joint parent_joint,
                                 Joints children_joints)  {
+      if (RigidMember::particle_is_instance(p)) {
+        // see also RigidBody::add_member
+        IMP_THROW("RigidMemer cannot be set as KinematicNode at this point," +
+                  " in order to guarantee coherent coordinates update",
+                  IMP::ValueException);
+      }
       if (!RigidBody::particle_is_instance(p)) {
           RigidBody::setup_particle(p, ParticlesTemp() );
       }
@@ -273,4 +295,9 @@ private:
     <XXX tree structure XXX> tree_;
     };
 
-#endif /* IMP_PROTEINCHAIN_H */
+IMP_DECORATORS_DEF(KinematicNode, KinematicNodes);RigidMember,RigidMembers);
+   IMP_DECORATORS(KinematicNode, KinematicNodes, RigidBodies);
+
+IMPCORE_END_NAMESPACE
+
+#endif  /* IMPCORE_KINEMATIC_NODE_H */

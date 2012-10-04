@@ -20,7 +20,7 @@
 #include <IMP/core/internal/rigid_body_tree.h>
 #include <IMP/internal/InternalListSingletonContainer.h>
 #include <IMP/algebra/geometric_alignment.h>
-
+#include <IMP/exception.h>
 
 IMPCORE_BEGIN_INTERNAL_NAMESPACE
 
@@ -496,6 +496,7 @@ RigidBody RigidBody::setup_particle(Particle *p,
   IMP_FUNCTION_LOG;
   //IMP_LOG(VERBOSE, "Creating rigid body from other rigid bodies"<<std::endl);
   IMP_USAGE_CHECK(members.size() > 0, "Must provide members");
+
   algebra::ReferenceFrame3D rf= get_initial_reference_frame(members);
   RigidBody rb= setup_particle(p, rf);
   for (unsigned int i=0; i< members.size(); ++i) {
@@ -635,10 +636,17 @@ RigidBody::get_members() const {
 
 void RigidBody::add_member(Particle *p) {
   IMP_FUNCTION_LOG;
+
   algebra::ReferenceFrame3D r= get_reference_frame();
   if (RigidBody::particle_is_instance(p)) {
     /*IMP_LOG(TERSE, "Adding rigid body " << p->get_name()
       << " as member." << std::endl);*/
+    if (KinematicNode::particle_is_instance(p)) {
+      // see also KinematicNode::setup_particle()
+      IMP_THROW("KinematicNoder cannot be set as RigidMember at this point," +
+                " in order to guarantee coherent coordinates update",
+                IMP::ValueException);
+    }
     RigidBody d(p);
     internal::add_required_attributes_for_body_member(d, get_particle());
     RigidMember cm(d);
@@ -900,6 +908,7 @@ ContainersTemp RigidMembersRefiner::get_input_containers(Particle *) const {
 
 void RigidMembersRefiner::do_show(std::ostream &) const {
 }
+
 
 
 namespace internal {
