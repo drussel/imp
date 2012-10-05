@@ -12,6 +12,7 @@
 
 #include <IMP/core/KinematicNode.h>
 #include <IMP/object.h>
+#include <IMP/compatibility/include/nullptr.h>
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -41,45 +42,104 @@ private:
 };
 
 class RevoluteJoint : public Joint{
-  // constructs a revolute joint on the line connecting the reference frames
-  // from_rb and to_rb
 
+  // constructs a revolute joint on the line connecting a and b,
+  // with an initial angle 'angle'
+  // TODO: cstr from two rigid body reference frames?
+  RevoluteJoint(IMP::core::XYZ a, IMP::core::XYZ b, double angle)
+    {
+      // TODO: who are the witnesses here exactly?
+      set_joint_vector( b.get_coordinates() - a.get_coordinates() );
+      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
+      p->get_model()->add_score_state(ss); // TODO: implement that?
+    }
 
-  static RevoluteJoint setup_particle(Particle*p, RigidBody rb,
-                                      Vector3D offset,
-                                      Vector3D axis, double angle) {
-    add offset, axis, angle to p
-      ss=new RevoluteJointScoreState(p, rb)
-      p->get_model()->add_score_state(ss)
-      store score state in Particle
-      add p to rb as the associated joint
-      return RevoluteJoint(p)
-      }
+  virtual void Transformation3D get_transformation() const
+  {
+    double x = joint_unit_vector_[0];
+    double y = joint_unit_vector_[1];
+    double z = joint_unit_vector_[2];
 
-  virtual Transformation3D get_transformation() const;
+    double cos_angle= cos(angle_);
+    double sin_angle = sin(angle_);
+    double s = 1 - cos_angle;
+    IMP::algebra::Rotation3D r =
+      IMP::algebra::get_rotation_from_matrix
+      ( x*x*s + cos_angle,   y*x*s - z*sin_angle, z*x*s + y * sin_angle,
+        x*y*s + z*sin_angle, y*y*s + cos_angle,   z*y*s - x*sin_angle,
+        x*z*s - y*sin_angle, y*z*s + x*sin_angle, z*z*s + cos_angle );
+    return IMP::algebra::Transformation3D(r, (r*(-d1_))+d1_);
+  }
 
   virtual void update_joint_from_cartesian_witnesses();
 
-  void set_angle(double angle);
+  void set_angle(double angle) { angle_ = angle; }
 
-  double get_angle() const;
+  double get_angle() const { return angle_; }
+
+  /** sets v to the axis around which this joint revolves
+   */
+  void set_joint_vector(IMP::algebra::Vector3D v)
+  { joint_unit_vector_ = v.get_unit_vector(); }
+
+  IMP::algebra::Vector3D const& get_joint_unit_vector() const
+    { return joint_unit_vector_; }
+ private:
+  angle_;
+
+  // the unit vector around which the joint revolves
+  IMP::algebra::Vector3D joint_unit_vector_;
 };
 
 class DihedralAngleRevoluteJoint : public RevoluteJoint{
-    // constructs a dihedral angle based on the last two particles in
-    // rb1 and the first two particles rb2
-    // TODO: atom is not the place for dihedral, either algebra, or kinematics
-      //       module
-    DihedralAngleRevoluteJoint(IMP::atom::Dihedral d);
+  /**
+     constructs a dihedral angle that revolutes around the axis b-c,
+     using a,b,c,d as witnesses for the dihedral angle
+     // TODO1: use core/internal/dihedral_helpers.h + move to algebra?
+     // TODO2: do we want to handle derivatives?
 
-    virtual Transformation3D get_transformation() const;
+     @param a,b,c,d 'witnesses' whose coordinates define the dihedral
+                    angle, as the angle between a-b and c-d, with
+                    respect to the revolute axis b-c
+     */
+  DihedralAngleRevoluteJoint(IMP::core::XYZ a,
+                             IMP::core::XYZ b,
+                             IMP::core::XYZ c,
+                             IMP::core::XYZ d) :
+  RevoluteJoint(b, c),
+  a_(a), b_(b), c_(c), d_(d)
+  {
+    // TODO: scorestate for udpating the model? see revolute joint
+    update_joint_from_cartesian_witnesses();
+  }
 
 
-    virtual void update_joint_from_cartesian_witnesses();
+  virtual Transformation3D get_transformation() const
+  {
+    return RevoluteJoint::get_transformation();
+  }
 
-    void set_angle(double angle);
+  virtual void update_joint_from_cartesian_witnesses()
+  {
+    set_joint_axis( c_.get_coordinates() - b_.get_coordinates() );
+    // TODO: perhaps the knowledge of normalized joint axis can accelerate
+    // the dihedral calculation in next line?
+    angle_ = IMP::core::dihedral(a_, b_, c_, d_,
+                                 nullptr, // derivatives - TODO: support?
+                                 nullptr,
+                                 nullptr,
+                                 nullptr);
+  }
 
-    double get_angle() const;
+  void set_angle(double angle) { angle_ = angle; }
+
+  double get_angle() const { return angle_; }
+
+ private:
+    IMP::core::XYZ a_;
+    IMP::core::XYZ b_;
+    IMP::core::XYZ c_;
+    IMP::core::XYZ d_;
 };
 
 class BondAngleRevoluteJoint : public RevoluteJoint{

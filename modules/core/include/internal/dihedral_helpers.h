@@ -14,6 +14,9 @@
 
 IMPCORE_BEGIN_INTERNAL_NAMESPACE
 
+// TODO: move this from core/internal to algebra, and leave
+// core/internal/dihedral_helpers.h as an obsolete wrapper
+
 //! Calculate the dihedral angle between the given four XYZ particles.
 /** \return the dihedral angle.
     If derv0 is non-nullptr, all four algebra::Vector3D parameters are filled
