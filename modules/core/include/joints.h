@@ -41,15 +41,29 @@ private:
     Transformation3D transformation_;
 };
 
+/** Abstract class for all revolute joints **/
 class RevoluteJoint : public Joint{
 
-  // constructs a revolute joint on the line connecting a and b,
-  // with an initial angle 'angle'
-  // TODO: cstr from two rigid body reference frames?
-  RevoluteJoint(IMP::core::XYZ a, IMP::core::XYZ b, double angle)
+  /**
+     constructs a revolute joint on the line connecting a and b,
+     with an initial angle 'angle'
+
+     @param from,to kinematic nodes upstream and downstream (resp.) of this
+                    joint
+     @param a,b end points of revolute joint axis
+     @param angle initial rotation angle
+  **/
+ RevoluteJoint(KinematicNode from,
+               KinematicNode to,
+               IMP::core::XYZ a,
+               IMP::core::XYZ b,
+               double angle = 0.0)
+   : Joint(from, to),
+    angle_(angle)
     {
       // TODO: who are the witnesses here exactly?
       set_joint_vector( b.get_coordinates() - a.get_coordinates() );
+      // TODO: is angle useful for anything
       ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
       p->get_model()->add_score_state(ss); // TODO: implement that?
     }
@@ -71,7 +85,8 @@ class RevoluteJoint : public Joint{
     return IMP::algebra::Transformation3D(r, (r*(-d1_))+d1_);
   }
 
-  virtual void update_joint_from_cartesian_witnesses();
+  // abstract
+  virtual void update_joint_from_cartesian_witnesses() = 0;
 
   void set_angle(double angle) { angle_ = angle; }
 
@@ -85,7 +100,8 @@ class RevoluteJoint : public Joint{
   IMP::algebra::Vector3D const& get_joint_unit_vector() const
     { return joint_unit_vector_; }
  private:
-  angle_;
+  // the angle in Radians about the joint axis ("unit vector")
+  double angle_;
 
   // the unit vector around which the joint revolves
   IMP::algebra::Vector3D joint_unit_vector_;
@@ -98,16 +114,20 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
      // TODO1: use core/internal/dihedral_helpers.h + move to algebra?
      // TODO2: do we want to handle derivatives?
 
+     @param from,to kinematic nodes upstream and downstream (resp.) of
+                    this joint
      @param a,b,c,d 'witnesses' whose coordinates define the dihedral
                     angle, as the angle between a-b and c-d, with
                     respect to the revolute axis b-c
      */
-  DihedralAngleRevoluteJoint(IMP::core::XYZ a,
+  DihedralAngleRevoluteJoint(KinematicNode from,
+                             KinematicNode to,
+                             IMP::core::XYZ a,
                              IMP::core::XYZ b,
                              IMP::core::XYZ c,
                              IMP::core::XYZ d) :
-  RevoluteJoint(b, c),
-  a_(a), b_(b), c_(c), d_(d)
+  RevoluteJoint(from, to, b, c),
+    a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
   {
     // TODO: scorestate for udpating the model? see revolute joint
     update_joint_from_cartesian_witnesses();
@@ -121,19 +141,18 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
 
   virtual void update_joint_from_cartesian_witnesses()
   {
-    set_joint_axis( c_.get_coordinates() - b_.get_coordinates() );
+    set_joint_axis
+      ( c_.get_coordinates() - b_.get_coordinates() );
     // TODO: perhaps the knowledge of normalized joint axis can accelerate
     // the dihedral calculation in next line?
-    angle_ = IMP::core::dihedral(a_, b_, c_, d_,
-                                 nullptr, // derivatives - TODO: support?
-                                 nullptr,
-                                 nullptr,
-                                 nullptr);
+    set_angle( IMP::core::dihedral
+                              (a_, b_, c_, d_,
+                               nullptr, // derivatives - TODO: support?
+                               nullptr,
+                               nullptr,
+                               nullptr)
+                              );
   }
-
-  void set_angle(double angle) { angle_ = angle; }
-
-  double get_angle() const { return angle_; }
 
  private:
     IMP::core::XYZ a_;
