@@ -1,4 +1,14 @@
 import utility
+from SCons.Script import File, Dir
+import os
+import os.path
+
+
+def _check_names(names):
+    for n in names:
+        if n=="":
+            raise ValueError("Invalid empty name")
+
 
 class IMPData:
     class ModuleData:
@@ -53,30 +63,12 @@ class IMPData:
             self.modules=modules
             self.version=version
             self.ok=ok
-    class DependencyData:
-        def __init__(self, name, ok=True, variables=[], libs=[], libpath=None,
-                     includepath=None, pkgconfig=False, version=None,
-                     versioncpp=None, versionheader=None):
-            self.ok=ok
-            self.libs=libs
-            self.includepath=includepath
-            self.libpath=libpath
-            self.variables=variables
-            self.pkgconfig=pkgconfig
-            self.version=version
-            self.versioncpp=versioncpp
-            self.versionheader=versionheader
     def __init__(self, env):
         self.modules={}
         self.applications={}
         self.systems={}
-        self.dependencies={}
         self.examples={}
         self.env=env
-    def _check_names(self, names):
-        for n in names:
-            if n=="":
-                raise ValueError("Invalid empty name")
     def _expand_modules(self, imodules, external=False):
         modules=imodules[:]
         ml=[]
@@ -99,41 +91,6 @@ class IMPData:
             if not m in dependencies[i+1:]:
                 dret.append(m)
         return dret
-    def add_module(self, name, directory="", alias="none",
-                   dependencies=[], unfound_dependencies=[], modules=[],
-                   unfound_modules=[], libname=None,
-                   version="", ok=True,
-                   external=False):
-        #print name, dependencies, unfound_dependencies
-        self._check_names(dependencies)
-        self._check_names(unfound_dependencies)
-        self._check_names(modules)
-        if not ok:
-            self.modules[name]=self.ModuleData(name, ok=False)
-        else:
-            # prevent recurrence
-            self.modules[name]=self.ModuleData(name, ok=True)
-            passmodules= self._expand_modules(modules, external)
-            passdependencies= self._expand_dependencies(passmodules,
-                                                        dependencies)
-            self.modules[name]=self.ModuleData(name, alias, passdependencies, dependencies,
-                                               unfound_dependencies,
-                                               passmodules, unfound_modules,
-                                               libname,
-                                               version, external)
-    def add_dependency(self, name, libs=[], ok=True, variables=[], pkgconfig=False,
-                       includepath=None, libpath=None, version=None,
-                       versioncpp=None, versionheader=None):
-        if type(libs) != type([]):
-            utility.report_error(self.env, "lib lists must be stored as a list: "+name)
-
-        self.dependencies[name]=self.DependencyData(name, libs=libs, variables=variables,
-                                                    ok=ok, pkgconfig=pkgconfig,
-                                                    includepath=includepath,
-                                                    libpath=libpath,
-                                                    version=version,
-                                                    versioncpp=versioncpp,
-                                                    versionheader=versionheader)
     def add_application(self, name, link="",
                         dependencies=[], unfound_dependencies=[], modules=[],
                         version=None, ok=True):
@@ -151,6 +108,28 @@ class IMPData:
                                       unfound_dependencies=unfound_dependencies,
                                       modules=passmodules,
                                       version=version)
+    def add_module(self, name, directory="", alias="none",
+                   dependencies=[], unfound_dependencies=[], modules=[],
+                   unfound_modules=[], libname=None,
+                   version="", ok=True,
+                   external=False):
+        #print name, dependencies, unfound_dependencies
+        _check_names(dependencies)
+        _check_names(unfound_dependencies)
+        _check_names(modules)
+        if not ok:
+            self.modules[name]=self.ModuleData(name, ok=False)
+        else:
+            # prevent recurrence
+            self.modules[name]=self.ModuleData(name, ok=True)
+            passmodules= self._expand_modules(modules, external)
+            passdependencies= self._expand_dependencies(passmodules,
+                                                        dependencies)
+            self.modules[name]=self.ModuleData(name, alias, passdependencies, dependencies,
+                                               unfound_dependencies,
+                                               passmodules, unfound_modules,
+                                               libname,
+                                               version, external)
     def add_system(self, name, link="",
                    dependencies=[], unfound_dependencies=[], modules=[],
                         version="", ok=True):
@@ -240,12 +219,6 @@ class IMPData:
             if self.modules[m].ok:
                 ret.append(m)
         return ret
-    def get_found_dependencies(self, dependencies):
-        ret=[]
-        for d in dependencies:
-            if self.dependencies[d].ok:
-                ret.append(d)
-        return ret
     def add_to_alias(self, name, nodes):
         #print "add alias", name
         self.env.Alias(name, nodes)
@@ -260,3 +233,81 @@ def add(env, data= None):
     if not data:
         data=IMPData(env)
     env["IMP_DATA"] = data
+
+
+def add_module(self, name, directory="", alias="none",
+               dependencies=[], unfound_dependencies=[], modules=[],
+               unfound_modules=[], libname=None,
+               version="", ok=True,
+               external=False):
+               #print name, dependencies, unfound_dependencies
+    _check_names(dependencies)
+    _check_names(unfound_dependencies)
+    _check_names(modules)
+    if not os.path.exists(Dir("#/build/modules").abspath):
+        os.mkdir(Dir("#/build/modules").abspath)
+    fl= open(File("#/build/modules/"+name).abspath, "w")
+
+    data={"ok":ok}
+    if ok:
+        # prevent recurrence
+        passmodules= self._expand_modules(modules, external)
+        passdependencies= self._expand_dependencies(passmodules,
+                                                    dependencies)
+        data["dependencies"]=passdependencies
+        data["unfound_dependencies"]= unfound_dependencies
+        data["modules"]= passmodules
+        data["libname"]=libname
+        data["version"]=version
+        if external:
+            data["external"]=True
+
+_dependencies={}
+
+def add_dependency(name, libs=[], ok=True, variables=[],
+                   includepath=None, libpath=None, version=None,
+                   versioncpp="", versionheader="", local=False,
+                   build=""):
+    if type(libs) != type([]):
+        utility.report_error(self.env, "lib lists must be stored as a list: "+name)
+    if not os.path.exists(Dir("#/build/dependencies").abspath):
+        os.makedirs(Dir("#/build/dependencies").abspath)
+    fl= open(File("#/build/dependencies/"+name).abspath, "w")
+    data={"ok":ok}
+    if ok:
+        if len(libs)>0:
+            data["libs"]=libs
+        if len(variables) >0:
+            data["variables"]=variables
+        if includepath:
+            data["includepath"]=includepath
+        if libpath:
+            data["libpath"]=libpath
+        if version:
+            data["version"]=version
+            data["versioncpp"]=versioncpp
+            data["versionheader"]=versionheader
+        if local:
+            data["local"]=True
+            data["build"]=build
+    print >> fl, data
+    _dependencies[name]=data
+
+def get_dependency(name):
+    return _dependencies[name]
+    path=File("#/build/dependencies/"+name).abspath
+    try:
+        contents= open(path, "r").read()
+        return eval(contents)
+    except:
+        return None
+
+def get_has_configured_dependency(name):
+    return _dependencies.has_key(name)
+
+def get_found_dependencies(dependencies):
+    ret=[]
+    for d in dependencies:
+        if get_dependency(d)["ok"]:
+            ret.append(d)
+    return ret

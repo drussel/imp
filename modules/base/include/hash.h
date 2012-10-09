@@ -10,6 +10,7 @@
 
 #include "base_config.h"
 #include <IMP/compatibility/hash.h>
+#include <IMP/compatibility/vector.h>
 
 
 IMPBASE_BEGIN_NAMESPACE
@@ -23,11 +24,21 @@ inline std::size_t hash_value(double d) {
 inline std::size_t hash_value(int d) {
   return boost::hash_value(d);
 }
+inline std::size_t hash_value(bool d) {
+  return boost::hash_value(d);
+}
 inline std::size_t hash_value(const std::string& d) {
   return boost::hash_value(d);
 }
+#ifdef IMP_USE_DEBUG_VECTOR
 template <class T>
 inline std::size_t hash_value(const IMP::compatibility::vector<T> &t) {
+  return boost::hash_range(t.begin(), t.end());
+}
+#endif
+// for RMF
+template <class T>
+inline std::size_t hash_value(const std::vector<T> &t) {
   return boost::hash_range(t.begin(), t.end());
 }
 IMPBASE_END_NAMESPACE

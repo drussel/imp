@@ -1,8 +1,9 @@
 import scons_tools.utility
 import scons_tools.data
+import scons_tools.paths
 import SCons
 import os
-from SCons.Script import Glob, Dir, File, Builder, Action, Exit, Scanner
+from SCons.Script import File, Action, Dir
 
 def _search_for_deps(context, libname, extra_libs, headers, body, possible_deps):
     for i in range(0,len(possible_deps)+1):
@@ -13,6 +14,8 @@ def _search_for_deps(context, libname, extra_libs, headers, body, possible_deps)
             context.env.Append(LIBS=[libname]+lc)
         else:
             context.env.Append(LIBS=lc)
+            #print context.env["LIBPATH"]
+            #print context.env["CPPPATH"]
         #print context.env['LINKFLAGS']
         #print "checking", libname, lc
         ret=context.sconf.CheckLibWithHeader(libname, header=headers, call=body, language='CXX',
@@ -77,6 +80,9 @@ def check_lib(context, name, lib, header, body="", extra_libs=[], versioncpp=Non
                                          "The versioncpp argument must be given as a list. It was not for "+name)
     #oldflags= context.env.get('LINKFLAGS')
     #context.env.Replace(LINKFLAGS=context.env['IMP_BIN_LINKFLAGS'])
+    #print context.env["LIBPATH"]
+    #print context.env["CPPPATH"]
+
     if lib is not None:
         ret=_search_for_deps(context, lib[0], lib[1:], header, body, extra_libs)
     else:
@@ -162,6 +168,9 @@ def _get_info_pkgconfig(context, env,  name, versioncpp, versionheader):
 def _get_info_test(context, env, name, lib, header, body,
                    extra_libs, versioncpp, versionheader):
     lcname= get_dependency_string(name)
+    #print context.env["LIBPATH"]
+    #print context.env["CPPPATH"]
+
     (ret, libs, version)= check_lib(context, name, lib=lib, header=header,
                                     body=body,
                                     extra_libs=extra_libs,
@@ -172,22 +181,24 @@ def _get_info_test(context, env, name, lib, header, body,
     else:
         return (True, libs, version, None, None)
 
+
 def add_external_library(env, name, lib, header, body="", extra_libs=[],
                          versioncpp=None, versionheader=None,
-                         enabled=True):
+                         enabled=True, build=None):
     tenv= scons_tools.environment.get_test_environment(env)
     lcname= get_dependency_string(name)
     ucname= lcname.upper()
     dta= scons_tools.data.get(env)
-    if dta.dependencies.has_key(name):
+    if scons_tools.data.get_has_configured_dependency(name):
         # already has been added
         return
     variables=[lcname, lcname+"libs", lcname+"version"]
     def _check(context):
+        local=False
         if context.env['IMP_OUTER_ENVIRONMENT'][lcname] == "no":
             context.Message('Checking for '+name+' ...')
             context.Result("disabled")
-            dta.add_dependency(name, variables=variables,
+            scons_tools.data.add_dependency(name, variables=variables,
                                                              ok=False)
             ok=False
         else:
@@ -200,8 +211,39 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                     (ok, libs, version, includepath, libpath)=\
                       _get_info_test(context, env, name, lib, header, body,
                                       extra_libs, versioncpp, versionheader)
+                    if not ok and build:
+                        local=True
+                        paths={"builddir":Dir("#/build/local_dependencies/"+name).abspath,
+                               "srcdir":scons_tools.paths.get_input_path(context.env, name),
+                               "installprefix":env["prefix"]}
+                        includepath=[x%paths for x in build[2]]
+                        libpath= [x%paths for x in build[3]]
+                        for i in includepath:
+                            context.env.Append(CPPPATH=[i])
+                        for i in libpath:
+                            context.env.Append(LIBPATH=[i])
+                            #print context.env["LIBPATH"], includepath
+                            #print context.env["CPPPATH"], libpath
+
+                        buildscript= build[0]%paths
+                        installscript= build[1]%paths
+                        if not os.path.exists(paths["builddir"]):
+                            os.makedirs(paths["builddir"])
+                        try:
+                            os.system(buildscript)
+                            print "run"
+                            (ok, libs, version, xincludepath, xlibpath)=\
+                             _get_info_test(context, env, name, lib, header, body,
+                                extra_libs, versioncpp, versionheader)
+                                 #print "found", ok
+                        except:
+                            pass
+                        if ok:
+                            bld=SCons.Builder.Builder(action=installscript)
+                            env.Alias("install", bld(env))
+
             if not ok:
-                dta.add_dependency(name, variables=variables,
+                scons_tools.data.add_dependency(name, variables=variables,
                                                                  ok=False)
                 return False
             else:
@@ -211,14 +253,16 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                 else:
                     pversioncpp=versioncpp
                     pversionheader=versionheader
-                dta.add_dependency(name,
-                                                                 variables=variables,
-                                                                 libs=libs,
-                                                                 includepath=includepath,
-                                                                 libpath=libpath,
-                                                                 version=version,
-                                                                 versioncpp=pversioncpp,
-                                                             versionheader=pversionheader)
+                scons_tools.data.add_dependency(name,
+                                   variables=variables,
+                                   libs=libs,
+                                   includepath=includepath,
+                                   libpath=libpath,
+                                   version=version,
+                                   versioncpp=pversioncpp,
+                                   versionheader=pversionheader,
+                                   local=local,
+                                   build=build)
                 return True
     vars = env['IMP_VARIABLES']
     if enabled:
@@ -234,21 +278,6 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
     #if not env.GetOption('clean') and not env.GetOption('help'):
         if conf.CheckThisLib():
             env.Append(IMP_ENABLED=[name])
-            env.Append(IMP_CONFIGURATION=[lcname+"='yes'"])
-            env.Append(IMP_CONFIGURATION=[lcname+"libs='"+\
-                                          ":".join(dta.dependencies[name].libs)+"'"])
-            if dta.dependencies[name].includepath:
-                env.Append(IMP_CONFIGURATION=[lcname\
-                                      +"includepath='"+\
-                                      dta.dependencies[name].includepath+"'"])
-            if dta.dependencies[name].libpath:
-                env.Append(IMP_CONFIGURATION=[lcname\
-                                              +"libpath='"+\
-                                            dta.dependencies[name].libpath+"'"])
-            if dta.dependencies[name].version:
-                env.Append(IMP_CONFIGURATION=[lcname\
-                                              +"version='"+\
-                                            " ".join(dta.dependencies[name].version)+"'"])
         else:
             env.Append(IMP_DISABLED=[name])
             env.Append(IMP_CONFIGURATION=[lcname+"='no'"])
