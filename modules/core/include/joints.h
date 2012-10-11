@@ -17,29 +17,107 @@
 IMPCORE_BEGIN_NAMESPACE
 
 
-class Joint : public Object{
+class Joint : public Object{ // TODO: should it be ModelObject or Object?
 public:
-    Joint(KinematicNode from, KinematicNode to) :
-        from_(from), to_(to)
-    {
-     // compute transformation from from_rb to to_rb
+  /**
+     An abstract class for a joint between a parent and a child
+
+     @note we currently assume that a parent cannot be switched
+   */
+ Joint(RigidBody parent, RigidBody child)
+  {
+    // setup parent as a kinematic node asscoiated with this joint
+    Particle* parent_p = parent.get_particle();
+    if(!KinematicNode::particle_is_instance( parent_p ) ) {
+      Joints joints();
+      joints.push_back(this);
+      KinematicNode::setup_particle( parent_p, null, joints );
+    } else {
+      KinematicNode( parent_p ).add_child_joint( this );
     }
+    parent_ = KinematicNode( parent_p );
+    // setup child as a kinematic node assosicated with this joint
+    Particle* child_p = child.get_particle();
+    if(!KinematicNode::particle_is_instance( child_p ) ) {
+      KinematicNode::setup_particle( child_p, this );
+    } else {
+      if( KinematicNode( child_p ).get_parent_joint() != this ) {
+        IMP_THROW( "IMP currently does not support switching of "
+                   + " parents in a kinematic tree",
+                   IMP::ValueException );
+        // TODO: do we want to allow parent switching? not for now
+        //       in this case, should we remove this child from its old parent?
+        //       see note above
+        }
+    }
+    child_ = KinematicNode( child_p );
+  }
+
 
     // returns the transformation that should be applied to all rigid bodies
     // downstream of the joint
     virtual IMP::algebra::Transformation3D get_transformation() const
     { return transformation_}
 
-    virtual void update_joint_from_cartesian_witnesses();
+    /**
+       // TODO: this should probably not be here anymore
+       Computes the reference frame of the rigid body downstream of
+       this joint, which is the reference frame of the upstream rigid
+       body, transformed by this joint's transformation.
+    */
+    virtual void
+      update_child_node_reference_frame() const
+    {
+     // TODO: make this efficient - indexing? lazy? update flag?
+     using namespace IMP::algebra;
+
+     parent_.update_reference_frame_from_joint(); // TODO: should we cache
+                                                  // this for next line?
+     Transformation3D parent_tr =
+       parent_.get_reference_frame()->get_transformation_to();
+     Transformation3D composed_tr = compose
+       ( parent_tr, get_transformation() );
+     RigidBody(child_.get_particle()).set_reference_frame
+       ( ReferenceFrame3D( composed_tr ));
+    }
+
+
+
+    /**
+       // TODO: this should probably not be here anymore
+    */
+    virtual IMP::algebra::Transformation3D
+      update_downstream_nodes_reference_frame() const
+    {
+     // TODO: make this efficient - indexing? lazy? update flag?
+     using namespace IMP::algebra;
+
+     update_child_node_reference_frame();
+     child_.update_downstream_nodes_from_joints();
+    }
+
+
+    virtual void update_joint_from_cartesian_witnesses() = 0;
 
     void set_transformation(IMP::algebra::Transformation3D t)
     { transformation_ = t; }
 
+    KinematicNode get_parent_node() { return parent_; }
+
+    KinematicNode get_child_node() { return child_; }
+
 private:
-    KinematicNode from_;
-    KinematicNode to_;
+    KinematicNode parent_;
+    KinematicNode child_;
     Transformation3D transformation_;
 };
+
+/** A joint with a completely non-constrained transformation
+    between parent and child nodes
+*/
+class TransformationJoint : public Joint{
+  // TODO
+}
 
 /** Abstract class for all revolute joints **/
 class RevoluteJoint : public Joint{
@@ -48,17 +126,17 @@ class RevoluteJoint : public Joint{
      constructs a revolute joint on the line connecting a and b,
      with an initial angle 'angle'
 
-     @param from,to kinematic nodes upstream and downstream (resp.) of this
+     @param parent,child kinematic nodes upstream and downstream (resp.) of this
                     joint
      @param a,b end points of revolute joint axis
      @param angle initial rotation angle
   **/
- RevoluteJoint(KinematicNode from,
-               KinematicNode to,
+ RevoluteJoint(RigidBody parent,
+               RigidBody child,
                IMP::core::XYZ a,
                IMP::core::XYZ b,
                double angle = 0.0)
-   : Joint(from, to),
+   : Joint(parent, child),
     angle_(angle)
     {
       // TODO: who are the witnesses here exactly?
@@ -114,19 +192,19 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
      // TODO1: use core/internal/dihedral_helpers.h + move to algebra?
      // TODO2: do we want to handle derivatives?
 
-     @param from,to kinematic nodes upstream and downstream (resp.) of
+     @param parent,child kinematic nodes upstream and downstream (resp.) of
                     this joint
      @param a,b,c,d 'witnesses' whose coordinates define the dihedral
                     angle, as the angle between a-b and c-d, with
                     respect to the revolute axis b-c
      */
-  DihedralAngleRevoluteJoint(KinematicNode from,
-                             KinematicNode to,
+  DihedralAngleRevoluteJoint(RigidBody parent,
+                             RigidBody child,
                              IMP::core::XYZ a,
                              IMP::core::XYZ b,
                              IMP::core::XYZ c,
                              IMP::core::XYZ d) :
-  RevoluteJoint(from, to, b, c),
+  RevoluteJoint(parent, child, b, c),
     a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
   {
     // TODO: scorestate for udpating the model? see revolute joint

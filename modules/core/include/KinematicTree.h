@@ -15,6 +15,8 @@
 #include <IMP/core/KinematicNode.h>
 #include <IMP/core/joints.h>
 #include <IMP/object.h>
+#include <IMP/compatibility/set.h>
+#include <IMP/exception.h>
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -35,18 +37,31 @@ public:
     KinematicTree(Model* m, IMP::Hierarchy hierarchy);
 
     void add_root_rigid_body(IMP::RigidBody rb){
-        KinematicNode n = KinematicNode::setup_particle(p, NULL);
+      root_ = KinematicNode::setup_particle(rb.get_particle());
+      nodes_.insert(root_)
     }
 
+    /**
+       Adds child_rb to the tree, using parent_rb as his father,
+       and using a non-constrained joint
+     */
     // NOTE: must have root on first call
-    void add_rigid_body(IMP::RigidBody parent_rb, IMP::RigidBody rb)
+    // TODO: verify parent_rb is in tree
+    void add_child(IMP::RigidBody child_rb, IMP::RigidBody parent_rb)
     {
-        add_rigid_body( rb, parent_rb, TransformationJoint(rb, parent_rb) );
+      add_rigid_body( child_rb, parent_rb, Joint(parent_rb, child_rb) );
     }
 
-    void add_rigid_body_with_dihedral(IMP::RigidBody rb,
-                                      IMP::RigidBody parent_rb,
-                                      Joint joint);
+    void add_child_from_joint(Joint* joint) {
+      // I. make sure parent_rb is in tree
+      KinematicNode parent = joint->get_parent();
+      if(!nodes_.find(parent)) {
+        IMP_THROW("cannot find parent rigid body of joint in kinematic tree, "
+                  + ", cannot add child rigid body to tree",
+                  IMP::ValueException);
+      }
+
+    }
 
     // first will be root? use default TransformationJoint
     add_rigid_bodies_in_chain(IMP::RigidBodies rbs);
@@ -76,13 +91,20 @@ private:
     IMP::Particle get_parent(IMP::Particle child) const;
 
     friend std::ostream& operator<<(std::ostream& s,
-                                    const KinematicChain& kc);
+                                    const KinematicTree& kt);
 private:
     Model* m;
     bool is_cartesian_updated_;
     bool is_internal_updated_;
-    <XXX tree structure XXX> tree_;
-    };
+
+    /** the root node that serves as spatial anchor to the
+        kinematic tree */
+    KinematicNode root_;
+
+    /** the set of nodes in the tree */
+    // TODO: is vector more efficient memory access wise?
+    IMP::compatibility::set<KinematicNode> nodes_;
+};
 
 
 IMPCORE_END_NAMESPACE
