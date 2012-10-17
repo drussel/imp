@@ -13,6 +13,8 @@
 #include <IMP/core/KinematicNode.h>
 #include <IMP/object.h>
 #include <IMP/compatibility/include/nullptr.h>
+#include <IMP/exception.h>
+
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -22,35 +24,25 @@ public:
   /**
      An abstract class for a joint between a parent and a child
 
+     @param parent rigid body upstream of this joint
+     @param child rigid body downstream of this joint
      @note we currently assume that a parent cannot be switched
    */
- Joint(RigidBody parent, RigidBody child)
+  Joint(RigidBody parent, RigidBody child)
+    parent_(parent), child_(child), owner_kf_(nullptr)
   {
-    // setup parent as a kinematic node asscoiated with this joint
-    Particle* parent_p = parent.get_particle();
-    if(!KinematicNode::particle_is_instance( parent_p ) ) {
-      Joints joints();
-      joints.push_back(this);
-      KinematicNode::setup_particle( parent_p, null, joints );
-    } else {
-      KinematicNode( parent_p ).add_child_joint( this );
+    if(!owner_kc_){
+      IMP_THROW("IMP supports only joints that are managed by a kinematic tree",
+                IMP::ValueException);
     }
-    parent_ = KinematicNode( parent_p );
-    // setup child as a kinematic node assosicated with this joint
-    Particle* child_p = child.get_particle();
-    if(!KinematicNode::particle_is_instance( child_p ) ) {
-      KinematicNode::setup_particle( child_p, this );
-    } else {
-      if( KinematicNode( child_p ).get_parent_joint() != this ) {
-        IMP_THROW( "IMP currently does not support switching of "
-                   + " parents in a kinematic tree",
-                   IMP::ValueException );
-        // TODO: do we want to allow parent switching? not for now
-        //       in this case, should we remove this child from its old parent?
-        //       see note above
-        }
-    }
-    child_ = KinematicNode( child_p );
+  }
+
+  void set_owner_kf(KinematicForest* kf) {
+    owner_kf_ = kf;
+  }
+
+  KinematicForest* get_owner_kf() const{
+    return owner_kf_;
   }
 
 
@@ -102,14 +94,15 @@ public:
     void set_transformation(IMP::algebra::Transformation3D t)
     { transformation_ = t; }
 
-    KinematicNode get_parent_node() { return parent_; }
+    RigidBody     get_parent_node() { return parent_; }
 
-    KinematicNode get_child_node() { return child_; }
+    RigidBody get_child_node() { return child_; }
 
 private:
-    KinematicNode parent_;
-    KinematicNode child_;
+    RigidBody parent_;
+    RigidBody child_;
     Transformation3D transformation_;
+    KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
 
 /** A joint with a completely non-constrained transformation
@@ -166,9 +159,23 @@ class RevoluteJoint : public Joint{
   // abstract
   virtual void update_joint_from_cartesian_witnesses() = 0;
 
-  void set_angle(double angle) { angle_ = angle; }
+  void set_angle(double angle) {
+    if(get_owner_kf()){
+      get_owner_kf()->update_all_internal_coordinates();
+    }
+    angle_ = angle;
+    if(get_owner_kf()){
+      get_owner_kf()->mark_internal_coordinate_changed();
+    }
+    // TODO: what happens if joint is unmanaged?
+  }
 
-  double get_angle() const { return angle_; }
+  double get_angle() const {
+    if(get_owner_kf()){
+      get_owner_kf()->update_all_external_coordinates( this );
+    }
+    return angle_;
+  }
 
   /** sets v to the axis around which this joint revolves
    */
