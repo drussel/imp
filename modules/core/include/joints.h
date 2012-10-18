@@ -18,8 +18,11 @@
 
 IMPCORE_BEGIN_NAMESPACE
 
+class KinematicForest;
 
 class Joint : public Object{ // TODO: should it be ModelObject or Object?
+  friend class KinematicForest;
+
 public:
   /**
      An abstract class for a joint between a parent and a child
@@ -31,72 +34,72 @@ public:
   Joint(RigidBody parent, RigidBody child)
     parent_(parent), child_(child), owner_kf_(nullptr)
   {
-    if(!owner_kc_){
-      IMP_THROW("IMP supports only joints that are managed by a kinematic tree",
+    if(!owner_kf_){
+      IMP_THROW("IMP supports only joints that are managed by a"
+                + " kinematic forest",
                 IMP::ValueException);
     }
   }
 
-  void set_owner_kf(KinematicForest* kf) {
-    owner_kf_ = kf;
-  }
+  /***************** getter methods: ***************/
 
   KinematicForest* get_owner_kf() const{
     return owner_kf_;
   }
 
+  // returns the transformation that should be applied to all rigid bodies
+  // downstream of the joint
+  virtual IMP::algebra::Transformation3D get_transformation() const {
+    if( get_owner_kf() ) {
+      get_owner_kf()->update_all_internal_coordinates();
+    }
+    return transformation_;
+  }
 
-    // returns the transformation that should be applied to all rigid bodies
-    // downstream of the joint
-    virtual IMP::algebra::Transformation3D get_transformation() const
-    { return transformation_}
+  RigidBody  get_parent_node() const
+  { return parent_; }
 
-    /**
-       // TODO: this should probably not be here anymore
-       Computes the reference frame of the rigid body downstream of
-       this joint, which is the reference frame of the upstream rigid
-       body, transformed by this joint's transformation.
-    */
-    virtual void
-      update_child_node_reference_frame() const
-    {
-     // TODO: make this efficient - indexing? lazy? update flag?
-     using namespace IMP::algebra;
+  RigidBody get_child_node() const
+  { return child_; }
 
-     parent_.update_reference_frame_from_joint(); // TODO: should we cache
-                                                  // this for next line?
-     Transformation3D parent_tr =
-       parent_.get_reference_frame()->get_transformation_to();
-     Transformation3D composed_tr = compose
-       ( parent_tr, get_transformation() );
-     RigidBody(child_.get_particle()).set_reference_frame
+ private:
+
+  /***************** setter methods: ***************/
+
+  void set_owner_kf(KinematicForest* kf) {
+    owner_kf_ = kf;
+  }
+
+  /**************** general methods: **************/
+
+  /**
+     Updates the reference frame of the rigid body directly downstream
+     of this joint
+
+    // TODO: validate test - must be buggy :)
+  */
+  virtual void
+    update_child_node_reference_frame() const
+  {
+    // TODO: make this efficient - indexing? lazy? update flag?
+    using namespace IMP::algebra;
+
+    Transformation3D parent_tr =
+      parent_.get_reference_frame()->get_transformation_to();
+    Transformation3D composed_tr =
+      parent_tr * get_transformation();
+    RigidBody(child_.get_particle()).set_reference_frame
        ( ReferenceFrame3D( composed_tr ));
-    }
+  }
 
+  /**
+     Updates the joint transformation based on external coordinates
+     of 'witness' particles.
 
-
-    /**
-       // TODO: this should probably not be here anymore
-    */
-    virtual IMP::algebra::Transformation3D
-      update_downstream_nodes_reference_frame() const
-    {
-     // TODO: make this efficient - indexing? lazy? update flag?
-     using namespace IMP::algebra;
-
-     update_child_node_reference_frame();
-     child_.update_downstream_nodes_from_joints();
-    }
-
-
-    virtual void update_joint_from_cartesian_witnesses() = 0;
-
-    void set_transformation(IMP::algebra::Transformation3D t)
-    { transformation_ = t; }
-
-    RigidBody     get_parent_node() { return parent_; }
-
-    RigidBody get_child_node() { return child_; }
+     @note Witness particles do not necessarily belong to the child or
+           parent rigid bodes.
+   */
+  virtual void update_joint_from_cartesian_witnesses() = 0;
 
 private:
     RigidBody parent_;
@@ -105,12 +108,12 @@ private:
     KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
 
-/** A joint with a completely non-constrained transformation
-    between parent and child nodes
-*/
-class TransformationJoint : public Joint{
-  // TODO
-}
+/* /\** A joint with a completely non-constrained transformation */
+/*     between parent and child nodes */
+/* *\/ */
+/* class TransformationJoint : public Joint{ */
+/*   // TODO */
+/* } */
 
 /** Abstract class for all revolute joints **/
 class RevoluteJoint : public Joint{
@@ -139,8 +142,26 @@ class RevoluteJoint : public Joint{
       p->get_model()->add_score_state(ss); // TODO: implement that?
     }
 
-  virtual void Transformation3D get_transformation() const
-  {
+ public:
+  /******************* getter methods **************/
+  double get_angle() const {
+    if(get_owner_kf()){
+      get_owner_kf()->update_all_external_coordinates( this );
+    }
+    return angle_;
+  }
+
+  IMP::algebra::Vector3D const& get_joint_unit_vector() const
+    { return joint_unit_vector_; }
+
+ private:
+  /****************** general methods ***************/
+
+  /**
+     updates the transformation stored within the joint
+     based on the current angle_ value
+   */
+  void update_transformation_from_angle() const{
     double x = joint_unit_vector_[0];
     double y = joint_unit_vector_[1];
     double z = joint_unit_vector_[2];
@@ -153,28 +174,23 @@ class RevoluteJoint : public Joint{
       ( x*x*s + cos_angle,   y*x*s - z*sin_angle, z*x*s + y * sin_angle,
         x*y*s + z*sin_angle, y*y*s + cos_angle,   z*y*s - x*sin_angle,
         x*z*s - y*sin_angle, y*z*s + x*sin_angle, z*z*s + cos_angle );
-    return IMP::algebra::Transformation3D(r, (r*(-d1_))+d1_);
+    transformation_ = IMP::algebra::Transformation3D(r, (r*(-d1_))+d1_);
   }
 
-  // abstract
-  virtual void update_joint_from_cartesian_witnesses() = 0;
-
+  /******************* setter methods **************/
+  /**
+     sets the angle of the revolute joint and update the joint
+     transformation accordingly
+   */
   void set_angle(double angle) {
     if(get_owner_kf()){
       get_owner_kf()->update_all_internal_coordinates();
     }
     angle_ = angle;
+    update_transformation_from_angle();
     if(get_owner_kf()){
       get_owner_kf()->mark_internal_coordinate_changed();
     }
-    // TODO: what happens if joint is unmanaged?
-  }
-
-  double get_angle() const {
-    if(get_owner_kf()){
-      get_owner_kf()->update_all_external_coordinates( this );
-    }
-    return angle_;
   }
 
   /** sets v to the axis around which this joint revolves
@@ -182,8 +198,6 @@ class RevoluteJoint : public Joint{
   void set_joint_vector(IMP::algebra::Vector3D v)
   { joint_unit_vector_ = v.get_unit_vector(); }
 
-  IMP::algebra::Vector3D const& get_joint_unit_vector() const
-    { return joint_unit_vector_; }
  private:
   // the angle in Radians about the joint axis ("unit vector")
   double angle_;
@@ -218,12 +232,7 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
     update_joint_from_cartesian_witnesses();
   }
 
-
-  virtual Transformation3D get_transformation() const
-  {
-    return RevoluteJoint::get_transformation();
-  }
-
+ private:
   virtual void update_joint_from_cartesian_witnesses()
   {
     set_joint_axis
@@ -231,12 +240,12 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
     // TODO: perhaps the knowledge of normalized joint axis can accelerate
     // the dihedral calculation in next line?
     set_angle( IMP::core::dihedral
-                              (a_, b_, c_, d_,
-                               nullptr, // derivatives - TODO: support?
-                               nullptr,
-                               nullptr,
-                               nullptr)
-                              );
+               (a_, b_, c_, d_,
+                nullptr, // derivatives - TODO: support?
+                nullptr,
+                nullptr,
+                nullptr)
+               );
   }
 
  private:
@@ -246,49 +255,50 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
     IMP::core::XYZ d_;
 };
 
-class BondAngleRevoluteJoint : public RevoluteJoint{
-    // rotation of rigid body around the plane defined by three atoms
-    // TODO: atom is not the place for Angle, either algebra, or kinematics
-      //       module
-    BondAngleRevoluteJoint(IMP::atom::Angle a);
+/* class BondAngleRevoluteJoint : public RevoluteJoint{ */
+/*     // rotation of rigid body around the plane defined by three atoms */
+/*     // TODO: atom is not the place for Angle, either algebra, or */
+/*               kinematics */
+/*       //       module */
+/*     BondAngleRevoluteJoint(IMP::atom::Angle a); */
 
-    virtual Transformation3D get_transformation() const;
+/*     virtual Transformation3D get_transformation() const; */
 
-    virtual void update_joint_from_cartesian_witnesses();
+/*     virtual void update_joint_from_cartesian_witnesses(); */
 
-    void set_angle(double angle);
+/*     void set_angle(double angle); */
 
-    double get_angle();
-private:
-    IMP::atom::Angle a;
-};
+/*     double get_angle(); */
+/* private: */
+/*     IMP::atom::Angle a; */
+/* }; */
 
-// joint in which too rigid bodies may slide along a line
-class PrismaticJoint : public Joint{
-    // TODO create prismatic decorator, probably in algebra or kinematics
-    PrismaticJoint(IMP::XXX::Prismatic p);
+/* // joint in which too rigid bodies may slide along a line */
+/* class PrismaticJoint : public Joint{ */
+/*     // TODO create prismatic decorator, probably in algebra or kinematics */
+/*     PrismaticJoint(IMP::XXX::Prismatic p); */
 
-    virtual Transformation3D get_transformation() const;
+/*     virtual Transformation3D get_transformation() const; */
 
-    virtual void update_joint_from_cartesian_witnesses() = 0;
+/*     virtual void update_joint_from_cartesian_witnesses() = 0; */
 
-    set_length(double l);
+/*     set_length(double l); */
 
-    double get_length() const;
-private:
-};
+/*     double get_length() const; */
+/* private: */
+/* }; */
 
-class CompositeJoint : public Joint{
-    void add_joint(Joint j);
+/* class CompositeJoint : public Joint{ */
+/*     void add_joint(Joint j); */
 
-    virtual Transformation3D get_transformation() const;
+/*     virtual Transformation3D get_transformation() const; */
 
-    virtual void update_joint_from_cartesian_witnesses() = 0;
+/*     virtual void update_joint_from_cartesian_witnesses() = 0; */
 
-    Joints& get_inner_joints();
-private:
-    Joints joints;
-};
+/*     Joints& get_inner_joints(); */
+/* private: */
+/*     Joints joints; */
+/* }; */
 
 
 

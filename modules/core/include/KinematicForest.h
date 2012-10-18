@@ -10,20 +10,21 @@
  */
 
 #ifndef IMPCORE_KINEMATIC_FOREST_H
-#define IMPCORE_KINEMATIC_FOREST_H_
+#define IMPCORE_KINEMATIC_FOREST_H
 
+#include <IMP/Model.h>
 #include <IMP/core/KinematicNode.h>
 #include <IMP/core/joints.h>
 #include <IMP/object.h>
 #include <IMP/compatibility/set.h>
 #include <IMP/exception.h>
 #include <IMP/base/check_macros.h>
+#include <queue>
 
 IMPCORE_BEGIN_NAMESPACE
 
 
-// TODO: perhaps separate collision detection capabilities?
-class KinematicForest : public CollisionDetector {
+class KinematicForest  {
 public:
     KinematicForest(Model* m);
 
@@ -45,12 +46,12 @@ public:
      */
     // NOTE: must have root on first call
     // TODO: verify parent_rb is in tree
-    void add_edge(IMP::RigidBody parent, IMP::RigidBody child)
+    Joint* add_edge(IMP::RigidBody parent, IMP::RigidBody child)
     {
       // create joint and associate it with parent and child
       IMP_NEW( TransformationJoint, joint, (parent, child, this) );
       add_joint( joint );
-
+      return joint;
     }
 
     /**
@@ -141,84 +142,111 @@ public:
     }
 
     void update_all_internal_coordinates(){
-      if(!external_coordinates_changed_)
+      if(is_internal_coords_updated_)
         return;
-      // TODO: update from cartesian witnesses recursively
       for(int i = 0; i < joints_.size(); i++){
         joints_[i]->update_joint_from_cartesian_witnesses();
       }
-      external_coordinates_changed_ = false;
+      is_internal_coords_updated_ = true;
     }
 
     void update_all_external_coordinates(){
-      if(!internal_coordinates_changed_)
+      if(is_external_coords_updated)
         return;
-      // TODO: forward kinematics from all roots
-
-      internal_coordinates_changed_ = false;
+      // tree BFS traversal
+      std::queue<KinematicNode> q;
+      for(unsinged int i = 0 ; i < roots_.size(); i++){
+        q.push( roots_[i] );
+      }
+      while( !q.empty() ){
+        KinematicNode n = q.pop();
+        JointsTemp child_joints = n.get_children_joints();
+        for(unsigned int i = 0; i < child_joints.size(); i++){
+          Joint* joint_i = child_joints[i];
+          // TODO: add and implement to joint
+          joint_i->update_child_node_reference_frame();
+          q.push( KinematicNode(joint_i->get_child_node() ) );
+        }
+      }
+      is_external_coords_updated_ = true;
     }
 
     void mark_internal_coordinate_changed(  ) {
       update_all_external_coordinates(); // TODO: do we really need it?
-      internal_coordinates_changed_ = true;
+      is_external_coords_updated_ = false;
     }
 
     void mark_external_coordinate_changed(  ) {
       update_all_internal_coordinates(); // TODO: do we really need it?
-      external_coordinates_changed_ = true;
+      is_internal_coords_updated_ = false;
     }
 
     /**
        sets the corodinates of a particle, and makes sure that particles
        and joints in the tree will return correct external and internal
        coordinates
+
+       @param rb a rigid body that was previously added to the tree
+       @param c  new coordinates
     */
-    void set_coordinates_safe(IMP::XYZ xyz, IMP::algebra::Vector3D c){
-      // TODO: complete this - do we want to handle reference frames?
-      // TODO: runtime check that xyz_particle is indeed within the tree,
-      //       at least in debug mode
-      xyz.set_coordinates(c);
+    void set_coordinates_safe(IMP::RigidBody rb, IMP::algebra::Vector3D c){
+      IMP_USAGE_CHECK( is_member(rb) ,
+                       "A KinematicForest can only handle particles "
+                       + " that were perviously added to it" );
+      rb.set_coordinates( c );
       mark_external_coordinate_changed = true;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    void set_joint_to_rigid_body(IMP::Particle* rb, Joint* joint);
-
-    IMP::Pointer<Joint> get_parent_joint(IMP::RigidBody rb) const
-      {
-      }
-
-    TransformationDOF get_transformation_to_rigid_body
-    (IMP::RigidBody rb) const{
-        // get joint and call joint::get_transformation()
+    /**
+     */
+    IMP::algebra::Vector3D get_cooridnates_safe( IMP::RigidBody rb ) const{
+      IMP_USAGE_CHECK( is_member(rb) ,
+                       "A KinematicForest can only handle particles "
+                       + " that were perviously added to it" );
+      const_cast<KinematicForest*>(this)->update_all_external_coordinates();
+      return rb.get_coordinates();
     }
 
-    // returns the coordinate of any particle in the hierarchy
-    // that has a rigid-body ancestor in the kinematic chain
-    Vector3D get_coordinates(IMP::Particle p) const;
+    /**
+     */
+    bool is_member(IMP::RigidBody rb){
+      Particle* p = rb.get_particle();
+      return
+        KinematicNode::particle_is_instance( p ) &&
+        nodes_.find( KinematicNode( p ) ) != nodes_.end() ;
+    }
+
+    // TODO: do we want to add safe access to rigid body members?
+
+    /**
+     */
+    IMP::algebra::ReferenceFrame3D
+      get_reference_frame_safe(IMP::RigidBody rb) const {
+      IMP_USAGE_CHECK( is_member(rb) ,
+                       "A KinematicForest can only handle particles "
+                       + " that were perviously added to it" );
+      const_cast<KinematicForest*>(this)->update_all_external_coordinates();
+      return rb.get_reference_frame();
+    }
+
+    /**
+       sets the reference frame of a rigid body, and makes sure that
+       particles and joints in the tree will return correct external
+       and internal coordinates when queried through the KinematicForest
+
+       @param rb a rigid body that was previously added to the tree
+       @param r  new reference frame
+    */
+    void set_reference_frame_safe
+      (IMP::RigidBody rb, IMP::algebra::ReferenceFrame3D r){
+      IMP_USAGE_CHECK( is_member(rb) ,
+                       "A KinematicForest can only handle particles "
+                       + " that were perviously added to it" );
+      rb.set_reference_frame( r );
+      mark_external_coordinate_changed = true;
+    }
+
+    // TODO: handle derivatives, and safe getting / setting of them
 
 private:
     IMP::Particles get_children(IMP::Particle parent) const;
@@ -228,9 +256,10 @@ private:
     friend std::ostream& operator<<(std::ostream& s,
                                     const KinematicForest& kt);
 private:
-    Model* m;
-    bool is_cartesian_updated_;
-    bool is_internal_updated_;
+    Model* m_;
+
+    bool is_internal_coords_updated_;
+    bool is_external_coords_updated_;
 
     /** the root nodes that serves as spatial anchor to the
         kinematic trees in the forest */
