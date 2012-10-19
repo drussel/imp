@@ -643,8 +643,8 @@ void RigidBody::add_member(Particle *p) {
       << " as member." << std::endl);*/
     if (KinematicNode::particle_is_instance(p)) {
       // see also KinematicNode::setup_particle()
-      IMP_THROW("KinematicNoder cannot be set as RigidMember at this point," +
-                " in order to guarantee coherent coordinates update",
+      IMP_THROW("KinematicNoder cannot be set as RigidMember at this point,"
+                << " in order to guarantee consistent update of coordinates",
                 IMP::ValueException);
     }
     RigidBody d(p);

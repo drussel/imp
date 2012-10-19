@@ -11,10 +11,10 @@
 #define IMPCORE_JOINTS_H
 
 #include <IMP/core/KinematicNode.h>
-#include <IMP/object.h>
-#include <IMP/compatibility/include/nullptr.h>
+#include <IMP/Object.h>
+#include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
-
+#include <IMP/core/internal/dihedral_helpers.h>
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -22,6 +22,8 @@ class KinematicForest;
 
 class Joint : public Object{ // TODO: should it be ModelObject or Object?
   friend class KinematicForest;
+
+  IMP_OBJECT(Joint);
 
 public:
   /**
@@ -31,12 +33,13 @@ public:
      @param child rigid body downstream of this joint
      @note we currently assume that a parent cannot be switched
    */
-  Joint(RigidBody parent, RigidBody child)
+ Joint(RigidBody parent, RigidBody child) :
+  Object("IMP_CORE_JOINT"),
     parent_(parent), child_(child), owner_kf_(nullptr)
   {
     if(!owner_kf_){
       IMP_THROW("IMP supports only joints that are managed by a"
-                + " kinematic forest",
+                << " kinematic forest",
                 IMP::ValueException);
     }
   }
@@ -49,12 +52,7 @@ public:
 
   // returns the transformation that should be applied to all rigid bodies
   // downstream of the joint
-  virtual IMP::algebra::Transformation3D get_transformation() const {
-    if( get_owner_kf() ) {
-      get_owner_kf()->update_all_internal_coordinates();
-    }
-    return transformation_;
-  }
+  virtual IMP::algebra::Transformation3D get_transformation() const;
 
   RigidBody  get_parent_node() const
   { return parent_; }
@@ -62,7 +60,7 @@ public:
   RigidBody get_child_node() const
   { return child_; }
 
- private:
+ protected:
 
   /***************** setter methods: ***************/
 
@@ -85,7 +83,7 @@ public:
     using namespace IMP::algebra;
 
     Transformation3D parent_tr =
-      parent_.get_reference_frame()->get_transformation_to();
+      parent_.get_reference_frame().get_transformation_to();
     Transformation3D composed_tr =
       parent_tr * get_transformation();
     RigidBody(child_.get_particle()).set_reference_frame
@@ -101,23 +99,47 @@ public:
    */
   virtual void update_joint_from_cartesian_witnesses() = 0;
 
-private:
+protected:
     RigidBody parent_;
     RigidBody child_;
-    Transformation3D transformation_;
+    IMP::algebra::Transformation3D transformation_;
     KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
 
 /* /\** A joint with a completely non-constrained transformation */
-/*     between parent and child nodes */
+/*     between parent and child nodes reference frames */
 /* *\/ */
-/* class TransformationJoint : public Joint{ */
-/*   // TODO */
-/* } */
+class TransformationJoint : public Joint{
+ public:
+ TransformationJoint(RigidBody parent,
+                     RigidBody child) :
+  Joint(parent, child)
+    {
+      update_joint_from_cartesian_witnesses();
+    }
+
+  /**
+     Sets the transfromation from parent to child (TODO: vice versa?)
+     to t
+  */
+  void set_transformation(IMP::algebra::Transformation3D transformation);
+
+ protected:
+  /**
+     sets the joint transformation to the transformation from the
+     parent reference frame to the child reference frame (TODO: or
+     vide versa), after making sure the external coordinates are
+     updated from the owner KinematicForest object)
+   */
+  virtual void update_joint_from_cartesian_witnesses() {
+    // TODO: implement , is it from parent to child or other way?
+  }
+
+};
 
 /** Abstract class for all revolute joints **/
 class RevoluteJoint : public Joint{
-
+ public:
   /**
      constructs a revolute joint on the line connecting a and b,
      with an initial angle 'angle'
@@ -136,32 +158,35 @@ class RevoluteJoint : public Joint{
     angle_(angle)
     {
       // TODO: who are the witnesses here exactly?
-      set_joint_vector( b.get_coordinates() - a.get_coordinates() );
+      set_joint( b.get_coordinates() - a.get_coordinates(),
+                 a.get_coordinates());
       // TODO: is angle useful for anything
-      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
-      p->get_model()->add_score_state(ss); // TODO: implement that?
+      //      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
+      //p->get_model()->add_score_state(ss); // TODO: implement that?
     }
 
  public:
-  /******************* getter methods **************/
-  double get_angle() const {
-    if(get_owner_kf()){
-      get_owner_kf()->update_all_external_coordinates( this );
-    }
-    return angle_;
-  }
+  /******************* public getter / setter methods **************/
+
+  /**
+     sets the angle of the revolute joint and update the joint
+     transformation accordingly
+   */
+  void set_angle(double angle);
+
+  double get_angle() const;
 
   IMP::algebra::Vector3D const& get_joint_unit_vector() const
     { return joint_unit_vector_; }
 
- private:
+ protected:
   /****************** general methods ***************/
 
   /**
      updates the transformation stored within the joint
      based on the current angle_ value
    */
-  void update_transformation_from_angle() const{
+  void update_transformation_from_angle(){
     double x = joint_unit_vector_[0];
     double y = joint_unit_vector_[1];
     double z = joint_unit_vector_[2];
@@ -174,29 +199,17 @@ class RevoluteJoint : public Joint{
       ( x*x*s + cos_angle,   y*x*s - z*sin_angle, z*x*s + y * sin_angle,
         x*y*s + z*sin_angle, y*y*s + cos_angle,   z*y*s - x*sin_angle,
         x*z*s - y*sin_angle, y*z*s + x*sin_angle, z*z*s + cos_angle );
-    transformation_ = IMP::algebra::Transformation3D(r, (r*(-d1_))+d1_);
+    transformation_ = IMP::algebra::Transformation3D(r, (r*(-a_))+a_);
   }
 
-  /******************* setter methods **************/
-  /**
-     sets the angle of the revolute joint and update the joint
-     transformation accordingly
-   */
-  void set_angle(double angle) {
-    if(get_owner_kf()){
-      get_owner_kf()->update_all_internal_coordinates();
-    }
-    angle_ = angle;
-    update_transformation_from_angle();
-    if(get_owner_kf()){
-      get_owner_kf()->mark_internal_coordinate_changed();
-    }
-  }
-
+  /******************* protected setter methods **************/
   /** sets v to the axis around which this joint revolves
+      sets a to the starting point of the joint
    */
-  void set_joint_vector(IMP::algebra::Vector3D v)
-  { joint_unit_vector_ = v.get_unit_vector(); }
+  void set_joint(IMP::algebra::Vector3D v, IMP::algebra::Vector3D a){
+    joint_unit_vector_ = v.get_unit_vector();
+    a_ = a;
+  }
 
  private:
   // the angle in Radians about the joint axis ("unit vector")
@@ -204,6 +217,9 @@ class RevoluteJoint : public Joint{
 
   // the unit vector around which the joint revolves
   IMP::algebra::Vector3D joint_unit_vector_;
+
+  // joint start
+  IMP::algebra::Vector3D a_;
 };
 
 class DihedralAngleRevoluteJoint : public RevoluteJoint{
@@ -235,11 +251,11 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
  private:
   virtual void update_joint_from_cartesian_witnesses()
   {
-    set_joint_axis
-      ( c_.get_coordinates() - b_.get_coordinates() );
+    set_joint( c_.get_coordinates() - b_.get_coordinates(),
+               b_.get_coordinates());
     // TODO: perhaps the knowledge of normalized joint axis can accelerate
     // the dihedral calculation in next line?
-    set_angle( IMP::core::dihedral
+    set_angle( IMP::core::internal::dihedral
                (a_, b_, c_, d_,
                 nullptr, // derivatives - TODO: support?
                 nullptr,
@@ -300,7 +316,7 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
 /*     Joints joints; */
 /* }; */
 
-
+IMP_OBJECTS(Joint,Joints);
 
 IMPCORE_END_NAMESPACE
 

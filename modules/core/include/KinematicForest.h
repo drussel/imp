@@ -15,11 +15,15 @@
 #include <IMP/Model.h>
 #include <IMP/core/KinematicNode.h>
 #include <IMP/core/joints.h>
-#include <IMP/object.h>
+#include <IMP/Object.h>
+#include <IMP/Decorator.h>
 #include <IMP/compatibility/set.h>
 #include <IMP/exception.h>
 #include <IMP/base/check_macros.h>
+#include <IMP/base/warning_macros.h>
+#include <IMP/atom/Hierarchy.h>
 #include <queue>
+#include <algorithm>
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -36,7 +40,7 @@ public:
        TODO: think about what foldtree scheme to use (star?),
 
      */
-    KinematicForest(Model* m, IMP::Hierarchy hierarchy);
+    KinematicForest(Model* m, IMP::atom::Hierarchy hierarchy);
 
 
     /**
@@ -46,22 +50,24 @@ public:
      */
     // NOTE: must have root on first call
     // TODO: verify parent_rb is in tree
-    Joint* add_edge(IMP::RigidBody parent, IMP::RigidBody child)
+    Joint* add_edge(IMP::core::RigidBody parent, IMP::core::RigidBody child)
     {
       // create joint and associate it with parent and child
-      IMP_NEW( TransformationJoint, joint, (parent, child, this) );
-      add_joint( joint );
+      IMP_NEW( TransformationJoint, joint, (parent, child) );
+      add_edge( joint );
       return joint;
     }
 
     /**
        Adds a kinematic edge between the joint parent and child
        rigid bodies, decorating them as KinematicNodes if needed.
+       The joint becomes owned by this KinematicForest, such that
+       changes to the joint are synchronized with the KinematicForest
      */
     void add_edge(Joint* joint) {
-      joint->set_owner( this );
-      RigidBody parent_rb = joint->get_parent();
-      RigidBody child_rb = joint->get_child();
+      joint->set_owner_kf( this );
+      RigidBody parent_rb = joint->get_parent_node();
+      RigidBody child_rb = joint->get_child_node();
       KinematicNode parent_kn, child_kn;
       // I. decorate parent / child as kinematic nodes if needed,
       //    and store in parent_kn / child_kn resp.
@@ -88,7 +94,7 @@ public:
       }
       parent_kn.add_child_joint( joint );
       // update child:
-      if( nodes_.find( child ) == nodes_.end() ){
+      if( nodes_.find( child_kn ) == nodes_.end() ){
         nodes_.insert( child_kn );
       }
       else {
@@ -98,7 +104,7 @@ public:
         }
         else {
           IMP_THROW( "IMP currently does not support switching of "
-                     + " parents in a kinematic tree",
+                     << " parents in a kinematic tree",
                      IMP::ValueException );
           // TODO: do we want to allow parent switching? not for now
           //       in this case, should we remove this child from its old
@@ -111,55 +117,46 @@ public:
     }
 
     /**
-       adds edges between each pair of consecutive rigid bodies, using default
-       transformation between rigid bodies reference frames
+       adds edges between each pair of consecutive rigid bodies in the list
+       rbs, using default TransformationJoint joints (transforming from one
+       rigid body to the next)
 
        @param rbs list of n consecutive rigid bodies
     */
-    void add_rigid_bodies_in_chain(IMP::RigidBodies rbs){
-      for(int i = 0 ; i < rbs.size() - 1; i++){
+    void add_rigid_bodies_in_chain(IMP::core::RigidBodies rbs) {
+      for(int i = 0 ; i < (int)rbs.size() - 1; i++){
         add_edge( rbs[i], rbs[i+1] );
       }
     }
 
-    /**
-       adds edges between each pair of consecutive rigid bodies in the list
-       rbs, using the corresponding joints
-
-       @param rbs list of n consecutive rigid bodies
-       @param joints list of n-1 joints to connect consecutive rigid bodies
-    */
-    void add_rigid_bodies_in_chain(IMP::RigidBodies rbs, Joints joints){
-      for(int i = 0 ; i < rbs.size() - 1; i++){
-        add_edge( rbs[i], rbs[i+1], joints[i] );
-      }
-    }
-
     // rebuild tree (same topology but change directionality)
-    reset_root(IMP::Particle* new_root){
+    void reset_root(IMP::Particle* new_root){
       // TODO: implement
       IMP_NOT_IMPLEMENTED;
+      IMP_UNUSED(new_root);
     }
 
     void update_all_internal_coordinates(){
       if(is_internal_coords_updated_)
         return;
-      for(int i = 0; i < joints_.size(); i++){
+      for(int i = 0; i < (int)joints_.size(); i++){
         joints_[i]->update_joint_from_cartesian_witnesses();
       }
       is_internal_coords_updated_ = true;
     }
 
     void update_all_external_coordinates(){
-      if(is_external_coords_updated)
+      if(is_external_coords_updated_)
         return;
-      // tree BFS traversal
+      // tree BFS traversal from roots
       std::queue<KinematicNode> q;
-      for(unsinged int i = 0 ; i < roots_.size(); i++){
-        q.push( roots_[i] );
+      IMP::compatibility::set<KinematicNode>::iterator it;
+      for(it = roots_.begin(); it != roots_.end(); it++){
+        q.push( *it );
       }
       while( !q.empty() ){
-        KinematicNode n = q.pop();
+        KinematicNode n = q.front();
+        q.pop();
         JointsTemp child_joints = n.get_children_joints();
         for(unsigned int i = 0; i < child_joints.size(); i++){
           Joint* joint_i = child_joints[i];
@@ -171,13 +168,21 @@ public:
       is_external_coords_updated_ = true;
     }
 
-    void mark_internal_coordinate_changed(  ) {
-      update_all_external_coordinates(); // TODO: do we really need it?
+    /**
+       notifies the tree that joint (internal) coordinates
+       have changed and therefore external coordinates are not
+       up to date
+    */
+    void mark_internal_coordinates_changed(  ) {
       is_external_coords_updated_ = false;
     }
 
-    void mark_external_coordinate_changed(  ) {
-      update_all_internal_coordinates(); // TODO: do we really need it?
+    /**
+       notifies the tree that external Cartesian coordinates
+       have changed and therefore internal (joint) coordinates are not
+       up to date
+    */
+    void mark_external_coordinates_changed(  ) {
       is_internal_coords_updated_ = false;
     }
 
@@ -189,17 +194,19 @@ public:
        @param rb a rigid body that was previously added to the tree
        @param c  new coordinates
     */
-    void set_coordinates_safe(IMP::RigidBody rb, IMP::algebra::Vector3D c){
+    void set_coordinates_safe
+      (IMP::core::RigidBody rb, IMP::algebra::Vector3D c){
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
                        + " that were perviously added to it" );
       rb.set_coordinates( c );
-      mark_external_coordinate_changed = true;
+      mark_external_coordinates_changed();
     }
 
     /**
      */
-    IMP::algebra::Vector3D get_cooridnates_safe( IMP::RigidBody rb ) const{
+    IMP::algebra::Vector3D get_cooridnates_safe
+      ( IMP::core::RigidBody rb ) const{
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
                        + " that were perviously added to it" );
@@ -209,7 +216,7 @@ public:
 
     /**
      */
-    bool is_member(IMP::RigidBody rb){
+    bool is_member(IMP::core::RigidBody rb){
       Particle* p = rb.get_particle();
       return
         KinematicNode::particle_is_instance( p ) &&
@@ -221,7 +228,7 @@ public:
     /**
      */
     IMP::algebra::ReferenceFrame3D
-      get_reference_frame_safe(IMP::RigidBody rb) const {
+      get_reference_frame_safe(IMP::core::RigidBody rb) const {
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
                        + " that were perviously added to it" );
@@ -238,12 +245,12 @@ public:
        @param r  new reference frame
     */
     void set_reference_frame_safe
-      (IMP::RigidBody rb, IMP::algebra::ReferenceFrame3D r){
+      (IMP::core::RigidBody rb, IMP::algebra::ReferenceFrame3D r){
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
                        + " that were perviously added to it" );
       rb.set_reference_frame( r );
-      mark_external_coordinate_changed = true;
+      mark_external_coordinates_changed();
     }
 
     // TODO: handle derivatives, and safe getting / setting of them
@@ -269,7 +276,7 @@ private:
     IMP::compatibility::set<KinematicNode> nodes_;
 
     // TODO: do we really need this?
-    IMP::compatibility::vector<Joint*> joints_;
+    Joints joints_;
 
 };
 

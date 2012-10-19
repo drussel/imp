@@ -10,8 +10,8 @@
 #define IMPCORE_KINEMATIC_NODE_H
 
 #include <IMP/core/rigid_bodies.h>
+#include <IMP/core/joints.h>
 #include <IMP/exception.h>
-
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -25,12 +25,27 @@ class KinematicForest;
   A KinematicNode is a rigid body that is connected by a joint to other
   rigid bodies
 */
-class KinematicNode : IMP::RigidBody{
+class KinematicNode : public RigidBody{
   friend class KinematicForest;
 
   IMP_DECORATOR(KinematicNode, RigidBody);
 
-private:
+ public:
+
+  /**
+     @brief Return true if the particle is a kinematic nodea (has the
+     appropriate properties).
+  */
+  static bool particle_is_instance(Particle *p) {
+    ParticleIndex pi = p->get_index();
+    Model* m = p->get_model();
+    return
+      m->get_has_attribute( get_children_joints_key(), pi) &&
+      m->get_has_attribute( get_parent_joint_key(), pi);
+  }
+
+
+ private:
 
     /** sets up a node in a kinematic tree
 
@@ -42,25 +57,33 @@ private:
 
         @note Private so as only KinematicForest can setup new kinematic nodes
     */
-    static Joint setup_particle(Particle*p,
+    static KinematicNode setup_particle(Particle*p,
                                 Joint* parent_joint = nullptr,
-                                Joints& children_joints = ParticlesTemp())  {
+                                Joints children_joints = Joints())  {
       if (RigidMember::particle_is_instance(p)) {
         // see also RigidBody::add_member
-        IMP_THROW("RigidMemer cannot be set as KinematicNode at this point," +
+        IMP_THROW("RigidMemer cannot be set as KinematicNode at this point," <<
                   " in order to guarantee coherent coordinates update",
                   IMP::ValueException);
       }
       if (!RigidBody::particle_is_instance(p)) {
           RigidBody::setup_particle(p, ParticlesTemp() );
       }
-      p->add_attribute(get_parent_joint_key(), parent_joint)
-      p->add_attribute(get_children_joints_key(), children_joints);
+      p->get_model()->add_attribute(get_parent_joint_key(),
+                                    p->get_index(),
+                                    parent_joint);
+      p->get_model()->add_attribute(get_children_joints_key(),
+                                    p->get_index(),
+                                    children_joints);
+      return KinematicNode(p);
     }
 
     Joint* get_parent_joint() {
         // TODO: indexes system?
-        Object* o = get_particle()->get_value( get_parent_joint_key() );
+        Object* o =
+          get_model()->get_attribute( get_parent_joint_key(),
+                                      get_particle_index() );
+          // get_particle()->get_value( get_parent_joint_key() );
         return static_cast<Joint*>(o);
     }
 
@@ -70,7 +93,8 @@ private:
                                       get_particle_index() );
         Joints joints;
         for(unsigned int i = 0; i <= objs.size(); i++){
-            Joint* j = static_cast<Joint*>(objs[i]);
+          Object * o = objs[i];
+          Joint* j = static_cast<Joint*>(o);
             joints.push_back(j);
         }
         return joints;
@@ -84,8 +108,8 @@ private:
 
     void add_child_joint(Joint* j) {
       Joints joints = get_children_joints();
-      joints.push_back(this);
-      kn.set_children_joints(joints);
+      joints.push_back(j);
+      set_children_joints(joints);
     }
 
     void set_parent_joint(Joint* j) {
@@ -106,8 +130,8 @@ private:
     }
 };
 
-IMP_DECORATORS_DEF(KinematicNode, KinematicNodes);RigidMember,RigidMembers);
-IMP_DECORATORS(KinematicNode, KinematicNodes, RigidBodies);
+//IMP_DECORATORS_DEF(KinematicNode, KinematicNodes);
+IMP_DECORATORS(KinematicNode, KinematicNodes, RigidBody);
 
 IMPCORE_END_NAMESPACE
 

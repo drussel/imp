@@ -11,19 +11,25 @@
 
 #include <IMP/Model.h>
 #include <IMP/core/KinematicForest.h>
+#include <IMP/atom/Hierarchy.h>
+#include <IMP/base/warning_macros.h>
 
 IMPCORE_BEGIN_NAMESPACE
 
 
 KinematicForest::KinematicForest(Model* m) :
-  m_(m), is_internal_coords_updated_(true), is_external_coords_updated(true)
+  m_(m),
+  is_internal_coords_updated_(true),
+  is_external_coords_updated_(true)
 {
 }
 
 // build an entire tree from an existing hierarchy
-KinematicForest::KinematicForest(Model* m, IMP::Hierarchy hierarchy){
+KinematicForest::KinematicForest(Model* m, IMP::atom::Hierarchy hierarchy) :
+  m_(m){
   // TODO: implement
   IMP_NOT_IMPLEMENTED;
+  IMP_UNUSED(hierarchy);
 }
 
 
