@@ -5,8 +5,9 @@
 #include <sstream>
 #include "common.h"
 
-std::string description("Print out information about frames");
+std::string description("Lock an rmf file.");
 
+int frame=0;
 
 int main(int argc, char **argv) {
   try {
@@ -15,12 +16,7 @@ int main(int argc, char **argv) {
 
 
     RMF::FileConstHandle rh= RMF::open_rmf_file_read_only(input);
-    for (unsigned int i=0; i< rh.get_number_of_frames(); ++i) {
-      std::string cmt=rh.get_frame_name(i);
-      if (!cmt.empty()) {
-        std::cout << i << ": " << cmt << std::endl;
-      }
-    }
+    rh.set_is_locked(true);
     return 0;
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;

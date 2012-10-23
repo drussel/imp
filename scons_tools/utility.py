@@ -242,7 +242,7 @@ def add_to_include_path(env, path):
     #print not (sys.platform=="darwin"
     #                and env["CXXVERSION"].split(".")[0] == "4"
     #                and env["CXXVERSION"].split(".")[1] == "0")
-    if dependency.gcc.get_is_gcc_like(env)\
+    if dependency.gcc.get_is_gcc(env)\
            and not path.startswith("#"):
         if sys.platform=="darwin"\
             and env["CXXVERSION"].split(".")[0] == "4"\
@@ -316,12 +316,23 @@ def get_ld_path(env):
     # provided by MacPorts/Fink/HomeBrew and the OS, since it overrides the
     # rpath) and shouldn't be necessary anyway (paths to libraries are
     # stored in the binary)
-    if not env['IMP_USE_RPATH'] and env.get('libpath', None) \
-       and env['PLATFORM'] != 'darwin':
+    add_libpath = not env['IMP_USE_RPATH'] and env.get('libpath', None) \
+                  and env['PLATFORM'] != 'darwin'
+    if add_libpath:
         ret=get_env_paths(env, 'libpath')
     ret.extend(get_env_paths(env, 'ldlibpath'))
+    if add_libpath:
+        ret.extend(data.get_dependency_variable("libpath"))
     #print get_env_paths(env, 'ldlibpath')
     return ":".join(get_abspaths(env, "ldpath", ret))
+
+def get_python_path(env):
+    ret=[]
+    ret.extend(get_env_paths(env, 'pythonpath'))
+    ret.extend(data.get_dependency_variable("pythonpath"))
+    #print get_env_paths(env, 'ldlibpath')
+    return ":".join(get_abspaths(env, "pythonpath", ret))
+
 
 def get_separator(env):
     if env['PLATFORM'] == 'win32' or env['wine']:
@@ -332,9 +343,10 @@ def get_separator(env):
 
 def get_python_result(env, setup, cmd):
     #print "hi"
-    if env.get('pythonpath', None):
+    pp= get_python_path(env)
+    if pp:
         #print 1
-        ap=get_abspaths(env, 'pythonpath', env.get('pythonpath', ""))
+        ap=get_abspaths(env, 'pythonpath', pp)
         #print ap
         setpp="import sys; sys.path.extend("+str(ap)+");"
     else:

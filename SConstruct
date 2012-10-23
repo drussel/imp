@@ -28,13 +28,15 @@ EnsureSConsVersion(0, 98)
 vars = Variables(files=[File('#/config.py').abspath])
 scons_tools.variables.add_common_variables(vars, "imp")
 env = scons_tools.environment.get_base_environment(variables=vars,
-                              tools=["default", "swig", "dot", "doxygen", "cpp"],
+                              tools=["default", "swig", "dot", "doxygen", "cpp",
+                                     "protoc"],
                               toolpath=["scons_tools/tools"])
 try:
     env['IMP_VERSION']=open(scons_tools.utility.get_source_path(env, "VERSION"), "r").read().rstrip('\r\n')
 except:
     env['IMP_VERSION']="Unknown"
 env['IMP_VARIABLES']=vars
+env['IMP_SCONS_EXTRA_VARIABLES']=[]
 env['IMP_CONFIGURATION']=[]
 
 Export('env')
@@ -90,11 +92,11 @@ if not env.GetOption('help'):
 
 # placed here so that the result is universally visible since it
 # is special cased for benchmarks
-scons_tools.dependency.add_external_library(env, "tcmalloc",
-                                            ["tcmalloc"],
-                                            # garbage to avoid rename issues
-                                            "vector",
-                                            enabled=False)
+if not env.GetOption('help'):
+    scons_tools.dependency.add_external_library(env, "tcmalloc",
+                                                ["tcmalloc"],
+                                                # garbage to avoid rename issues
+                                                "vector", enabled=False)
 scripts=scons_tools.paths.get_sconscripts(env,["modules"],["tools", "doc"])
 env['IMP_PASS']="BUILD"
 for s in scripts:
@@ -126,13 +128,10 @@ if not env.GetOption('help'):
 
     unknown = vars.UnknownVariables()
 
-    # ignore for now, unclear if it is worth fixing
-
     # Older versions of scons have a bug with command line arguments
     # that are added late, so remove those we know about from this list
-    #for dep, data in scons_tools.data.get(env).dependencies.items():
-    #    for var in data.variables:
-    #        unknown.pop(var, None)
+    for var in env['IMP_SCONS_EXTRA_VARIABLES']:
+        unknown.pop(var, None)
     if unknown:
         print >> sys.stderr, "\n\nUnknown variables: ", " ".join(unknown.keys())
         print >> sys.stderr, "Use 'scons -h' to get a list of the accepted variables."

@@ -26,23 +26,20 @@ def _get_platform_cxxflags(env):
                                       "' '.join([x for x in distutils.sysconfig.get_config_vars('OPT')])")
         cflags=utility.get_python_result(env, "import distutils.sysconfig",
                                       "' '.join([x for x in distutils.sysconfig.get_config_vars('BASECFLAGS')])")
-        if dependency.gcc.get_is_gcc_like(env):
-            basecflags=[x for x in opt.split()+cflags.split() \
-                        if x not in ['-Werror', '-Wall', '-Wextra',
-                                     '-O2', '-O3', '-O1', '-Os',
-                                     '-fstack-protector', '-Wstrict-prototypes',
-                                     '-g', '-dynamic', '-DNDEBUG',
-                                     "-fwrapv", "-fno-strict-aliasing"]]
-                    #total.append(v)
-            # Using _FORTIFY_SOURCE without -O flags triggers a warning on
-            # newer systems, so remove it
-            ret=[x for x in basecflags \
+        basecflags=[x for x in opt.split()+cflags.split() \
+                    if x not in ['-Werror', '-Wall', '-Wextra',
+                                 '-O2', '-O3', '-O1', '-Os',
+                                 '-fstack-protector', '-Wstrict-prototypes',
+                                 '-g', '-dynamic', '-DNDEBUG',
+                                 "-fwrapv", "-fno-strict-aliasing"]]
+                                            #total.append(v)
+                                            # Using _FORTIFY_SOURCE without -O flags triggers a warning on
+                                            # newer systems, so remove it
+        ret=[x for x in basecflags \
                           if '_FORTIFY_SOURCE' not in x]
-        else:
-            ret= opt.split()+cflags.split()
 
     if env.get('cppcoverage', 'no') != 'no':
-        if not dependency.gcc.get_is_gcc_like(env):
+        if not dependency.gcc.get_is_gcc(env):
             raise ValueError("C coverage testing currently only works with gcc")
         env.Append(CXXFLAGS=["-fprofile-arcs", "-ftest-coverage"])
         if env['build'] == 'debug':
@@ -128,7 +125,7 @@ def _get_platform_cxxflags(env):
 def _get_platform_linkflags(env):
     ret=[]
     if env.get('cppcoverage', 'no') != 'no':
-        if not dependency.gcc.get_is_gcc_like(env):
+        if not dependency.gcc.get_is_gcc(env):
             raise ValueError("C coverage testing currently only works with gcc")
         ret+=["-fprofile-arcs", "-ftest-coverage"]
         if env['build'] == 'debug':
@@ -272,8 +269,10 @@ def _propagate_variables(env):
         env.Append(LIBS=utility.get_env_paths(env, 'libs'))
 
     if env.get('ldlibpath') is not None and env.get('ldlibpath') != '':
-        env['ENV']['LD_LIBRARY_PATH'] = env['ldlibpath']
-
+        dylib_name = utility.get_dylib_name(env)
+        if dylib_name:
+            env['ENV'][dylib_name] = env['ldlibpath']
+    env['ENV']['PATH']= ":".join([env['ENV']['PATH'], Dir("#/build/bin").abspath, env.get('path', "")])
     if env.get('environment') is not None:
         for pair in env.get('environment').split(','):
             if pair != "":
@@ -490,14 +489,19 @@ def add_common_variables(vars, package):
                       'no', ['no', 'lines', 'annotate']))
     vars.Add(EnumVariable('html_coverage',
                           'Whether to output a coverage report '
-                          'in HTML format. Requires cppcoverage set and the '
+                          'in HTML format. (Requires cppcoverage set and the '
                           'lcov package for C output, and pycoverage set '
-                          'for Python output). "single" will output '
+                          'for Python output.) "single" will output '
                           'a single report that covers all modules or '
                           'applications that were tested with this scons '
                           'invocation; "separate" will generate a separate '
-                          'report for each module or application.',
-                          'no', ['no', 'single', 'separate']))
+                          'report for each module or application; '
+                          '"separate:global" is like "separate" but the '
+                          'coverage, rather than just from running a module '
+                          'or application\'s own tests, includes running '
+                          '*all* tests.',
+                          'no', ['no', 'single', 'separate',
+                                 'separate:global']))
     #vars.Add(BoolVariable('noexternaldependencies', 'Do not check files in the provided includepath and libpath for changes.', False))
 
 

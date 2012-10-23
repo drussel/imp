@@ -195,6 +195,7 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
     variables=[lcname, lcname+"libs", lcname+"version"]
     def _check(context):
         local=False
+        pythonpath=None
         if context.env['IMP_OUTER_ENVIRONMENT'][lcname] == "no":
             context.Message('Checking for '+name+' ...')
             context.Result("disabled")
@@ -213,34 +214,21 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                                       extra_libs, versioncpp, versionheader)
                     if not ok and build:
                         local=True
-                        paths={"builddir":Dir("#/build/local_dependencies/"+name).abspath,
-                               "srcdir":scons_tools.paths.get_input_path(context.env, name),
-                               "installprefix":env["prefix"]}
-                        includepath=[x%paths for x in build[2]]
-                        libpath= [x%paths for x in build[3]]
-                        for i in includepath:
-                            context.env.Append(CPPPATH=[i])
-                        for i in libpath:
-                            context.env.Append(LIBPATH=[i])
-                            #print context.env["LIBPATH"], includepath
-                            #print context.env["CPPPATH"], libpath
+                        paths={"builddir":Dir("#/build/").abspath,
+                               "workdir":Dir("#/build/src/"+name).abspath,
+                               "srcdir":scons_tools.paths.get_input_path(context.env, "dependency/"+name)}
+                        if not os.path.exists(paths["workdir"]):
+                            os.makedirs(paths["workdir"])
 
-                        buildscript= build[0]%paths
-                        installscript= build[1]%paths
-                        if not os.path.exists(paths["builddir"]):
-                            os.makedirs(paths["builddir"])
+                        buildscript= build%paths
                         try:
                             os.system(buildscript)
-                            print "run"
-                            (ok, libs, version, xincludepath, xlibpath)=\
+                            (ok, libs, version, includepath, libpath)=\
                              _get_info_test(context, env, name, lib, header, body,
                                 extra_libs, versioncpp, versionheader)
                                  #print "found", ok
                         except:
                             pass
-                        if ok:
-                            bld=SCons.Builder.Builder(action=installscript)
-                            env.Alias("install", bld(env))
 
             if not ok:
                 scons_tools.data.add_dependency(name, variables=variables,
@@ -258,6 +246,7 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                                    libs=libs,
                                    includepath=includepath,
                                    libpath=libpath,
+                                   pythonpath=pythonpath,
                                    version=version,
                                    versioncpp=pversioncpp,
                                    versionheader=pversionheader,
@@ -265,6 +254,7 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                                    build=build)
                 return True
     vars = env['IMP_VARIABLES']
+    env['IMP_SCONS_EXTRA_VARIABLES'].append(lcname)
     if enabled:
         vars.Add(SCons.Variables.EnumVariable(lcname, 'Whether to use the '+name+' package', "auto", ["yes", "no", "auto"]))
     else:
@@ -282,6 +272,3 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
             env.Append(IMP_DISABLED=[name])
             env.Append(IMP_CONFIGURATION=[lcname+"='no'"])
         conf.Finish()
-    else:
-        # make sure they are only added once when help is passed
-        dta.add_dependency(name, ok=False)
