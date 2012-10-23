@@ -198,7 +198,7 @@ public:
       (IMP::core::RigidBody rb, IMP::algebra::Vector3D c){
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
-                       + " that were perviously added to it" );
+                       << " that were perviously added to it" );
       rb.set_coordinates( c );
       mark_external_coordinates_changed();
     }
@@ -209,14 +209,14 @@ public:
       ( IMP::core::RigidBody rb ) const{
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
-                       + " that were perviously added to it" );
+                       << " that were perviously added to it" );
       const_cast<KinematicForest*>(this)->update_all_external_coordinates();
       return rb.get_coordinates();
     }
 
     /**
      */
-    bool is_member(IMP::core::RigidBody rb){
+    bool is_member(IMP::core::RigidBody rb) const{
       Particle* p = rb.get_particle();
       return
         KinematicNode::particle_is_instance( p ) &&
@@ -231,7 +231,7 @@ public:
       get_reference_frame_safe(IMP::core::RigidBody rb) const {
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
-                       + " that were perviously added to it" );
+                       << " that were perviously added to it" );
       const_cast<KinematicForest*>(this)->update_all_external_coordinates();
       return rb.get_reference_frame();
     }
@@ -248,7 +248,7 @@ public:
       (IMP::core::RigidBody rb, IMP::algebra::ReferenceFrame3D r){
       IMP_USAGE_CHECK( is_member(rb) ,
                        "A KinematicForest can only handle particles "
-                       + " that were perviously added to it" );
+                       << " that were perviously added to it" );
       rb.set_reference_frame( r );
       mark_external_coordinates_changed();
     }

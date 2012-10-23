@@ -355,11 +355,13 @@ class PrismaticJoint : public Joint{
   */
   virtual void update_joint_from_cartesian_witnesses() {
     using namespace IMP::algebra;
-
+    const double tiny_double = 1e-12;
     IMP_USAGE_CHECK
-      ( a_.get_coordinates() != b_.get_coordinates(),
+      ( get_distance(a_.get_coordinates(), b_.get_coordinates())
+        < tiny_double,
         "witnesses of prismatic joint should have different"
         << " coordinates" );
+
     Vector3D v_diff = b_.get_coordinates() - a_.get_coordinates();
     double mag = v_diff.get_magnitude();
     l_ = mag;
