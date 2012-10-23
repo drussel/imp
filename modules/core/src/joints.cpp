@@ -17,25 +17,22 @@
 
 IMPCORE_BEGIN_NAMESPACE
 
-// returns the transformation that should be applied to all rigid bodies
-// downstream of the joint
-IMP::algebra::Transformation3D
-Joint::get_transformation() const {
+const IMP::algebra::Transformation3D&
+Joint::get_transformation_child_to_parent() const {
   if( get_owner_kf() ) {
     get_owner_kf()->update_all_internal_coordinates();
   }
-  return transformation_;
+  return transformation_child_to_parent_;
 }
 
-// Sets the transfromation from parent to child (TODO: vice versa?)
-// to t
+// Sets the transfromation from parent to child
 void
-TransformationJoint::set_transformation
+TransformationJoint::set_transformation_child_to_parent
 (IMP::algebra::Transformation3D transformation) {
   if(get_owner_kf()){
     get_owner_kf()->update_all_internal_coordinates( );
   }
-  transformation_ = transformation;
+  transformation_child_to_parent_ = transformation;
   if(get_owner_kf()){
     get_owner_kf()->mark_internal_coordinates_changed();
   }
@@ -82,14 +79,16 @@ PrismaticJoint::set_length(double l){
     get_owner_kf()->update_all_internal_coordinates();
   }
   l_ = l;
-  IMP::algebra::Vector3D v_diff =
+  IMP::algebra::Vector3D v =
     b_.get_coordinates() - a_.get_coordinates();
   IMP::algebra::Vector3D translation =
-    l_ * v_diff.get_unit_vector();
-  transformation_ = IMP::algebra::Transformation3D( translation );
+    l_ * v.get_unit_vector();
+  transformation_child_to_parent_ =
+    IMP::algebra::Transformation3D( translation );
   if(get_owner_kf()){
     get_owner_kf()->mark_internal_coordinates_changed();
   }
+  // note: lazy so we don't update coords of b
 }
 
 

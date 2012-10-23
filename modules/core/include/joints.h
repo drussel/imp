@@ -52,9 +52,12 @@ public:
     return owner_kf_;
   }
 
-  // returns the transformation that should be applied to all rigid bodies
-  // downstream of the joint
-  virtual IMP::algebra::Transformation3D get_transformation() const;
+  /**
+     returns the transformation of a vector from the child
+     reference frame to the parent reference frame
+  */
+  virtual const IMP::algebra::Transformation3D&
+    get_transformation_child_to_parent() const;
 
   RigidBody  get_parent_node() const
   { return parent_; }
@@ -84,12 +87,15 @@ public:
     // TODO: make this efficient - indexing? lazy? update flag?
     using namespace IMP::algebra;
 
-    Transformation3D parent_tr =
+    const Transformation3D& tr_parent_to_global =
       parent_.get_reference_frame().get_transformation_to();
-    Transformation3D composed_tr =
-      parent_tr * get_transformation();
-    RigidBody(child_.get_particle()).set_reference_frame
-       ( ReferenceFrame3D( composed_tr ));
+    const Transformation3D& tr_child_to_parent =
+      get_transformation_child_to_parent();
+    Transformation3D tr_child_to_global
+      (tr_parent_to_global * tr_child_to_parent);
+    RigidBody child_rb = RigidBody(child_.get_particle());
+    child_rb.set_reference_frame
+      ( ReferenceFrame3D( tr_child_to_global ) );
   }
 
   /**
@@ -104,7 +110,7 @@ public:
 protected:
     RigidBody parent_;
     RigidBody child_;
-    IMP::algebra::Transformation3D transformation_;
+    IMP::algebra::Transformation3D transformation_child_to_parent_;
     KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
 
@@ -121,10 +127,10 @@ class TransformationJoint : public Joint{
     }
 
   /**
-     Sets the transfromation from parent to child (TODO: vice versa?)
-     to t
+     Sets the transfromation from parent to child reference frame
   */
-  void set_transformation(IMP::algebra::Transformation3D transformation);
+  void set_transformation_child_to_parent
+    (IMP::algebra::Transformation3D transformation);
 
  protected:
   /**
@@ -201,7 +207,8 @@ class RevoluteJoint : public Joint{
       ( x*x*s + cos_angle,   y*x*s - z*sin_angle, z*x*s + y * sin_angle,
         x*y*s + z*sin_angle, y*y*s + cos_angle,   z*y*s - x*sin_angle,
         x*z*s - y*sin_angle, y*z*s + x*sin_angle, z*z*s + cos_angle );
-    transformation_ = IMP::algebra::Transformation3D(r, (r*(-a_))+a_);
+    transformation_child_to_parent_ =
+      IMP::algebra::Transformation3D(r, (r*(-a_))+a_);
   }
 
   /******************* protected setter methods **************/
@@ -305,6 +312,7 @@ class PrismaticJoint : public Joint{
   /**
      Create a prismatic joint whose axis of translation is from a
      to b, which serve as witnesses for the joint transformation
+     (a is associated with the parent and b with the child)
   */
  PrismaticJoint(RigidBody parent, RigidBody child,
                 XYZ a, XYZ b) :
@@ -338,7 +346,8 @@ class PrismaticJoint : public Joint{
   /**
      sets the length of the prismatic joint to l, that is
      the length between the two witnesses set up upon construction
-     (in a lazy fashion)
+     (in a lazy fashion, without updating external coords).
+     Updates the owner of the change in internal coordinates.
 
      @note it is assumed that l > 0, and for efficiency, runtime
            checks for this are not made in fast mode
@@ -362,20 +371,22 @@ class PrismaticJoint : public Joint{
         "witnesses of prismatic joint should have different"
         << " coordinates" );
 
-    Vector3D v_diff = b_.get_coordinates() - a_.get_coordinates();
-    double mag = v_diff.get_magnitude();
+    Vector3D v =
+      b_.get_coordinates() - a_.get_coordinates();
+    double mag = v.get_magnitude();
     l_ = mag;
-    transformation_ =  // TODO: should implement set_transformation instead?
-       IMP::algebra::Transformation3D( v_diff ) ; // TODO: or -v?
+    // TODO: should implement set_transformation instead?
+    transformation_child_to_parent_ =
+      IMP::algebra::Transformation3D( v ) ;
   }
 
 
 
  private:
 
-  XYZ a_; // prismatic joint from point
+  XYZ a_; // prismatic joint from point, associated with parent
 
-  XYZ b_; // prismatic joint to point
+  XYZ b_; // prismatic joint to point, associated with child
 
   double l_; // the length of the prismatic joint
 
