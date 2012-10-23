@@ -15,6 +15,8 @@
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/core/internal/dihedral_helpers.h>
+#include <IMP/algebra/Vector3D.h>
+#include <IMP/base/check_macros.h>
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -151,8 +153,8 @@ class RevoluteJoint : public Joint{
   **/
  RevoluteJoint(RigidBody parent,
                RigidBody child,
-               IMP::core::XYZ a,
-               IMP::core::XYZ b,
+               XYZ a,
+               XYZ b,
                double angle = 0.0)
    : Joint(parent, child),
     angle_(angle)
@@ -237,10 +239,10 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
      */
   DihedralAngleRevoluteJoint(RigidBody parent,
                              RigidBody child,
-                             IMP::core::XYZ a,
-                             IMP::core::XYZ b,
-                             IMP::core::XYZ c,
-                             IMP::core::XYZ d) :
+                             XYZ a,
+                             XYZ b,
+                             XYZ c,
+                             XYZ d) :
   RevoluteJoint(parent, child, b, c),
     a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
   {
@@ -248,14 +250,19 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
     update_joint_from_cartesian_witnesses();
   }
 
- private:
+ protected:
+  /**
+     Update the stored dihedral angle (and the resulting joint transformation)
+     to fit the positions of the four cartesian witnesses given upon
+     construction.
+   */
   virtual void update_joint_from_cartesian_witnesses()
   {
     set_joint( c_.get_coordinates() - b_.get_coordinates(),
                b_.get_coordinates());
     // TODO: perhaps the knowledge of normalized joint axis can accelerate
     // the dihedral calculation in next line?
-    set_angle( IMP::core::internal::dihedral
+    set_angle( internal::dihedral
                (a_, b_, c_, d_,
                 nullptr, // derivatives - TODO: support?
                 nullptr,
@@ -265,10 +272,10 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
   }
 
  private:
-    IMP::core::XYZ a_;
-    IMP::core::XYZ b_;
-    IMP::core::XYZ c_;
-    IMP::core::XYZ d_;
+    XYZ a_;
+    XYZ b_;
+    XYZ c_;
+    XYZ d_;
 };
 
 /* class BondAngleRevoluteJoint : public RevoluteJoint{ */
@@ -289,20 +296,88 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
 /*     IMP::atom::Angle a; */
 /* }; */
 
-/* // joint in which too rigid bodies may slide along a line */
-/* class PrismaticJoint : public Joint{ */
-/*     // TODO create prismatic decorator, probably in algebra or kinematics */
-/*     PrismaticJoint(IMP::XXX::Prismatic p); */
+/**
+   joint in which too rigid bodies may slide along a line
+*/
+class PrismaticJoint : public Joint{
+ public:
+  /******************* Constructors ***********************/
+  /**
+     Create a prismatic joint whose axis of translation is from a
+     to b, which serve as witnesses for the joint transformation
+  */
+ PrismaticJoint(RigidBody parent, RigidBody child,
+                XYZ a, XYZ b) :
+  Joint(parent, child), a_(a), b_(b) {
+    double tiny_double = 1e-12;
+    if( (a.get_coordinates() - b_.get_coordinates()).get_magnitude()
+       < tiny_double ) {
+      IMP_THROW( "cannot create a prismatic joint with witnesses of"
+                 << " identical coordinates " << a << " and " << b,
+                 IMP::ValueException );
+    }
+    update_joint_from_cartesian_witnesses();
+  }
 
-/*     virtual Transformation3D get_transformation() const; */
+  /**
+     Create a prismatic joint whose axis of translation is between
+     the reference framess of parent and child, who also
+     serve as witnesses for the joint transformation
+  */
+ PrismaticJoint(RigidBody parent, RigidBody child) :
+  PrismaticJoint(parent, child, parent, child) {  }
 
-/*     virtual void update_joint_from_cartesian_witnesses() = 0; */
+ public:
+  /******************* Public getters / setters ***********************/
+  /**
+     gets the length of the prismatic joint, that is the length
+     between the two witnesses
+  */
+  double get_length() const;
 
-/*     set_length(double l); */
+  /**
+     sets the length of the prismatic joint to l, that is
+     the length between the two witnesses set up upon construction
+     (in a lazy fashion)
 
-/*     double get_length() const; */
-/* private: */
-/* }; */
+     @note it is assumed that l > 0, and for efficiency, runtime
+           checks for this are not made in fast mode
+  */
+  void set_length(double l);
+
+ protected:
+  /****************** General protected methods *********************/
+
+  /**
+      Update the length and transformation of the prismatic joint
+      based on the distance and relative orientation of the witnesses
+      given upon construction
+  */
+  virtual void update_joint_from_cartesian_witnesses() {
+    using namespace IMP::algebra;
+
+    IMP_USAGE_CHECK
+      ( a_.get_coordinates() != b_.get_coordinates(),
+        "witnesses of prismatic joint should have different"
+        << " coordinates" );
+    Vector3D v_diff = b_.get_coordinates() - a_.get_coordinates();
+    double mag = v_diff.get_magnitude();
+    l_ = mag;
+    transformation_ =  // TODO: should implement set_transformation instead?
+       IMP::algebra::Transformation3D( v_diff ) ; // TODO: or -v?
+  }
+
+
+
+ private:
+
+  XYZ a_; // prismatic joint from point
+
+  XYZ b_; // prismatic joint to point
+
+  double l_; // the length of the prismatic joint
+
+};
 
 /* class CompositeJoint : public Joint{ */
 /*     void add_joint(Joint j); */
