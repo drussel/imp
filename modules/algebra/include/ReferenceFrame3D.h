@@ -36,14 +36,24 @@ public:
   ReferenceFrame3D(): tr_(get_identity_transformation_3d()),
     has_inverse_(true),
     tri_(tr_){}
+  //! a reference frame specified by a transformation matrix
+  /** Constructs a reference frame using transformation tr
+
+      @param tr a transformation from local coordinates in this
+                constructed reference frame to the global coordinates
+                (equiv., tr brings the origin of the global frame
+                 to the origin of this frame, in global coordinates),
+  */
   explicit ReferenceFrame3D(const Transformation3D &tr): tr_(tr),
     has_inverse_(false){}
   ~ReferenceFrame3D();
-  //! Get the transformation taking the global reference frame to this one.
+  //! Get the transformation that brings the origin of the global reference
+  //! frame to the origin of this frame (both in global coordinates).
   const Transformation3D &get_transformation_to() const {
     return tr_;
   }
-  //! Get the transformation from this one to the global reference.
+  //! Get the transformation from the origin of this reference frame
+  //! to the origin of the global frame (both in global coordinates).
   const Transformation3D &get_transformation_from() const {
     return get_inverse();
   }

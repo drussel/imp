@@ -22,7 +22,9 @@ IMPCORE_BEGIN_NAMESPACE
 
 class KinematicForest;
 
-class Joint : public Object{ // TODO: should it be ModelObject
+class  IMPCOREEXPORT Joint
+: public Object
+{ // TODO: should it be ModelObject
                              //       or Object, or base::Object?
   friend class KinematicForest;
 
@@ -100,14 +102,11 @@ protected:
 /* /\** A joint with a completely non-constrained transformation */
 /*     between parent and child nodes reference frames */
 /* *\/ */
-class TransformationJoint : public Joint{
+class  IMPCOREEXPORT
+TransformationJoint : public Joint{
  public:
- TransformationJoint(RigidBody parent,
-                     RigidBody child) :
-  Joint(parent, child)
-    {
-      update_joint_from_cartesian_witnesses();
-    }
+  TransformationJoint(RigidBody parent,
+                      RigidBody child);
 
   /**
      Sets the transfromation from parent to child reference frame
@@ -130,7 +129,7 @@ class TransformationJoint : public Joint{
 
 
 /** Abstract class for all revolute joints **/
-class RevoluteJoint : public Joint{
+class IMPCOREEXPORT RevoluteJoint : public Joint{
  public:
   /**
      constructs a revolute joint on the line connecting a and b,
@@ -147,6 +146,9 @@ class RevoluteJoint : public Joint{
                XYZ b,
                double angle = 0.0);
 
+
+  // pure virtual dtr to declare as abstrat class for SWIG
+ virtual ~RevoluteJoint() = 0;
  public:
  /******* public getter / setter methods *********/
 
@@ -207,11 +209,17 @@ class RevoluteJoint : public Joint{
   IMP::algebra::Vector3D a_;
 };
 
+// inline for speed, dummy pure virtual definition, just for SWIG
+RevoluteJoint::~RevoluteJoint()
+{}
+
+
 
 /********************** DihedralAngleRevoluteJoint ***************/
 
 
-class DihedralAngleRevoluteJoint : public RevoluteJoint{
+class  IMPCOREEXPORT
+DihedralAngleRevoluteJoint : public RevoluteJoint{
  public:
   /**
      constructs a dihedral angle that revolutes around the axis b-c,
@@ -246,7 +254,7 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
 
 /********************** BondAngleRevoluteJoint ***************/
 
-/* class BondAngleRevoluteJoint : public RevoluteJoint{ */
+/* class  IMPCOREEXPORT BondAngleRevoluteJoint : public RevoluteJoint{ */
 /*     // rotation of rigid body around the plane defined by three atoms */
 /*     // TODO: atom is not the place for Angle, either algebra, or */
 /*               kinematics */
@@ -270,7 +278,7 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
 /**
    joint in which too rigid bodies may slide along a line
 */
-class PrismaticJoint : public Joint{
+class  IMPCOREEXPORT PrismaticJoint : public Joint{
  public:
   /********* Constructors ********/
   /**
@@ -327,9 +335,9 @@ class PrismaticJoint : public Joint{
 };
 
 
-/********************** CompositeJoint ***************/
+/********************** Joint ***************/
 
-/* class CompositeJoint : public Joint{ */
+/* class  IMPCOREEXPORT CompositeJoint : public Joint{ */
 /*     void add_joint(Joint j); */
 
 /*     virtual Transformation3D get_transformation() const; */
@@ -343,7 +351,7 @@ class PrismaticJoint : public Joint{
 
 IMP_OBJECTS(Joint,Joints);
 IMP_OBJECTS(RevoluteJoint,RevoluteJoints);
-//IMP_OBJECTS(DihedralAngleRevoluteJoint, DihedralAngleRevoluteJoints);
+IMP_OBJECTS(DihedralAngleRevoluteJoint, DihedralAngleRevoluteJoints);
 IMP_OBJECTS(TransformationJoint,TransformationJoints);
 IMP_OBJECTS(PrismaticJoint,PrismaticJoints);
 

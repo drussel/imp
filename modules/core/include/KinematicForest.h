@@ -29,7 +29,8 @@
 IMPCORE_BEGIN_NAMESPACE
 
 
-class KinematicForest
+class  IMPCOREEXPORT
+KinematicForest
 : public Object // or ModelObject? or base::Object?
 {
  public:
@@ -62,8 +63,6 @@ IMP_NEW( TransformationJoint, joint, (parent, child) );
 add_edge( joint );
 return joint;
   }
-
-virtual void hi() const;
 
   /**
      Adds a kinematic edge between the joint parent and child

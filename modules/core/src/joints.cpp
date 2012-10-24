@@ -66,6 +66,14 @@ Joint::do_show(std::ostream & os) const
 
 /********************** Transformation Joint ***************/
 
+TransformationJoint::TransformationJoint
+(RigidBody parent, RigidBody child)
+  :  Joint(parent, child)
+{
+  update_joint_from_cartesian_witnesses();
+}
+
+
 // Sets the transfromation from parent to child
 void
 TransformationJoint::set_transformation_child_to_parent
@@ -79,6 +87,14 @@ TransformationJoint::set_transformation_child_to_parent
     get_owner_kf()->mark_internal_coordinates_changed();
   }
 }
+
+void
+TransformationJoint::update_joint_from_cartesian_witnesses()
+{
+  // TODO: IMPLEMENT
+  IMP_NOT_IMPLEMENTED;
+}
+
 
 /********************** Revolute Joint ***************/
 
@@ -95,7 +111,6 @@ RevoluteJoint::RevoluteJoint
   //      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
   //p->get_model()->add_score_state(ss); // TODO: implement that?
 }
-
 
 double
 RevoluteJoint::get_angle() const
@@ -123,33 +138,33 @@ RevoluteJoint::set_angle(double angle) {
 
 /********************** DihedralAngleRevoluteJoint ***************/
 
-// DihedralAngleRevoluteJoint
-// ::DihedralAngleRevoluteJoint
-// (RigidBody parent, RigidBody child,
-//  XYZ a, XYZ b, XYZ c, XYZ d) :
-//   RevoluteJoint(parent, child, b, c),
-//   a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
-// {
-//   // TODO: scorestate for udpating the model? see revolute joint
-//   update_joint_from_cartesian_witnesses();
-// }
+DihedralAngleRevoluteJoint
+::DihedralAngleRevoluteJoint
+(RigidBody parent, RigidBody child,
+ XYZ a, XYZ b, XYZ c, XYZ d) :
+  RevoluteJoint(parent, child, b, c),
+  a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
+{
+  // TODO: scorestate for udpating the model? see revolute joint
+  update_joint_from_cartesian_witnesses();
+}
 
 
-// void
-// DihedralAngleRevoluteJoint::update_joint_from_cartesian_witnesses()
-// {
-//   set_joint( c_.get_coordinates() - b_.get_coordinates(),
-//              b_.get_coordinates());
-//   // TODO: perhaps the knowledge of normalized joint axis can accelerate
-//   // the dihedral calculation in next line?
-//   set_angle( internal::dihedral
-//              (a_, b_, c_, d_,
-//               nullptr, // derivatives - TODO: support?
-//               nullptr,
-//               nullptr,
-//               nullptr)
-//              );
-// }
+void
+DihedralAngleRevoluteJoint::update_joint_from_cartesian_witnesses()
+{
+  set_joint( c_.get_coordinates() - b_.get_coordinates(),
+             b_.get_coordinates());
+  // TODO: perhaps the knowledge of normalized joint axis can accelerate
+  // the dihedral calculation in next line?
+  set_angle( internal::dihedral
+             (a_, b_, c_, d_,
+              nullptr, // derivatives - TODO: support?
+              nullptr,
+              nullptr,
+              nullptr)
+             );
+}
 
 /********************** Prismatic Joint ***************/
 

@@ -26,8 +26,6 @@ void KinematicForest::do_show(std::ostream & os) const
   }
 }
 
-void KinematicForest::hi() const {}
-
 
 KinematicForest::KinematicForest(Model* m) :
   Object("IMP_CORE_KINEMATIC_FOREST"),
