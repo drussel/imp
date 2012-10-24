@@ -24,11 +24,6 @@ Joint::Joint
   Object("IMP_CORE_JOINT"),
   parent_(parent), child_(child), owner_kf_(nullptr)
 {
-  if(!owner_kf_){
-    IMP_THROW("IMP supports only joints that are managed by a"
-              << " kinematic forest",
-              IMP::ValueException);
-  }
 }
 
 
@@ -173,13 +168,6 @@ PrismaticJoint::PrismaticJoint
  XYZ a, XYZ b) :
   Joint(parent, child), a_(a), b_(b)
 {
-  double tiny_double = 1e-12;
-  if( (a.get_coordinates() - b_.get_coordinates()).get_magnitude()
-      < tiny_double ) {
-    IMP_THROW( "cannot create a prismatic joint with witnesses of"
-               << " identical coordinates " << a << " and " << b,
-               IMP::ValueException );
-  }
   update_joint_from_cartesian_witnesses();
 }
 
@@ -222,7 +210,7 @@ PrismaticJoint::update_joint_from_cartesian_witnesses()
   const double tiny_double = 1e-12;
   IMP_USAGE_CHECK
     ( get_distance(a_.get_coordinates(), b_.get_coordinates())
-      < tiny_double,
+      > tiny_double,
       "witnesses of prismatic joint should have different"
       << " coordinates" );
 
