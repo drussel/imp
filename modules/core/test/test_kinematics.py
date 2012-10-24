@@ -34,6 +34,17 @@ class Test(IMP.test.TestCase):
         kf.add_edge(pj01)
         kf.add_edge(pj12)
         print kf
+        print "lengths before set coords safe"
+        print pj01.get_length()
+        print pj12.get_length()
+        kf.set_coordinates_safe(rb1,[0,0,0.5])
+        print "lengths after set coords safe"
+        print pj01.get_length()
+        print pj12.get_length()
+        pj01.set_length(10.0)
+        print "lengths after set_length(10.0) of pj01"
+        print pj01.get_length()
+        print pj12.get_length()
 
 
 if __name__ == '__main__':
