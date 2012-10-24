@@ -22,7 +22,8 @@ IMPCORE_BEGIN_NAMESPACE
 
 class KinematicForest;
 
-class Joint : public Object{ // TODO: should it be ModelObject or Object?
+class Joint : public Object{ // TODO: should it be ModelObject
+                             //       or Object, or base::Object?
   friend class KinematicForest;
 
   IMP_OBJECT(Joint);
@@ -35,16 +36,7 @@ public:
      @param child rigid body downstream of this joint
      @note we currently assume that a parent cannot be switched
    */
- Joint(RigidBody parent, RigidBody child) :
-  Object("IMP_CORE_JOINT"),
-    parent_(parent), child_(child), owner_kf_(nullptr)
-  {
-    if(!owner_kf_){
-      IMP_THROW("IMP supports only joints that are managed by a"
-                << " kinematic forest",
-                IMP::ValueException);
-    }
-  }
+  Joint(RigidBody parent, RigidBody child);
 
   /***************** getter methods: ***************/
 
@@ -52,12 +44,14 @@ public:
     return owner_kf_;
   }
 
+#ifndef SWIG
   /**
      returns the transformation of a vector from the child
      reference frame to the parent reference frame
   */
   virtual const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent() const;
+#endif
 
   RigidBody  get_parent_node() const
   { return parent_; }
@@ -82,21 +76,7 @@ public:
     // TODO: validate test - must be buggy :)
   */
   virtual void
-    update_child_node_reference_frame() const
-  {
-    // TODO: make this efficient - indexing? lazy? update flag?
-    using namespace IMP::algebra;
-
-    const Transformation3D& tr_parent_to_global =
-      parent_.get_reference_frame().get_transformation_to();
-    const Transformation3D& tr_child_to_parent =
-      get_transformation_child_to_parent();
-    Transformation3D tr_child_to_global
-      (tr_parent_to_global * tr_child_to_parent);
-    RigidBody child_rb = RigidBody(child_.get_particle());
-    child_rb.set_reference_frame
-      ( ReferenceFrame3D( tr_child_to_global ) );
-  }
+    update_child_node_reference_frame() const;
 
   /**
      Updates the joint transformation based on external coordinates
@@ -113,6 +93,9 @@ protected:
     IMP::algebra::Transformation3D transformation_child_to_parent_;
     KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
+
+/********************** TransformationJoint ***************/
+
 
 /* /\** A joint with a completely non-constrained transformation */
 /*     between parent and child nodes reference frames */
@@ -139,11 +122,12 @@ class TransformationJoint : public Joint{
      vide versa), after making sure the external coordinates are
      updated from the owner KinematicForest object)
    */
-  virtual void update_joint_from_cartesian_witnesses() {
-    // TODO: implement , is it from parent to child or other way?
-  }
+  virtual void update_joint_from_cartesian_witnesses() ;
 
 };
+
+/********************** RevoluteJoint ***************/
+
 
 /** Abstract class for all revolute joints **/
 class RevoluteJoint : public Joint{
@@ -161,20 +145,10 @@ class RevoluteJoint : public Joint{
                RigidBody child,
                XYZ a,
                XYZ b,
-               double angle = 0.0)
-   : Joint(parent, child),
-    angle_(angle)
-    {
-      // TODO: who are the witnesses here exactly?
-      set_joint( b.get_coordinates() - a.get_coordinates(),
-                 a.get_coordinates());
-      // TODO: is angle useful for anything
-      //      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
-      //p->get_model()->add_score_state(ss); // TODO: implement that?
-    }
+               double angle = 0.0);
 
  public:
-  /******************* public getter / setter methods **************/
+ /******* public getter / setter methods *********/
 
   /**
      sets the angle of the revolute joint and update the joint
@@ -184,8 +158,10 @@ class RevoluteJoint : public Joint{
 
   double get_angle() const;
 
+#ifndef SWIG
   IMP::algebra::Vector3D const& get_joint_unit_vector() const
     { return joint_unit_vector_; }
+#endif
 
  protected:
   /****************** general methods ***************/
@@ -211,7 +187,7 @@ class RevoluteJoint : public Joint{
       IMP::algebra::Transformation3D(r, (r*(-a_))+a_);
   }
 
-  /******************* protected setter methods **************/
+  /*********** protected setter methods **********/
   /** sets v to the axis around which this joint revolves
       sets a to the starting point of the joint
    */
@@ -231,7 +207,12 @@ class RevoluteJoint : public Joint{
   IMP::algebra::Vector3D a_;
 };
 
+
+/********************** DihedralAngleRevoluteJoint ***************/
+
+
 class DihedralAngleRevoluteJoint : public RevoluteJoint{
+ public:
   /**
      constructs a dihedral angle that revolutes around the axis b-c,
      using a,b,c,d as witnesses for the dihedral angle
@@ -244,18 +225,9 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
                     angle, as the angle between a-b and c-d, with
                     respect to the revolute axis b-c
      */
-  DihedralAngleRevoluteJoint(RigidBody parent,
-                             RigidBody child,
-                             XYZ a,
-                             XYZ b,
-                             XYZ c,
-                             XYZ d) :
-  RevoluteJoint(parent, child, b, c),
-    a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
-  {
-    // TODO: scorestate for udpating the model? see revolute joint
-    update_joint_from_cartesian_witnesses();
-  }
+  DihedralAngleRevoluteJoint
+    (RigidBody parent, RigidBody child,
+     XYZ a, XYZ b, XYZ c, XYZ d);
 
  protected:
   /**
@@ -263,20 +235,7 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
      to fit the positions of the four cartesian witnesses given upon
      construction.
    */
-  virtual void update_joint_from_cartesian_witnesses()
-  {
-    set_joint( c_.get_coordinates() - b_.get_coordinates(),
-               b_.get_coordinates());
-    // TODO: perhaps the knowledge of normalized joint axis can accelerate
-    // the dihedral calculation in next line?
-    set_angle( internal::dihedral
-               (a_, b_, c_, d_,
-                nullptr, // derivatives - TODO: support?
-                nullptr,
-                nullptr,
-                nullptr)
-               );
-  }
+  virtual void update_joint_from_cartesian_witnesses();
 
  private:
     XYZ a_;
@@ -284,6 +243,8 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
     XYZ c_;
     XYZ d_;
 };
+
+/********************** BondAngleRevoluteJoint ***************/
 
 /* class BondAngleRevoluteJoint : public RevoluteJoint{ */
 /*     // rotation of rigid body around the plane defined by three atoms */
@@ -303,29 +264,22 @@ class DihedralAngleRevoluteJoint : public RevoluteJoint{
 /*     IMP::atom::Angle a; */
 /* }; */
 
+
+/********************** PrismaticJoint ***************/
+
 /**
    joint in which too rigid bodies may slide along a line
 */
 class PrismaticJoint : public Joint{
  public:
-  /******************* Constructors ***********************/
+  /********* Constructors ********/
   /**
      Create a prismatic joint whose axis of translation is from a
      to b, which serve as witnesses for the joint transformation
      (a is associated with the parent and b with the child)
   */
  PrismaticJoint(RigidBody parent, RigidBody child,
-                XYZ a, XYZ b) :
-  Joint(parent, child), a_(a), b_(b) {
-    double tiny_double = 1e-12;
-    if( (a.get_coordinates() - b_.get_coordinates()).get_magnitude()
-       < tiny_double ) {
-      IMP_THROW( "cannot create a prismatic joint with witnesses of"
-                 << " identical coordinates " << a << " and " << b,
-                 IMP::ValueException );
-    }
-    update_joint_from_cartesian_witnesses();
-  }
+                XYZ a, XYZ b);
 
   /**
      Create a prismatic joint whose axis of translation is between
@@ -336,7 +290,7 @@ class PrismaticJoint : public Joint{
   PrismaticJoint(parent, child, parent, child) {  }
 
  public:
-  /******************* Public getters / setters ***********************/
+  /************* Public getters / setters *************/
   /**
      gets the length of the prismatic joint, that is the length
      between the two witnesses
@@ -355,42 +309,25 @@ class PrismaticJoint : public Joint{
   void set_length(double l);
 
  protected:
-  /****************** General protected methods *********************/
+  /************ General protected methods *************/
 
   /**
       Update the length and transformation of the prismatic joint
       based on the distance and relative orientation of the witnesses
       given upon construction
   */
-  virtual void update_joint_from_cartesian_witnesses() {
-    using namespace IMP::algebra;
-    const double tiny_double = 1e-12;
-    IMP_USAGE_CHECK
-      ( get_distance(a_.get_coordinates(), b_.get_coordinates())
-        < tiny_double,
-        "witnesses of prismatic joint should have different"
-        << " coordinates" );
-
-    Vector3D v =
-      b_.get_coordinates() - a_.get_coordinates();
-    double mag = v.get_magnitude();
-    l_ = mag;
-    // TODO: should implement set_transformation instead?
-    transformation_child_to_parent_ =
-      IMP::algebra::Transformation3D( v ) ;
-  }
-
-
+  virtual void update_joint_from_cartesian_witnesses();
 
  private:
 
   XYZ a_; // prismatic joint from point, associated with parent
-
   XYZ b_; // prismatic joint to point, associated with child
-
   double l_; // the length of the prismatic joint
 
 };
+
+
+/********************** CompositeJoint ***************/
 
 /* class CompositeJoint : public Joint{ */
 /*     void add_joint(Joint j); */
@@ -405,6 +342,10 @@ class PrismaticJoint : public Joint{
 /* }; */
 
 IMP_OBJECTS(Joint,Joints);
+IMP_OBJECTS(RevoluteJoint,RevoluteJoints);
+//IMP_OBJECTS(DihedralAngleRevoluteJoint, DihedralAngleRevoluteJoints);
+IMP_OBJECTS(TransformationJoint,TransformationJoints);
+IMP_OBJECTS(PrismaticJoint,PrismaticJoints);
 
 IMPCORE_END_NAMESPACE
 

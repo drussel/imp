@@ -117,6 +117,13 @@ IMP_SWIG_OBJECT( IMP::core, AllSamePairPredicate, AllSamePairPredicates);
 IMP_SWIG_OBJECT( IMP::core, AllSameTripletPredicate, AllSameTripletPredicates);
 IMP_SWIG_OBJECT( IMP::core, AllSameQuadPredicate, AllSameQuadPredicates);
 
+IMP_SWIG_BASE_OBJECT( IMP::core, Joint, Joints);
+IMP_SWIG_OBJECT( IMP::core, TransformationJoint, TransformationJoints);
+IMP_SWIG_BASE_OBJECT( IMP::core, RevoluteJoint, RevoluteJoints);
+#IMP_SWIG_OBJECT( IMP::core, DihedralAngleRevoluteJoint, DihedralAngleRevoluteJoint);
+IMP_SWIG_OBJECT( IMP::core, PrismaticJoint, PrismaticJoints);
+IMP_SWIG_OBJECT( IMP::core, KinematicForest, KinematicForests);
+
 IMP_SWIG_BASE_OBJECT( IMP::core, Mover, Movers);
 IMP_SWIG_DECORATOR( IMP::core, XYZ, XYZs);
 IMP_SWIG_DECORATOR( IMP::core, XYZR, XYZRs);
@@ -295,6 +302,9 @@ void visit_depth_first(Hierarchy d, HierarchyVisitor *f)
 %include "IMP/core/Typed.h"
 %include "IMP/core/model_statistics.h"
 %include "IMP/core/blame.h"
+
+%include "IMP/core/joints.h"
+%include "IMP/core/KinematicForest.h"
 
 %inline %{
 namespace IMP {
