@@ -15,7 +15,7 @@
 #include <IMP/Model.h>
 #include <IMP/core/KinematicNode.h>
 #include <IMP/core/joints.h>
-#include <IMP/Object.h>
+#include <IMP/base/Object.h>
 #include <IMP/Decorator.h>
 #include <IMP/compatibility/set.h>
 #include <IMP/exception.h>
@@ -29,9 +29,8 @@
 IMPCORE_BEGIN_NAMESPACE
 
 
-class  IMPCOREEXPORT
-KinematicForest
-: public Object // or ModelObject? or base::Object?
+class IMPCOREEXPORT KinematicForest
+: public base::Object // or ModelObject?
 {
  public:
 IMP_OBJECT(KinematicForest);
@@ -56,12 +55,12 @@ IMP_OBJECT(KinematicForest);
   */
   // NOTE: must have root on first call
   // TODO: verify parent_rb is in tree
-Joint* add_edge(IMP::core::RigidBody parent, IMP::core::RigidBody child)
-{
-// create joint and associate it with parent and child
-IMP_NEW( TransformationJoint, joint, (parent, child) );
-add_edge( joint );
-return joint;
+  Joint* add_edge(IMP::core::RigidBody parent, IMP::core::RigidBody child)
+  {
+    // create joint and associate it with parent and child
+    IMP_NEW( TransformationJoint, joint, (parent, child) );
+    add_edge( joint );
+    return joint;
   }
 
   /**
@@ -69,59 +68,12 @@ return joint;
      rigid bodies, decorating them as KinematicNodes if needed.
      The joint becomes owned by this KinematicForest, such that
      changes to the joint are synchronized with the KinematicForest
-  */
-  void add_edge(Joint* joint) {
-    joint->set_owner_kf( this );
-    RigidBody parent_rb = joint->get_parent_node();
-    RigidBody child_rb = joint->get_child_node();
-    KinematicNode parent_kn, child_kn;
-    // I. decorate parent / child as kinematic nodes if needed,
-    //    and store in parent_kn / child_kn resp.
-    {
-      Particle* parent_p = parent_rb.get_particle();
-      if(!KinematicNode::particle_is_instance( parent_p ) ) {
-        parent_kn = KinematicNode::setup_particle( parent_p, nullptr );
-      } else {
-        parent_kn = KinematicNode( parent_p );
-      }
-      Particle* child_p = child_rb.get_particle();
-      if(!KinematicNode::particle_is_instance( child_p ) ) {
-        child_kn = KinematicNode::setup_particle( child_p, nullptr );
-      } else {
-        child_kn = KinematicNode( child_p );
-      }
-    }
-    // update tree topology with parent and child
-    // and update roots, joints and nodes lists
-    // update parent:
-    if( nodes_.find( parent_kn ) == nodes_.end() ){
-      nodes_.insert( parent_kn );
-      roots_.insert( parent_kn );
-    }
-    parent_kn.add_child_joint( joint );
-    // update child:
-    if( nodes_.find( child_kn ) == nodes_.end() ){
-      nodes_.insert( child_kn );
-    }
-    else {
-      if( !child_kn.get_parent_joint() ) {
-        child_kn.set_parent_joint( joint );
-        roots_.erase( child_kn ); // no longer a root
-      }
-      else {
-        IMP_THROW( "IMP currently does not support switching of "
-                   << " parents in a kinematic tree",
-                   IMP::ValueException );
-        // TODO: do we want to allow parent switching? not for now
-        //       in this case, should we remove this child from its old
-        //       parent?
-        //       see note above
-      }
-    }
-    // update joints:
-    joints_.push_back( joint);
-  }
 
+     @note it is assumed that neither the joint or the rigid bodies in it
+           were previously added to a kinematic forest (might change in
+           future IMP versions)
+  */
+  void add_edge(Joint* joint);
   /**
      adds edges between each pair of consecutive rigid bodies in the list
      rbs, using default TransformationJoint joints (transforming from one
@@ -163,9 +115,9 @@ return joint;
     while( !q.empty() ){
       KinematicNode n = q.front();
       q.pop();
-      JointsTemp child_joints = n.get_children_joints();
-      for(unsigned int i = 0; i < child_joints.size(); i++){
-        Joint* joint_i = child_joints[i];
+      JointsTemp in_joints = n.get_out_joints();
+      for(unsigned int i = 0; i < in_joints.size(); i++){
+        Joint* joint_i = in_joints[i];
         // TODO: add and implement to joint
         joint_i->update_child_node_reference_frame();
         q.push( KinematicNode(joint_i->get_child_node() ) );

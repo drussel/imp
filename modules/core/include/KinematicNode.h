@@ -17,15 +17,14 @@ IMPCORE_BEGIN_NAMESPACE
 
 class KinematicForest;
 
-// TODO: what can be moved to Model fast indexing system
 // TODO: check for cycles
 // TODO: privatize most methods INCLUDING constructor
 
 /**
-  A KinematicNode is a rigid body that is connected by a joint to other
-  rigid bodies
+   A KinematicNode is a rigid body that is connected by a joint to other
+   rigid bodies
 */
-class KinematicNode : public RigidBody{
+class IMPCOREEXPORT KinematicNode : public RigidBody{
   friend class KinematicForest;
 
   IMP_DECORATOR(KinematicNode, RigidBody);
@@ -36,99 +35,100 @@ class KinematicNode : public RigidBody{
      @brief Return true if the particle is a kinematic nodea (has the
      appropriate properties).
   */
-  static bool particle_is_instance(Particle *p) {
-    ParticleIndex pi = p->get_index();
-    Model* m = p->get_model();
-    return
-      m->get_has_attribute( get_children_joints_key(), pi) &&
-      m->get_has_attribute( get_parent_joint_key(), pi);
-  }
-
+  inline static
+    bool particle_is_instance(Particle *p);
 
  private:
 
-    /** sets up a node in a kinematic tree
+  /** sets up a node in a kinematic tree
 
-        @param parent_joint The joint upstream of this kinematic
-                            node. Setting the the transformation of
-                            any upstream joint is expected to affect
-                            the reference frame of this node.  Use
-                            nullptr for root nodes.
+      @param owner a non-null kinematic forest pointer that will own this node
+      @param in_joint the joint upstream of this kinematic node.
+      Use nullptr for root nodes.
+      @param out_joints a list of joints directly downstream of this node
 
-        @note Private so as only KinematicForest can setup new kinematic nodes
-    */
-    static KinematicNode setup_particle(Particle*p,
-                                Joint* parent_joint = nullptr,
-                                Joints children_joints = Joints())  {
-      if (RigidMember::particle_is_instance(p)) {
-        // see also RigidBody::add_member
-        IMP_THROW("RigidMemer cannot be set as KinematicNode at this point," <<
-                  " in order to guarantee coherent coordinates update",
-                  IMP::ValueException);
-      }
-      if (!RigidBody::particle_is_instance(p)) {
-          RigidBody::setup_particle(p, ParticlesTemp() );
-      }
-      p->get_model()->add_attribute(get_parent_joint_key(),
-                                    p->get_index(),
-                                    parent_joint);
-      p->get_model()->add_attribute(get_children_joints_key(),
-                                    p->get_index(),
-                                    children_joints);
-      return KinematicNode(p);
-    }
+      @note Private so as only KinematicForest can setup new kinematic nodes
+  */
+  static KinematicNode setup_particle( Particle*p,
+                                       KinematicForest* owner,
+                                       Joint* in_joint = nullptr,
+                                       Joints out_joints = Joints() );
 
-    Joint* get_parent_joint() {
-        // TODO: indexes system?
-        Object* o =
-          get_model()->get_attribute( get_parent_joint_key(),
-                                      get_particle_index() );
-          // get_particle()->get_value( get_parent_joint_key() );
-        return static_cast<Joint*>(o);
-    }
+  //! returns the kinematic forest associated with this node
+  KinematicForest* get_owner();
 
-    Joints get_children_joints() {
-        Objects objs =
-          get_model()->get_attribute( get_children_joints_key(),
-                                      get_particle_index() );
-        Joints joints;
-        for(unsigned int i = 0; i <= objs.size(); i++){
-          Object * o = objs[i];
-          Joint* j = static_cast<Joint*>(o);
-            joints.push_back(j);
-        }
-        return joints;
-    }
+  //! return nullptr if does not have incoming joint
+  inline Joint* get_in_joint();
 
-    void set_children_joints(Joints children) {
-      get_model()->set_attribute( get_children_joints_key(),
-                                  get_particle_index(), children );
-    }
+  //! returns list of outcoming joints
+  inline Joints get_out_joints();
 
+  void set_out_joints(Joints in);
 
-    void add_child_joint(Joint* j) {
-      Joints joints = get_children_joints();
-      joints.push_back(j);
-      set_children_joints(joints);
-    }
+  void add_out_joint(Joint* j);
 
-    void set_parent_joint(Joint* j) {
-      get_model()->set_attribute( get_parent_joint_key(),
-                                  get_particle_index(), j );
-    }
+  void set_in_joint(Joint* j);
 
-    static ObjectsKey get_children_joints_key()
-    {
-      static ObjectsKey k("children_joints");
-      return k;
-    }
+  static ObjectKey get_owner_key()
+  {
+    static ObjectKey k("core_kinematic_node_owner");
+    return k;
+  }
 
-    static ObjectKey get_parent_joint_key()
-    {
-      static ObjectKey k("parent_joint");
-      return k;
-    }
+  static ObjectKey get_in_joint_key()
+  {
+    static ObjectKey k("core_kinematic_node_in_joint");
+    return k;
+  }
+
+  static ObjectsKey get_out_joints_key()
+  {
+    static ObjectsKey k("core_kinematic_node_out_joint");
+    return k;
+  }
+
 };
+
+/************** inlines ***********/
+
+bool
+KinematicNode::particle_is_instance
+(Particle *p)
+{
+  ParticleIndex pi = p->get_index();
+  Model* m = p->get_model();
+  return
+    m->get_has_attribute( get_owner_key(), pi);
+}
+
+
+//! return nullptr if does not have incoming joint
+Joint*
+KinematicNode::get_in_joint() {
+  if( !get_model()->get_has_attribute
+      ( get_in_joint_key(), get_particle_index() ) )
+    {
+      return nullptr;
+    }
+  Object* obj = get_model()->get_attribute
+    ( get_in_joint_key(), get_particle_index() );
+  return static_cast<Joint*>(obj);
+}
+
+//! returns list of outcoming joints
+Joints
+KinematicNode::get_out_joints() {
+  Objects objs = get_model()->get_attribute
+    ( get_out_joints_key(), get_particle_index() );
+  Joints joints;
+  for(unsigned int i = 0; i <= objs.size(); i++){
+    Object * o = objs[i];
+    Joint* j = static_cast<Joint*>(o);
+    joints.push_back(j);
+  }
+  return joints;
+}
+
 
 //IMP_DECORATORS_DEF(KinematicNode, KinematicNodes);
 IMP_DECORATORS(KinematicNode, KinematicNodes, RigidBody);

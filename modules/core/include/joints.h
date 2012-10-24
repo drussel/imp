@@ -11,7 +11,7 @@
 #define IMPCORE_JOINTS_H
 
 #include <IMP/core/KinematicNode.h>
-#include <IMP/Object.h>
+#include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/core/internal/dihedral_helpers.h>
@@ -23,9 +23,8 @@ IMPCORE_BEGIN_NAMESPACE
 class KinematicForest;
 
 class  IMPCOREEXPORT Joint
-: public Object
-{ // TODO: should it be ModelObject
-                             //       or Object, or base::Object?
+: public IMP::base::Object
+{
   friend class KinematicForest;
 
   IMP_OBJECT(Joint);
@@ -208,10 +207,6 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
   // joint start
   IMP::algebra::Vector3D a_;
 };
-
-// inline for speed, dummy pure virtual definition, just for SWIG
-RevoluteJoint::~RevoluteJoint()
-{}
 
 
 

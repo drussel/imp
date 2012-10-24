@@ -33,7 +33,7 @@ class Test(IMP.test.TestCase):
         print pj12
         kf.add_edge(pj01)
         kf.add_edge(pj12)
-        kf.do_show()
+        print kf
 
 
 if __name__ == '__main__':

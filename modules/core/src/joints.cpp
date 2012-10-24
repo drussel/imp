@@ -107,6 +107,12 @@ RevoluteJoint::RevoluteJoint
   //p->get_model()->add_score_state(ss); // TODO: implement that?
 }
 
+// definition of dummy pure virtual, just for SWIG
+RevoluteJoint::~RevoluteJoint()
+{}
+
+
+
 double
 RevoluteJoint::get_angle() const
 {
