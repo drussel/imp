@@ -11,14 +11,6 @@
 #include <IMP/core/joints.h>
 #include <string>
 
-void stupid_test()
-{
-  using namespace IMP::core;
-  //  RigidBody a = RigidBody::setup(0,0,1);
-  //  RigidBody b(0,0,2);
-  //  Rig(0,0,3);
-
-}
 
 int main(int argc, char **argv)
 {
@@ -70,7 +62,7 @@ int main(int argc, char **argv)
 
   pj->set_length(10.0);
   std::cerr << "coords after set_length(10.0) " << std::endl;
-        std::cerr    << kf->get_coordinates_safe( rbs[0] )
+  std::cerr << kf->get_coordinates_safe( rbs[0] )
             << ", "
             << kf->get_coordinates_safe( rbs[1] )
             << std::endl;

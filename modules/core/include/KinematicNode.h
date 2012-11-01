@@ -61,7 +61,7 @@ class IMPCOREEXPORT KinematicNode : public RigidBody{
   inline Joint* get_in_joint();
 
   //! returns list of outcoming joints
-  inline Joints get_out_joints();
+  inline JointsTemp get_out_joints();
 
   void set_out_joints(Joints in);
 
@@ -116,15 +116,19 @@ KinematicNode::get_in_joint() {
 }
 
 //! returns list of outcoming joints
-Joints
+JointsTemp
 KinematicNode::get_out_joints() {
+  std::cerr << "KinematicNode::get_out_joints()" << std::endl;
   Objects objs = get_model()->get_attribute
     ( get_out_joints_key(), get_particle_index() );
-  std::cerr << "retrieve joins from attribute table" << std::endl;
-  Joints joints;
-  for(unsigned int i = 0; i <= objs.size(); i++){
+  std::cerr << "retrieve joins from attribute table: "
+            << objs.size() << std::endl;
+  JointsTemp joints;
+  for(unsigned int i = 0; i < objs.size(); i++){
     Object * o = objs[i];
+    std::cerr << "before static_cast " << *o << std::endl;
     Joint* j = static_cast<Joint*>(o);
+    std::cerr << "after static_cast " << *j << std::endl;
     joints.push_back(j);
   }
   std::cerr << joints.size() << std::endl;
