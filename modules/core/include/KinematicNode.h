@@ -120,12 +120,14 @@ Joints
 KinematicNode::get_out_joints() {
   Objects objs = get_model()->get_attribute
     ( get_out_joints_key(), get_particle_index() );
+  std::cerr << "retrieve joins from attribute table" << std::endl;
   Joints joints;
   for(unsigned int i = 0; i <= objs.size(); i++){
     Object * o = objs[i];
     Joint* j = static_cast<Joint*>(o);
     joints.push_back(j);
   }
+  std::cerr << joints.size() << std::endl;
   return joints;
 }
 

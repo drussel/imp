@@ -26,7 +26,10 @@ int main(int argc, char **argv)
   for (int i = 0; i < argc; i++) std::cerr << argv[i] << " ";
   std::cerr << std::endl;
 
-  if(argc != 2) { std::cerr << "Usage: " << argv[0] << " pdb " << std::endl; }
+  if(argc != 2) {
+    std::cerr << "Usage: " << argv[0] << " pdb " << std::endl;
+    exit(1);
+  }
   std::string fname(argv[1]);
 
   // read pdb
@@ -41,6 +44,8 @@ int main(int argc, char **argv)
   // create rigid bodies
   IMP::atom::Hierarchies hr =
     IMP::atom::get_by_type(mhd, IMP::atom::RESIDUE_TYPE);
+
+  std::cerr << hr.size() << " residues were read from pdb file" << std::endl;
 
   IMP::core::RigidBodies rbs;
   for(unsigned int i=0; i<hr.size(); i++)
@@ -64,20 +69,20 @@ int main(int argc, char **argv)
             << std::endl;
 
   pj->set_length(10.0);
-  std::cout << "coords after set_length(10.0) "
-            << kf->get_coordinates_safe( rbs[0] )
+  std::cerr << "coords after set_length(10.0) " << std::endl;
+        std::cerr    << kf->get_coordinates_safe( rbs[0] )
             << ", "
             << kf->get_coordinates_safe( rbs[1] )
             << std::endl;
 
-  IMP::atom::write_pdb
-    (mhd, "./after_set_length_10_and_get_coords_safe.pdb");
+  //IMP::atom::write_pdb
+  //  (mhd, "./after_set_length_10_and_get_coords_safe.pdb");
 
   //
   pj->set_length(20.0);
   kf->update_all_external_coordinates();
-  IMP::atom::write_pdb
-    (mhd, "./after_set_length_20_and_update_all_external.pdb");
+  //IMP::atom::write_pdb
+  // (mhd, "./after_set_length_20_and_update_all_external.pdb");
 
   // test that set_coords safe works
   kf->set_coordinates_safe
