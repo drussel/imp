@@ -1,5 +1,5 @@
 /**
- *  \file IMP/core/joints.h
+ *  \file joints.h
  *  \brief functionality for defining kinematic joints between rigid bodies
  *         as part of a kinematic tree
  *  \authors Dina Schneidman, Barak Raveh
@@ -10,7 +10,7 @@
 #ifndef IMPCORE_JOINTS_H
 #define IMPCORE_JOINTS_H
 
-#include <IMP/core/KinematicNode.h>
+#include "KinematicNode.h"
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>

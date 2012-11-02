@@ -1,5 +1,5 @@
 /**
- *  \file IMP/core/KinematicForest.h
+ *  \file KinematicForest.h
  * \brief Wrapper class for a kinematic tree made of KinematicNode
            objects, interconnected by joints. This data structure
            allows for kinematic control of the tree and
@@ -13,8 +13,8 @@
 #define IMPCORE_KINEMATIC_FOREST_H
 
 #include <IMP/Model.h>
-#include <IMP/core/KinematicNode.h>
-#include <IMP/core/joints.h>
+#include "KinematicNode.h"
+#include "joints.h"
 #include <IMP/base/Object.h>
 #include <IMP/Decorator.h>
 #include <IMP/compatibility/set.h>

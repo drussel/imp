@@ -1,5 +1,5 @@
 /**
- *  \file IMP/core/KinematicForest.cpp
+ *  \file KinematicForest.cpp
 \ * \brief Wrapper class for a kinematic tree made of KinematicNode
           objects, interconnected by joints. This data structure
           allows for kinematic control of the tree and
@@ -10,11 +10,31 @@
  */
 
 #include <IMP/Model.h>
-#include <IMP/core/KinematicForest.h>
+#include "KinematicForest.h"
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/base/warning_macros.h>
 
 IMPCORE_BEGIN_NAMESPACE
+
+
+KinematicForest::KinematicForest(Model* m) :
+  Object("IMP_CORE_KINEMATIC_FOREST"),
+  m_(m),
+  is_internal_coords_updated_(true),
+  is_external_coords_updated_(true)
+{
+}
+
+// build an entire tree from an existing hierarchy
+KinematicForest::KinematicForest(Model* m, IMP::atom::Hierarchy hierarchy) :
+  Object("IMP_CORE_KINEMATIC_FOREST"),
+  m_(m){
+  // TODO: implement
+  IMP_NOT_IMPLEMENTED;
+  IMP_UNUSED(hierarchy);
+}
+
+
 
 void
 KinematicForest::add_edge(Joint* joint)
@@ -82,24 +102,6 @@ void KinematicForest::do_show(std::ostream & os) const
     }
     os << *(joints_[i]);
   }
-}
-
-
-KinematicForest::KinematicForest(Model* m) :
-  Object("IMP_CORE_KINEMATIC_FOREST"),
-  m_(m),
-  is_internal_coords_updated_(true),
-  is_external_coords_updated_(true)
-{
-}
-
-// build an entire tree from an existing hierarchy
-KinematicForest::KinematicForest(Model* m, IMP::atom::Hierarchy hierarchy) :
-  Object("IMP_CORE_KINEMATIC_FOREST"),
-  m_(m){
-  // TODO: implement
-  IMP_NOT_IMPLEMENTED;
-  IMP_UNUSED(hierarchy);
 }
 
 

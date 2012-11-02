@@ -1,5 +1,5 @@
 /**
- *  \file IMP/core/KinematicNode.h
+ *  \file KinematicNode.h
  *  \brief functionality for defining nodes on a kinematic chain
  *  \authors Dina Schneidman, Barak Raveh
  *
@@ -10,7 +10,7 @@
 #define IMPCORE_KINEMATIC_NODE_H
 
 #include <IMP/core/rigid_bodies.h>
-#include <IMP/core/joints.h>
+#include "joints.h"
 #include <IMP/exception.h>
 
 IMPCORE_BEGIN_NAMESPACE
@@ -115,23 +115,22 @@ KinematicNode::get_in_joint() {
   return static_cast<Joint*>(obj);
 }
 
-//! returns list of outcoming joints
+//! returns list of outcoming joints, or empty list if attribute
+//! does not exist
 JointsTemp
 KinematicNode::get_out_joints() {
-  std::cerr << "KinematicNode::get_out_joints()" << std::endl;
+  JointsTemp joints;
+  if(! get_model()->get_has_attribute
+     ( get_out_joints_key(), get_particle_index() ) ) {
+    return joints;
+  }
   Objects objs = get_model()->get_attribute
     ( get_out_joints_key(), get_particle_index() );
-  std::cerr << "retrieve joins from attribute table: "
-            << objs.size() << std::endl;
-  JointsTemp joints;
   for(unsigned int i = 0; i < objs.size(); i++){
     Object * o = objs[i];
-    std::cerr << "before static_cast " << *o << std::endl;
     Joint* j = static_cast<Joint*>(o);
-    std::cerr << "after static_cast " << *j << std::endl;
     joints.push_back(j);
   }
-  std::cerr << joints.size() << std::endl;
   return joints;
 }
 

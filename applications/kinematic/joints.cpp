@@ -1,5 +1,5 @@
 /**
- *  \file IMP/core/joints.cpp
+ *  \file joints.cpp
  *  \brief functionality for defining kinematic joints between rigid bodies
  *         as part of a kinematic tree
  *  \authors Dina Schneidman, Barak Raveh
@@ -8,8 +8,8 @@
  */
 
 
-#include <IMP/core/KinematicForest.h>
-#include <IMP/core/KinematicNode.h>
+#include "KinematicForest.h"
+#include "KinematicNode.h"
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -42,12 +42,14 @@ Joint::update_child_node_reference_frame() const
   // TODO: make this efficient - indexing? lazy? update flag?
   using namespace IMP::algebra;
 
+  ReferenceFrame3D parent_rf = parent_.get_reference_frame();
   const Transformation3D& tr_parent_to_global =
-    parent_.get_reference_frame().get_transformation_to();
+    parent_rf.get_transformation_to();
   const Transformation3D& tr_child_to_parent =
     get_transformation_child_to_parent();
   Transformation3D tr_child_to_global
     (tr_parent_to_global * tr_child_to_parent);
+
   RigidBody child_rb = RigidBody(child_.get_particle());
   child_rb.set_reference_frame
     ( ReferenceFrame3D( tr_child_to_global ) );
@@ -86,8 +88,17 @@ TransformationJoint::set_transformation_child_to_parent
 void
 TransformationJoint::update_joint_from_cartesian_witnesses()
 {
-  // TODO: IMPLEMENT
-  IMP_NOT_IMPLEMENTED;
+  // TODO: make this efficient - indexing? lazy? update flag?
+  using namespace IMP::algebra;
+
+  ReferenceFrame3D parent_rf = parent_.get_reference_frame();
+  ReferenceFrame3D child_rf = child_.get_reference_frame();
+  const Transformation3D& tr_global_to_parent =
+    parent_rf.get_transformation_from();
+  const Transformation3D& tr_child_to_global =
+    child_rf.get_transformation_to();
+  transformation_child_to_parent_ =
+    (tr_global_to_parent * tr_child_to_global);
 }
 
 
@@ -227,6 +238,9 @@ PrismaticJoint::update_joint_from_cartesian_witnesses()
   // TODO: should implement set_transformation instead?
   transformation_child_to_parent_ =
     IMP::algebra::Transformation3D( v ) ;
+  std::cerr << " v = " << v << std::endl;
+  std::cerr << " trans_c_to_p_: "
+            << transformation_child_to_parent_ << std::endl;
 
   IMP_UNUSED(tiny_double);
 }

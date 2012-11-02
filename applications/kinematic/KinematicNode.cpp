@@ -1,15 +1,15 @@
 /**
- *  \file IMP/core/KinematicNode. cpp
+ *  \file KinematicNode. cpp
  *  \brief functionality for defining nodes on a kinematic chain
  *  \authors Dina Schneidman, Barak Raveh
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#include <IMP/core/KinematicForest.h>
-#include <IMP/core/KinematicNode.h>
+#include "KinematicForest.h"
+#include "KinematicNode.h"
 #include <IMP/core/rigid_bodies.h>
-#include <IMP/core/joints.h>
+#include "joints.h"
 #include <IMP/exception.h>
 
 IMPCORE_BEGIN_NAMESPACE
