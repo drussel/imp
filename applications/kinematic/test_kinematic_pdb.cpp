@@ -95,7 +95,8 @@ void test_pdb_model(IMP::Model* model,
     std::cout << "rb " << i << ": ";
     for(unsigned int j = 0; j < rbs[i].get_number_of_members(); j++){
       std::cout << rbs[i].get_member(j) << " "
-                << IMP::core::XYZ(rbs[i].get_member(j)).get_coordinates() << ", ";
+                << IMP::core::XYZ(rbs[i].get_member(j)).get_coordinates()
+                << ", ";
     }
     std::cout << std::endl;
   }

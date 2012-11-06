@@ -246,9 +246,10 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
     rot_axis_unit_vector_ = axis_v.get_unit_vector();
     angle_ = initial_angle;
 
-    // compute the transformation from child to global, if the rotation was zero,
-    // that is - use the inverse of the transformation by initial angle, to compute
-    // the transformation for angle=0:
+    // compute the transformation from child to global, if the
+    // rotation was zero, that is - use the inverse of the
+    // transformation by initial angle, to compute the transformation
+    // for angle=0:
     Transformation3D R =
       get_rotation_about_joint();
     Transformation3D tr_child_to_global =
