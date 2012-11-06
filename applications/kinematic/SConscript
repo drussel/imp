@@ -1,0 +1,19 @@
+Import('env')
+#import scons_tools.dependency.boost
+#scons_tools.dependency.boost.add_boost_library(env, "ProgramOptions", "program_options", 'boost/program_options.hpp',
+#                                               extra_boost_libs=["system"])
+
+
+
+env= env.IMPApplication(name="kinematic",
+                        authors=["Barak Raveh and Dina Schneidman"],
+                        brief="kinematic joints support",
+                        overview="",
+                        publications=[],
+                        license=env.IMPStandardLicense(),
+                        required_modules=['core','atom'],
+                        required_dependencies=[],
+                        python=False)
+
+if env:
+    env.IMPCPPExecutable(target="test_kinematic_pdb", source=["test_kinematic_pdb.cpp", "joints.cpp", "KinematicForest.cpp", "KinematicNode.cpp"])

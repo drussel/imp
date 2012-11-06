@@ -95,8 +95,9 @@ IMP_OBJECT(KinematicForest);
   }
 
   void update_all_internal_coordinates(){
-    if(is_internal_coords_updated_)
+    if(is_internal_coords_updated_){
       return;
+    }
     for(unsigned int i = 0; i < joints_.size(); i++){
       joints_[i]->update_joint_from_cartesian_witnesses();
     }
@@ -104,28 +105,23 @@ IMP_OBJECT(KinematicForest);
   }
 
   void update_all_external_coordinates(){
-    if(is_external_coords_updated_)
+    if(is_external_coords_updated_){
       return;
-    std::cerr << "update needed" << std::endl;
+    }
     // tree BFS traversal from roots
     std::queue<KinematicNode> q;
     IMP::compatibility::set<KinematicNode>::iterator it;
     for(it = roots_.begin(); it != roots_.end(); it++){
       q.push( *it );
-      std::cerr << "pushing to queue " << std::endl;
     }
     while( !q.empty() ){
       KinematicNode n = q.front();
       q.pop();
-      std::cerr << "before get_out_joints" << std::endl;
       JointsTemp in_joints = n.get_out_joints();
-      std::cerr << "in_joints_size " << in_joints.size() << std::endl;
       for(unsigned int i = 0; i < in_joints.size(); i++){
         Joint* joint_i = in_joints[i];
         // TODO: add and implement to joint
-        std::cerr << "start ref frame update" << std::endl;
         joint_i->update_child_node_reference_frame();
-        std::cerr << "start done frame update" << std::endl;
         q.push( KinematicNode(joint_i->get_child_node() ) );
       }
     }

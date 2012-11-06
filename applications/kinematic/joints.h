@@ -4,6 +4,7 @@
  *         as part of a kinematic tree
  *  \authors Dina Schneidman, Barak Raveh
  *
+
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
@@ -52,6 +53,7 @@ public:
   */
   virtual const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent() const;
+
 #endif
 
   RigidBody  get_parent_node() const
@@ -68,6 +70,17 @@ public:
     owner_kf_ = kf;
   }
 
+  /**
+     Sets the transfromation from parent to child reference frame
+     (without any checks that internal coords are updated, and without
+      marking the owner internal coords as changed)
+  */
+  void set_transformation_child_to_parent_no_checks
+    (IMP::algebra::Transformation3D transformation) {
+    tr_child_to_parent_ = transformation;
+  }
+
+
   /**************** general methods: **************/
 
   /**
@@ -81,17 +94,18 @@ public:
 
   /**
      Updates the joint transformation based on external coordinates
-     of 'witness' particles.
+     of 'witness' particles, assuming all external coordinates are
+     up-to-date.
 
      @note Witness particles do not necessarily belong to the child or
            parent rigid bodes.
    */
   virtual void update_joint_from_cartesian_witnesses() = 0;
 
-protected:
+private:
     RigidBody parent_;
     RigidBody child_;
-    IMP::algebra::Transformation3D transformation_child_to_parent_;
+    IMP::algebra::Transformation3D tr_child_to_parent_;
     KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
 
@@ -108,7 +122,10 @@ TransformationJoint : public Joint{
                       RigidBody child);
 
   /**
-     Sets the transfromation from parent to child reference frame
+     Sets the transfromation from parent to child reference frame,
+     in a safe way - that is, after updating all intrnal coordinates
+     from external if needed, and marking the owner internal coordinates
+     as changed.
   */
   void set_transformation_child_to_parent
     (IMP::algebra::Transformation3D transformation);
@@ -117,8 +134,8 @@ TransformationJoint : public Joint{
   /**
      sets the joint transformation to the transformation from the
      parent reference frame to the child reference frame (TODO: or
-     vide versa), after making sure the external coordinates are
-     updated from the owner KinematicForest object)
+     vide versa), assuming the external coordinates are
+     up-to-date.
    */
   virtual void update_joint_from_cartesian_witnesses() ;
 
@@ -160,41 +177,89 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
   double get_angle() const;
 
 #ifndef SWIG
-  IMP::algebra::Vector3D const& get_joint_unit_vector() const
-    { return joint_unit_vector_; }
+  IMP::algebra::Vector3D const& get_rot_origin() const
+    { return rot_origin_; }
+
+  IMP::algebra::Vector3D const& get_rot_axis_unit_vector() const
+    { return rot_axis_unit_vector_; }
 #endif
 
  protected:
   /****************** general methods ***************/
 
   /**
-     updates the transformation stored within the joint
-     based on the current angle_ value
+     Returns the transformation matrix for roatating a vector
+     in global coordinates about the vector passing through the joint origin
+     get_rot_origin() and in the direction of get_axis_unit_vector().
    */
-  void update_transformation_from_angle(){
-    double x = joint_unit_vector_[0];
-    double y = joint_unit_vector_[1];
-    double z = joint_unit_vector_[2];
+  IMP::algebra::Transformation3D
+    get_rotation_about_joint()
+    {
+      IMP::algebra::Rotation3D R =
+        IMP::algebra::get_rotation_about_normalized_axis
+        ( rot_axis_unit_vector_, angle_ );
+      IMP::algebra::Transformation3D R_origin =
+        IMP::algebra::get_rotation_about_point(rot_origin_, R);
+      return R_origin;
+    }
 
-    double cos_angle= cos(angle_);
-    double sin_angle = sin(angle_);
-    double s = 1 - cos_angle;
-    IMP::algebra::Rotation3D r =
-      IMP::algebra::get_rotation_from_matrix
-      ( x*x*s + cos_angle,   y*x*s - z*sin_angle, z*x*s + y * sin_angle,
-        x*y*s + z*sin_angle, y*y*s + cos_angle,   z*y*s - x*sin_angle,
-        x*z*s - y*sin_angle, y*z*s + x*sin_angle, z*z*s + cos_angle );
-    transformation_child_to_parent_ =
-      IMP::algebra::Transformation3D(r, (r*(-a_))+a_);
+
+  /**
+     updates the transformation from child to parent coordinated that
+     is stored within the joint, based on the current angle_ value
+     and the stored axis of rotation
+   */
+  void update_child_to_parent_transformation_from_angle(){
+    using namespace IMP::algebra;
+    Transformation3D R =
+      get_rotation_about_joint();
+    ReferenceFrame3D parent_rf =
+      get_parent_node().get_reference_frame();
+    const Transformation3D& tr_global_to_parent =
+      parent_rf.get_transformation_from();
+    Joint::set_transformation_child_to_parent_no_checks
+      ( tr_global_to_parent
+        * R
+        * tr_child_to_global_without_rotation_ );
   }
 
   /*********** protected setter methods **********/
-  /** sets v to the axis around which this joint revolves
-      sets a to the starting point of the joint
+
+  /**
+      Sets the revolute joint to revolve about the axis whose origin
+      is rot_origin and direction is axis_v, and assuming the initial
+      rotation angle is currently initial_angle
+      @note it is assumed that all external coordinates are updated
+            before a call to this method
+
+      @param rot_origin the global origin of rotation
+      @param axis_v the axis direction about which this joint revolves
+      @param angle as the joint initial angle
    */
-  void set_joint(IMP::algebra::Vector3D v, IMP::algebra::Vector3D a){
-    joint_unit_vector_ = v.get_unit_vector();
-    a_ = a;
+  void set_revolute_joint_params
+    ( IMP::algebra::Vector3D rot_origin,
+      IMP::algebra::Vector3D axis_v,
+      double initial_angle ) {
+    using namespace IMP::algebra;
+
+    rot_origin_ = rot_origin;
+    rot_axis_unit_vector_ = axis_v.get_unit_vector();
+    angle_ = initial_angle;
+
+    // compute the transformation from child to global, if the rotation was zero,
+    // that is - use the inverse of the transformation by initial angle, to compute
+    // the transformation for angle=0:
+    Transformation3D R =
+      get_rotation_about_joint();
+    Transformation3D tr_child_to_global =
+      get_child_node().get_reference_frame().get_transformation_to();
+    tr_child_to_global_without_rotation_ =
+      R.get_inverse() * tr_child_to_global;
+    // update the transformation from child to parent
+    Transformation3D tr_global_to_parent =
+      get_parent_node().get_reference_frame().get_transformation_from();
+    Joint::set_transformation_child_to_parent_no_checks
+      ( tr_child_to_global * tr_global_to_parent );
   }
 
  private:
@@ -202,10 +267,15 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
   double angle_;
 
   // the unit vector around which the joint revolves
-  IMP::algebra::Vector3D joint_unit_vector_;
+  IMP::algebra::Vector3D rot_axis_unit_vector_;
 
   // joint start
-  IMP::algebra::Vector3D a_;
+  IMP::algebra::Vector3D rot_origin_;
+
+  // The transformation that would bring a vector
+  // from child coordinates to global coordinates, were it
+  // that the rotation angle would have been zero
+  IMP::algebra::Transformation3D tr_child_to_global_without_rotation_;
 };
 
 
@@ -236,7 +306,7 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
   /**
      Update the stored dihedral angle (and the resulting joint transformation)
      to fit the positions of the four cartesian witnesses given upon
-     construction.
+     construction, assuming all external coords are updated.
    */
   virtual void update_joint_from_cartesian_witnesses();
 
@@ -317,7 +387,8 @@ class  IMPCOREEXPORT PrismaticJoint : public Joint{
   /**
       Update the length and transformation of the prismatic joint
       based on the distance and relative orientation of the witnesses
-      given upon construction
+      given upon construction, assuming all external coordinates are
+      up-to-date.
   */
   virtual void update_joint_from_cartesian_witnesses();
 

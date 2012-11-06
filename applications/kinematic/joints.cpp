@@ -33,8 +33,9 @@ Joint::get_transformation_child_to_parent() const
   if( get_owner_kf() ) {
     get_owner_kf()->update_all_internal_coordinates();
   }
-  return transformation_child_to_parent_;
+  return tr_child_to_parent_;
 }
+
 
 void
 Joint::update_child_node_reference_frame() const
@@ -79,7 +80,7 @@ TransformationJoint::set_transformation_child_to_parent
   if(get_owner_kf()){
     get_owner_kf()->update_all_internal_coordinates( );
   }
-  transformation_child_to_parent_ = transformation;
+  Joint::set_transformation_child_to_parent_no_checks( transformation );
   if(get_owner_kf()){
     get_owner_kf()->mark_internal_coordinates_changed();
   }
@@ -91,13 +92,13 @@ TransformationJoint::update_joint_from_cartesian_witnesses()
   // TODO: make this efficient - indexing? lazy? update flag?
   using namespace IMP::algebra;
 
-  ReferenceFrame3D parent_rf = parent_.get_reference_frame();
-  ReferenceFrame3D child_rf = child_.get_reference_frame();
+  ReferenceFrame3D parent_rf = get_parent_node().get_reference_frame();
+  ReferenceFrame3D child_rf = get_child_node().get_reference_frame();
   const Transformation3D& tr_global_to_parent =
     parent_rf.get_transformation_from();
   const Transformation3D& tr_child_to_global =
     child_rf.get_transformation_to();
-  transformation_child_to_parent_ =
+  set_transformation_child_to_parent_no_checks
     (tr_global_to_parent * tr_child_to_global);
 }
 
@@ -105,15 +106,17 @@ TransformationJoint::update_joint_from_cartesian_witnesses()
 /********************** Revolute Joint ***************/
 
 RevoluteJoint::RevoluteJoint
-(RigidBody parent, RigidBody child,
- XYZ a, XYZ b, double angle)
-  : Joint(parent, child),
-    angle_(angle)
+( RigidBody parent, RigidBody child,
+  XYZ a, XYZ b,
+  double initial_angle )
+  : Joint(parent, child)
 {
   // TODO: who are the witnesses here exactly?
-  set_joint( b.get_coordinates() - a.get_coordinates(),
-             a.get_coordinates());
-  // TODO: is angle useful for anything
+  set_revolute_joint_params
+    ( a.get_coordinates(),
+      b.get_coordinates() - a.get_coordinates(),
+      initial_angle);
+
   //      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
   //p->get_model()->add_score_state(ss); // TODO: implement that?
 }
@@ -141,8 +144,18 @@ RevoluteJoint::set_angle(double angle) {
   if(get_owner_kf()){
     get_owner_kf()->update_all_internal_coordinates();
   }
+  using namespace IMP::algebra;;
   angle_ = angle;
-  update_transformation_from_angle();
+  // update child to parent transformation:
+  Transformation3D R = get_rotation_about_joint();
+  const Transformation3D tr_child_to_global =
+      R * tr_child_to_global_without_rotation_ ;
+  ReferenceFrame3D parent_rf =
+    get_parent_node().get_reference_frame();
+  const Transformation3D& tr_global_to_parent =
+    parent_rf.get_transformation_from();
+  Joint::set_transformation_child_to_parent_no_checks
+    ( tr_global_to_parent * tr_child_to_global );
   if(get_owner_kf()){
     get_owner_kf()->mark_internal_coordinates_changed();
   }
@@ -154,7 +167,10 @@ DihedralAngleRevoluteJoint
 ::DihedralAngleRevoluteJoint
 (RigidBody parent, RigidBody child,
  XYZ a, XYZ b, XYZ c, XYZ d) :
-  RevoluteJoint(parent, child, b, c),
+  RevoluteJoint(parent, child,
+                b, c,
+                internal::dihedral(a,b,c,d,nullptr,nullptr,nullptr,nullptr)
+                ),
   a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
 {
   // TODO: scorestate for udpating the model? see revolute joint
@@ -165,18 +181,22 @@ DihedralAngleRevoluteJoint
 void
 DihedralAngleRevoluteJoint::update_joint_from_cartesian_witnesses()
 {
-  set_joint( c_.get_coordinates() - b_.get_coordinates(),
-             b_.get_coordinates());
+  double angle = internal::dihedral
+    ( a_, b_, c_, d_,
+      nullptr, // derivatives - TODO: support?
+      nullptr,
+      nullptr,
+      nullptr );
+  RevoluteJoint::set_revolute_joint_params
+    ( b_.get_coordinates(),
+      c_.get_coordinates() - b_.get_coordinates(),
+      angle );
   // TODO: perhaps the knowledge of normalized joint axis can accelerate
-  // the dihedral calculation in next line?
-  set_angle( internal::dihedral
-             (a_, b_, c_, d_,
-              nullptr, // derivatives - TODO: support?
-              nullptr,
-              nullptr,
-              nullptr)
-             );
+  // the dihedral calculation in get_angle_from_witnesses()?
+  // TODO: support derivatives?
 }
+
+
 
 /********************** Prismatic Joint ***************/
 
@@ -212,8 +232,8 @@ PrismaticJoint::set_length
     b_.get_coordinates() - a_.get_coordinates();
   IMP::algebra::Vector3D translation =
     l_ * v.get_unit_vector();
-  transformation_child_to_parent_ =
-    IMP::algebra::Transformation3D( translation );
+  set_transformation_child_to_parent_no_checks
+    ( IMP::algebra::Transformation3D( translation ) );
   if(get_owner_kf()){
     get_owner_kf()->mark_internal_coordinates_changed();
   }
@@ -236,11 +256,8 @@ PrismaticJoint::update_joint_from_cartesian_witnesses()
   double mag = v.get_magnitude();
   l_ = mag;
   // TODO: should implement set_transformation instead?
-  transformation_child_to_parent_ =
-    IMP::algebra::Transformation3D( v ) ;
-  std::cerr << " v = " << v << std::endl;
-  std::cerr << " trans_c_to_p_: "
-            << transformation_child_to_parent_ << std::endl;
+  set_transformation_child_to_parent_no_checks
+    ( IMP::algebra::Transformation3D( v ) );
 
   IMP_UNUSED(tiny_double);
 }

@@ -110,6 +110,7 @@ get_rotation_about_point(const Vector3D &point,
   return Transformation3D(rotation, (rotation*(-point)+point));
 }
 
+
 //! compose two transformations
   /** For any vector v (a*b)*v = a*(b*v).
       \relatesalso Transformation3D
