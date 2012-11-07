@@ -1,7 +1,9 @@
 /**
- *  \file joints.cpp
- *  \brief functionality for defining kinematic joints between rigid bodies
- *         as part of a kinematic tree
+ *  \file revolute_joints.cpp
+ *  \brief functionality for defining various revolute kinematic
+ *         joints between rigid bodies as part of a kinematic tree,
+ *         including RevoluteJoint, DihedralAngleRevoluteJoint, and
+ *         BondAngleRevoluteJoint
  *  \authors Dina Schneidman, Barak Raveh
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
@@ -10,7 +12,7 @@
 
 #include "KinematicForest.h"
 #include "KinematicNode.h"
-#include "joints.h"
+#include "revolute_joints.h"
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -47,8 +49,9 @@ void
 RevoluteJoint::update_child_node_reference_frame() const
 {
   using namespace IMP::algebra;
-  std::cout << "Updating child node reference frame of RevoluteJoint with angle "
-            << angle_ << std::endl;
+  std::cout
+    << "Updating child node reference frame of RevoluteJoint with angle "
+    << angle_ << std::endl;
 
   // update child to parent transformation:
   Transformation3D R = get_rotation_about_joint();
@@ -56,7 +59,9 @@ RevoluteJoint::update_child_node_reference_frame() const
     get_parent_node().get_reference_frame();
   const Transformation3D& tr_parent_to_global =
     parent_rf.get_transformation_to();
-  const Transformation3D tr_child_to_global = // TODO: can we really assume that tr_child_to_parent_no_rotation_ remains constant, given e.g. CompositeJoint
+ // TODO: can we really assume that tr_child_to_parent_no_rotation_
+ // remains constant, given e.g. CompositeJoint
+  const Transformation3D tr_child_to_global =
     R * tr_parent_to_global * tr_child_to_parent_no_rotation_ ;
 
   RigidBody child_rb = RigidBody(get_child_node().get_particle());
