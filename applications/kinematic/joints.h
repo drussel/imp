@@ -37,8 +37,10 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
      @param parent,child kinematic nodes upstream and downstream (resp.) of this
                     joint
      @param origin origin of revolute joint rotation
-     @param axis_direction direction of rotation axis, relative to the origin of rotation
-     @param angle initial rotation angle assumed for the current state of parent and child
+     @param axis_direction direction of rotation axis,
+                          relative to the origin of rotation
+     @param angle initial rotation angle assumed for the current state of
+                          parent and child
   **/
  RevoluteJoint(RigidBody parent,
                RigidBody child,
