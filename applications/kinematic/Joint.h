@@ -114,6 +114,8 @@ public:
   virtual void
     update_child_node_reference_frame() const;
 
+
+
   /**
      Updates the joint transformation based on external coordinates
      of 'witness' particles.

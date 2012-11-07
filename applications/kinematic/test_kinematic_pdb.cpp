@@ -137,8 +137,8 @@ void test_pdb_model(IMP::Model* model,
   std::cout << "Phi2 " << phi2->get_angle() << " transformation "
             << phi2-> get_transformation_child_to_parent() <<std::endl;
   std::cout << "Phi3 " << phi3->get_angle() << std::endl;
-  phi1->set_angle(90 * IMP::algebra::PI / 180.0);
-  phi2->set_angle(120 * IMP::algebra::PI / 180.0);
+   phi1->set_angle(90 * IMP::algebra::PI / 180.0);
+   phi2->set_angle(240 * IMP::algebra::PI / 180.0);
 
   kf->update_all_external_coordinates();
   std::cout << "Phi1 " << phi1->get_angle() << std::endl;

@@ -42,6 +42,36 @@ RevoluteJoint::RevoluteJoint
 RevoluteJoint::~RevoluteJoint()
 {}
 
+// assumes angle and parent reference frame are updated
+void
+RevoluteJoint::update_child_node_reference_frame() const
+{
+  using namespace IMP::algebra;
+  std::cout << "Updating child node reference frame of RevoluteJoint with angle "
+            << angle_ << std::endl;
+
+  // update child to parent transformation:
+  Transformation3D R = get_rotation_about_joint();
+  ReferenceFrame3D parent_rf =
+    get_parent_node().get_reference_frame();
+  const Transformation3D& tr_parent_to_global =
+    parent_rf.get_transformation_to();
+  const Transformation3D tr_child_to_global = // TODO: can we really assume that tr_child_to_parent_no_rotation_ remains constant, given e.g. CompositeJoint
+    R * tr_parent_to_global * tr_child_to_parent_no_rotation_ ;
+
+  RigidBody child_rb = RigidBody(get_child_node().get_particle());
+  child_rb.set_reference_frame
+    ( ReferenceFrame3D( tr_child_to_global ) );
+
+  // TODO: do we really need to store or calculate child to parent?
+  const Transformation3D& tr_global_to_parent =
+    parent_rf.get_transformation_from();
+  const Transformation3D tr_child_to_parent =
+    tr_global_to_parent * tr_child_to_global ;
+  const_cast<RevoluteJoint*>(this)->set_transformation_child_to_parent_no_checks
+    ( tr_child_to_parent );
+
+}
 
 
 double
@@ -61,18 +91,7 @@ RevoluteJoint::set_angle(double angle) {
   if(get_owner_kf()){
     get_owner_kf()->update_all_internal_coordinates();
   }
-  using namespace IMP::algebra;;
   angle_ = angle;
-  // update child to parent transformation:
-  Transformation3D R = get_rotation_about_joint();
-  const Transformation3D tr_child_to_global =
-      R * tr_child_to_global_without_rotation_ ;
-  ReferenceFrame3D parent_rf =
-    get_parent_node().get_reference_frame();
-  const Transformation3D& tr_global_to_parent =
-    parent_rf.get_transformation_from();
-  Joint::set_transformation_child_to_parent_no_checks
-    ( tr_global_to_parent * tr_child_to_global );
   if(get_owner_kf()){
     get_owner_kf()->mark_internal_coordinates_changed();
   }
@@ -101,11 +120,11 @@ RevoluteJoint::set_revolute_joint_params
     get_rotation_about_joint();
   Transformation3D tr_child_to_global =
     get_child_node().get_reference_frame().get_transformation_to();
-  tr_child_to_global_without_rotation_ =
-    R.get_inverse() * tr_child_to_global;
-  // update the transformation from child to parent
   Transformation3D tr_global_to_parent =
     get_parent_node().get_reference_frame().get_transformation_from();
+  tr_child_to_parent_no_rotation_ =
+    tr_global_to_parent * R.get_inverse() * tr_child_to_global;
+  // update the transformation from child to parent
   Joint::set_transformation_child_to_parent_no_checks
     ( tr_global_to_parent * tr_child_to_global );
 }

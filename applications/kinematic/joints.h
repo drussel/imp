@@ -51,8 +51,18 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
 
   // pure virtual dtr to declare as abstrat class for SWIG
  virtual ~RevoluteJoint() = 0;
+
+ /****** general public methods **********/
  public:
+
+ /**
+    TODO: doc
+  */
+ virtual void update_child_node_reference_frame() const;
+
+
  /******* public getter / setter methods *********/
+ public:
 
   /**
      sets the angle of the revolute joint and update the joint
@@ -71,7 +81,7 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
 #endif
 
  protected:
-  /****************** general methods ***************/
+  /****************** general protected methods ***************/
 
   /**
      Returns the transformation matrix for roatating a vector
@@ -79,7 +89,7 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
      get_rot_origin() and in the direction of get_axis_unit_vector().
    */
   IMP::algebra::Transformation3D
-    get_rotation_about_joint()
+    get_rotation_about_joint() const
     {
       IMP::algebra::Rotation3D R =
         IMP::algebra::get_rotation_about_normalized_axis
@@ -90,24 +100,24 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
     }
 
 
-  /**
-     updates the transformation from child to parent coordinated that
-     is stored within the joint, based on the current angle_ value
-     and the stored axis of rotation
-   */
-  void update_child_to_parent_transformation_from_angle(){
-    using namespace IMP::algebra;
-    Transformation3D R =
-      get_rotation_about_joint();
-    ReferenceFrame3D parent_rf =
-      get_parent_node().get_reference_frame();
-    const Transformation3D& tr_global_to_parent =
-      parent_rf.get_transformation_from();
-    Joint::set_transformation_child_to_parent_no_checks
-      ( tr_global_to_parent
-        * R
-        * tr_child_to_global_without_rotation_ );
-  }
+  // /**
+  //    updates the transformation from child to parent coordinated that
+  //    is stored within the joint, based on the current angle_ value
+  //    and the stored axis of rotation
+  //  */
+  // void update_child_to_parent_transformation_from_angle(){
+  //   using namespace IMP::algebra;
+  //   Transformation3D R =
+  //     get_rotation_about_joint();
+  //   ReferenceFrame3D parent_rf =
+  //     get_parent_node().get_reference_frame();
+  //   const Transformation3D& tr_global_to_parent =
+  //     parent_rf.get_transformation_from();
+  //   Joint::set_transformation_child_to_parent_no_checks
+  //     ( tr_global_to_parent
+  //       * R
+  //       * tr_child_to_global_without_rotation_ );
+  // }
 
   /*********** protected setter methods **********/
 
@@ -138,9 +148,9 @@ class IMPCOREEXPORT RevoluteJoint : public Joint{
   IMP::algebra::Vector3D rot_origin_;
 
   // The transformation that would bring a vector
-  // from child coordinates to global coordinates, were it
+  // from child coordinates to parent coordinates, were it
   // that the rotation angle would have been zero
-  IMP::algebra::Transformation3D tr_child_to_global_without_rotation_;
+  IMP::algebra::Transformation3D tr_child_to_parent_no_rotation_;
 };
 
 
