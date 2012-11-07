@@ -16,4 +16,4 @@ env= env.IMPApplication(name="kinematic",
                         python=False)
 
 if env:
-    env.IMPCPPExecutable(target="test_kinematic_pdb", source=["test_kinematic_pdb.cpp", "joints.cpp", "KinematicForest.cpp", "KinematicNode.cpp"])
+    env.IMPCPPExecutable(target="test_kinematic_pdb", source=["test_kinematic_pdb.cpp", "Joint.cpp", "joints.cpp", "PrismaticJoint.h", "CompositeJoint.cpp", "TransformationJoint.cpp", "KinematicForest.cpp", "KinematicNode.cpp"])

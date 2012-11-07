@@ -11,6 +11,8 @@
 #include <IMP/core/rigid_bodies.h>
 #include "KinematicForest.h"
 #include <IMP/core/rigid_bodies.h>
+#include "PrismaticJoint.h"
+#include "TransformationJoint.h"
 #include "joints.h"
 #include <string>
 

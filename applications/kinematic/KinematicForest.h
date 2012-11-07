@@ -14,7 +14,8 @@
 
 #include <IMP/Model.h>
 #include "KinematicNode.h"
-#include "joints.h"
+#include "Joint.h"
+#include "TransformationJoint.h"
 #include <IMP/base/Object.h>
 #include <IMP/Decorator.h>
 #include <IMP/compatibility/set.h>

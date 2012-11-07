@@ -11,6 +11,7 @@
 #include "core_config.h"
 #include "../macros.h"
 #include "internal/dihedral_helpers.h"
+#include "internal/angle_helpers.h"
 
 #include <IMP/Decorator.h>
 #include <IMP/algebra/Vector3D.h>
@@ -152,6 +153,26 @@ inline double get_distance(XYZ a, XYZ b) {
  */
 inline double get_dihedral(XYZ a, XYZ b, XYZ c, XYZ d) {
   return internal::dihedral(a, b, c, d, nullptr, nullptr, nullptr, nullptr);
+}
+
+//! Compute the angle (in radians) between the three particles
+/** \ingroup helper
+    \relatesalso XYZ
+ */
+inline double get_angle(XYZ a, XYZ b, XYZ c) {
+  return internal::angle(a, b, c, nullptr, nullptr, nullptr);
+}
+
+//! Compute a vector that is perpendicular to the plane containing
+//! a, b and c, and passes through the origin
+inline IMP::algebra::Vector3D
+get_perpendicular_vector(XYZ a, XYZ b, XYZ c)
+{
+  IMP::algebra::Vector3D
+    v1 = a.get_coordinates() - b.get_coordinates();
+  IMP::algebra::Vector3D
+    v2 = c.get_coordinates() - b.get_coordinates();
+  return IMP::algebra::get_vector_product(v1, v2);
 }
 
 //! Apply a transformation to the particle
