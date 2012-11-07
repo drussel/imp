@@ -107,7 +107,7 @@ RevoluteJoint::set_revolute_joint_params
   Transformation3D tr_global_to_parent =
     get_parent_node().get_reference_frame().get_transformation_from();
   Joint::set_transformation_child_to_parent_no_checks
-    ( tr_child_to_global * tr_global_to_parent );
+    ( tr_global_to_parent * tr_child_to_global );
 }
 
 /********************** DihedralAngleRevoluteJoint ***************/

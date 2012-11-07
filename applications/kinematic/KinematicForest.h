@@ -118,9 +118,9 @@ IMP_OBJECT(KinematicForest);
     while( !q.empty() ){
       KinematicNode n = q.front();
       q.pop();
-      JointsTemp in_joints = n.get_out_joints();
-      for(unsigned int i = 0; i < in_joints.size(); i++){
-        Joint* joint_i = in_joints[i];
+      JointsTemp out_joints = n.get_out_joints();
+      for(unsigned int i = 0; i < out_joints.size(); i++){
+        Joint* joint_i = out_joints[i];
         // TODO: add and implement to joint
         joint_i->update_child_node_reference_frame();
         q.push( KinematicNode(joint_i->get_child_node() ) );

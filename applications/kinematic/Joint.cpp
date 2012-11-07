@@ -48,7 +48,7 @@ Joint::update_child_node_reference_frame() const
   const Transformation3D& tr_parent_to_global =
     parent_rf.get_transformation_to();
   const Transformation3D& tr_child_to_parent =
-    get_transformation_child_to_parent();
+    get_transformation_child_to_parent_no_checks();
   Transformation3D tr_child_to_global
     (tr_parent_to_global * tr_child_to_parent);
 

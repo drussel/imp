@@ -6,7 +6,7 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-
+#include <IMP/core/rigid_bodies.h>
 #include "KinematicForest.h"
 #include "KinematicNode.h"
 #include "PrismaticJoint.h"

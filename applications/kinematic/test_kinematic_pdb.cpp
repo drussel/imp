@@ -84,8 +84,8 @@ void test_pdb_model(IMP::Model* model,
                     bool print_hierarchy = false,
                     IMP::atom::Hierarchy mhd = IMP::atom::Hierarchy() )
 {
-  IMP_ALWAYS_CHECK(rbs.size() >=2,
-                   "Must have at least 2 rigid bodies but only got "
+  IMP_ALWAYS_CHECK(rbs.size() >=5,
+                   "Must have at least 5 rigid bodies but only got "
                    << rbs.size(), ValueException);
   std::cout << "initial coords residues";
   for(unsigned int i = 0; i < rbs.size(); i++) {
@@ -121,18 +121,42 @@ void test_pdb_model(IMP::Model* model,
           (rbs[2], rbs[3],
            rbs[2].get_member(2) /*C*/, rbs[3].get_member(0) /*N*/,
            rbs[3].get_member(1) /*CA*/, rbs[3].get_member(2) /*C*/) );
+  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, phi4,
+          (rbs[3], rbs[4],
+           rbs[3].get_member(2) /*C*/, rbs[4].get_member(0) /*N*/,
+           rbs[4].get_member(1) /*CA*/, rbs[4].get_member(2) /*C*/) );
 
   IMP_NEW(IMP::core::KinematicForest, kf, (model) );
   kf->add_edge(phi1);
   kf->add_edge(phi2);
   kf->add_edge(phi3);
+  kf->add_edge(phi4);
+  double phi1_init =  phi1->get_angle();
+  double phi2_init =  phi2->get_angle();
   std::cout << "Phi1 " << phi1->get_angle() << std::endl;
-  std::cout << "Phi2 " << phi2->get_angle() << std::endl;
+  std::cout << "Phi2 " << phi2->get_angle() << " transformation "
+            << phi2-> get_transformation_child_to_parent() <<std::endl;
   std::cout << "Phi3 " << phi3->get_angle() << std::endl;
-  phi1->set_angle(120 * IMP::algebra::PI / 180.0);
+  phi1->set_angle(90 * IMP::algebra::PI / 180.0);
+  phi2->set_angle(120 * IMP::algebra::PI / 180.0);
+
   kf->update_all_external_coordinates();
+  std::cout << "Phi1 " << phi1->get_angle() << std::endl;
+  std::cout << "Phi2 " << phi2->get_angle() << " transformation "
+            << phi2-> get_transformation_child_to_parent() << std::endl;
+  std::cout << "Phi3 " << phi3->get_angle() << std::endl;
   IMP::atom::write_pdb
     (mhd, "./after_set_phi1_to_120deg.pdb");
+  phi1->set_angle(phi1_init);
+  phi2->set_angle(phi2_init);
+  kf->update_all_external_coordinates();
+  std::cout << "Phi1 " << phi1->get_angle() << std::endl;
+  std::cout << "Phi2 " << phi2->get_angle() << " transformation "
+            << phi2-> get_transformation_child_to_parent() << std::endl;
+  std::cout << "Phi3 " << phi3->get_angle() << std::endl;
+
+ IMP::atom::write_pdb
+    (mhd, "./after_set_phi1_back.pdb");
 
 }
 

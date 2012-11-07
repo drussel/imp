@@ -3,7 +3,6 @@
  *  \brief a prismatic joint between rigid bodies as part of a kinematic tree
  *  \authors Dina Schneidman, Barak Raveh
  *
-
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
@@ -26,7 +25,7 @@ IMPCORE_BEGIN_NAMESPACE
 /**
    joint in which too rigid bodies may slide along a line
 */
-class  IMPCOREEXPORT PrismaticJoint : public Joint{
+class IMPCOREEXPORT PrismaticJoint : public Joint{
  public:
   /********* Constructors ********/
   /**
@@ -89,4 +88,4 @@ IMP_OBJECTS(PrismaticJoint, PrismaticJoints);
 
 IMPCORE_END_NAMESPACE
 
-#endif  /* IMPCORE_JOINTS_H */
+#endif  /* IMPCORE_PRISMATIC_JOINT_H */

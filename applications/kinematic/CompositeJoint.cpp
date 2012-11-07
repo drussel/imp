@@ -38,7 +38,7 @@ CompositeJoint::update_child_node_reference_frame() const
   //       in global coordinates instead of doing it one by one?
   using namespace IMP::algebra;
 
-  for(unsigned int i = joints_.size() - 1; i >= 0; i++) {
+  for(int i = (int)joints_.size() - 1; i >= 0; i++) {
     joints_[i]->update_child_node_reference_frame();
   }
 }

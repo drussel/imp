@@ -47,6 +47,8 @@ public:
 
   /***************** getter methods: ***************/
 
+ public:
+
   KinematicForest* get_owner_kf() const{
     return owner_kf_;
   }
@@ -54,7 +56,8 @@ public:
 #ifndef SWIG
   /**
      returns the transformation of a vector from the child
-     reference frame to the parent reference frame
+     reference frame to the parent reference frame in a safe way
+     (= after updating internal coordinates if needed)
   */
   virtual const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent() const;
@@ -67,9 +70,23 @@ public:
   RigidBody get_child_node() const
   { return child_; }
 
+
  protected:
 
+    /**
+       returns the transformation of a vector from the child
+       reference frame to the parent reference frame, without any checks
+       (= without updating internal coordinates even if needed)
+    */
+  virtual const IMP::algebra::Transformation3D&
+    get_transformation_child_to_parent_no_checks() const {
+    return tr_child_to_parent_;
+  }
+
+
   /***************** setter methods: ***************/
+
+ protected:
 
   void set_owner_kf(KinematicForest* kf) {
     owner_kf_ = kf;
