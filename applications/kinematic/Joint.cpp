@@ -25,6 +25,7 @@ Joint::Joint
   Object("IMP_CORE_JOINT"),
   parent_(parent), child_(child), owner_kf_(nullptr)
 {
+  update_joint_from_cartesian_witnesses();
 }
 
 
@@ -44,6 +45,7 @@ Joint::update_child_node_reference_frame() const
   // TODO: make this efficient - indexing? lazy? update flag?
   using namespace IMP::algebra;
 
+  std::cout << "Joint::update_child_node_reference_frame()" << std::endl;
   ReferenceFrame3D parent_rf = parent_.get_reference_frame();
   const Transformation3D& tr_parent_to_global =
     parent_rf.get_transformation_to();
@@ -52,10 +54,29 @@ Joint::update_child_node_reference_frame() const
   Transformation3D tr_child_to_global
     (tr_parent_to_global * tr_child_to_parent);
 
+  // TODO: should we add a set_reference_frame_lazy() variant? this
+  // has effects that need to be thought through
   RigidBody child_rb = RigidBody(child_.get_particle());
   child_rb.set_reference_frame
     ( ReferenceFrame3D( tr_child_to_global ) );
 }
+
+void
+Joint::update_joint_from_cartesian_witnesses()
+{
+  // TODO: make this efficient - indexing? lazy? update flag?
+  using namespace IMP::algebra;
+
+  ReferenceFrame3D parent_rf = get_parent_node().get_reference_frame();
+  ReferenceFrame3D child_rf = get_child_node().get_reference_frame();
+  const Transformation3D& tr_global_to_parent =
+    parent_rf.get_transformation_from();
+  const Transformation3D& tr_child_to_global =
+    child_rf.get_transformation_to();
+  set_transformation_child_to_parent_no_checks
+    (tr_global_to_parent * tr_child_to_global);
+}
+
 
 void
 Joint::do_show(std::ostream & os) const

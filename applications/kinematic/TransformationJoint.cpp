@@ -24,7 +24,6 @@ TransformationJoint::TransformationJoint
 (RigidBody parent, RigidBody child)
   :  Joint(parent, child)
 {
-  update_joint_from_cartesian_witnesses();
 }
 
 
@@ -42,20 +41,5 @@ TransformationJoint::set_transformation_child_to_parent
   }
 }
 
-void
-TransformationJoint::update_joint_from_cartesian_witnesses()
-{
-  // TODO: make this efficient - indexing? lazy? update flag?
-  using namespace IMP::algebra;
-
-  ReferenceFrame3D parent_rf = get_parent_node().get_reference_frame();
-  ReferenceFrame3D child_rf = get_child_node().get_reference_frame();
-  const Transformation3D& tr_global_to_parent =
-    parent_rf.get_transformation_from();
-  const Transformation3D& tr_child_to_global =
-    child_rf.get_transformation_to();
-  set_transformation_child_to_parent_no_checks
-    (tr_global_to_parent * tr_child_to_global);
-}
 
 IMPCORE_END_NAMESPACE

@@ -13,8 +13,10 @@
 #include <IMP/core/rigid_bodies.h>
 #include "PrismaticJoint.h"
 #include "TransformationJoint.h"
-#include "joints.h"
+#include "revolute_joints.h"
 #include <string>
+
+using namespace IMP::core;
 
 IMP::core::RigidBody create_rigid_particle
 (IMP::Model* m, double x, double y, double z)
@@ -39,6 +41,7 @@ IMP::Pointer<IMP::Model> build_model_no_pdb
   rbs.push_back( create_rigid_particle ( m, 1, 0, 0 ) );
   rbs.push_back( create_rigid_particle ( m, 1, 1, 0 ) );
   rbs.push_back( create_rigid_particle ( m, 2, 1, 0 ) );
+  rbs.push_back( create_rigid_particle ( m, 2, 2, 0 ) );
   return m;
  }
 
@@ -338,36 +341,30 @@ void test_model_with_rbs(IMP::Model* model,
 
 }
 
-
-void test_dihedral
-(IMP::Model* model,
- IMP::core::RigidBodies& rbs)
+void print_transformation
+(IMP::algebra::Transformation3D T, std::string description)
 {
-  IMP_ALWAYS_CHECK(rbs.size() >=4,
-                   "Must have at least 4 rigid bodies but only got "
-                   << rbs.size(), ValueException)
-
-  std::cout << "initial coords "
-            << rbs[0].get_coordinates()
-            << ", "
-            << rbs[1].get_coordinates()
-            << ", "
-            << rbs[2].get_coordinates()
-            << ", "
-            << rbs[3].get_coordinates()
+  std::pair< IMP::algebra::Vector3D, double > aa =
+    IMP::algebra::get_axis_and_angle( T.get_rotation() );
+  std::cout << "trans " << description << ": "
+            << "axis = " << aa.first
+            << "; angle = " << aa.second * 180.0 / 3.141256 << " deg"
+            << "; translation = " << T.get_translation()
             << std::endl;
-  // joints
-  IMP_NEW(IMP::core::PrismaticJoint, pj0, (rbs[0], rbs[1]));
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, dj1,
-          (rbs[1], rbs[2], rbs[0], rbs[1], rbs[2], rbs[3]));
-  IMP_NEW(IMP::core::PrismaticJoint, pj2, (rbs[2], rbs[3]));
-  // forest
-  IMP_NEW(IMP::core::KinematicForest, kf, (model) );
-  kf->add_edge(pj0);
-  kf->add_edge(dj1);
-  kf->add_edge(pj2);
+}
 
-  std::cout << "coords after KinematicForest ctr "
+void print_info(KinematicForest* kf,
+                RigidBodies& rbs,
+                PrismaticJoint* pj0,
+                DihedralAngleRevoluteJoint* dj1,
+                DihedralAngleRevoluteJoint* dj2,
+                PrismaticJoint* pj3,
+                std::string action_desc)
+{
+  std::cout << std::endl
+            << "******** After " << action_desc << " ********" << std::endl;
+
+  std::cout << "Coords: "
             << kf->get_coordinates_safe( rbs[0] )
             << ", "
             << kf->get_coordinates_safe( rbs[1] )
@@ -375,117 +372,83 @@ void test_dihedral
             << kf->get_coordinates_safe( rbs[2] )
             << ", "
             << kf->get_coordinates_safe( rbs[3] )
+            << ", "
+            << kf->get_coordinates_safe( rbs[4] )
             << std::endl;
-  std::cerr << "Distance 0-1: "
+  std::cout << "Distance 0-1: "
             << IMP::algebra::get_distance( kf->get_coordinates_safe( rbs[0] ),
                                            kf->get_coordinates_safe( rbs[1] ) )
             << std::endl;
-  std::cerr << "Distance 1-2: "
+  std::cout << "Distance 1-2: "
             << IMP::algebra::get_distance( kf->get_coordinates_safe( rbs[1] ),
                                            kf->get_coordinates_safe( rbs[2] ) )
             << std::endl;
-  std::cerr << "Distance 2-3: "
+  std::cout << "Distance 2-3: "
             << IMP::algebra::get_distance( kf->get_coordinates_safe( rbs[2] ),
                                            kf->get_coordinates_safe( rbs[3] ) )
+            << std::endl;
+  std::cout << "Distance 3-4: "
+            << IMP::algebra::get_distance( kf->get_coordinates_safe( rbs[3] ),
+                                           kf->get_coordinates_safe( rbs[4] ) )
             << std::endl;
   std::cout << "length 0-1 = "
             << pj0->get_length()
             << std::endl;
-  std::cout << "trans 0-1 = "
-            << pj0->get_transformation_child_to_parent()
-            << std::endl;
+  print_transformation( pj0->get_transformation_child_to_parent() , "0-1");
   std::cout << "angle 1-2 = "
-            << dj1->get_angle()
+            << dj1->get_angle() * 180 / 3.141256
             << std::endl;
-  std::cout << "trans 1-2 = "
-            << dj1->get_transformation_child_to_parent()
+  print_transformation( dj1->get_transformation_child_to_parent() , "1-2");
+  std::cout << "angle 2-3 = "
+            << dj2->get_angle() * 180 / 3.141256
             << std::endl;
-  std::cout << "length 2-3 = "
-            << pj2->get_length()
+  print_transformation( dj2->get_transformation_child_to_parent() , "2-3");
+  std::cout << "length 3-4 = "
+            << pj3->get_length()
             << std::endl;
-  std::cout << "trans 2-3 = "
-            << pj2->get_transformation_child_to_parent()
-            << std::endl;
+  print_transformation( pj3->get_transformation_child_to_parent() , "3-4");
+}
 
+
+void test_dihedral
+(IMP::Model* model,
+ IMP::core::RigidBodies& rbs)
+{
+  IMP_ALWAYS_CHECK(rbs.size() >= 5,
+                   "Must have at least 5 rigid bodies but only got "
+                   << rbs.size(), ValueException)
+
+  // joints
+  IMP_NEW(IMP::core::PrismaticJoint, pj0, (rbs[0], rbs[1]));
+  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, dj1,
+          (rbs[1], rbs[2], rbs[0], rbs[1], rbs[2], rbs[3]));
+  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, dj2,
+          (rbs[2], rbs[3], rbs[1], rbs[2], rbs[3], rbs[4]));
+  IMP_NEW(IMP::core::PrismaticJoint, pj3, (rbs[3], rbs[4]));
+  // forest
+  IMP_NEW(IMP::core::KinematicForest, kf, (model) );
+  kf->add_edge(pj0);
+  kf->add_edge(dj1);
+  kf->add_edge(dj2);
+  kf->add_edge(pj3);
+
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "KinematicForest ctr");
   dj1->set_angle(0.0 * 3.141259265358973/180);
-  std::cout << "coords after set_angle 0 deg" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-
-  dj1->set_angle(90.0 * 3.141259265358973/180);
-  std::cout << "coords after set_angle 90 deg" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-
-  dj1->set_angle(45.0 * 3.141259265358973/180);
-  std::cout << "coords after set_angle 45 deg" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle dj1 0 deg");
+  //  dj1->set_angle(45.0 * 3.141259265358973/180);
+  //print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle 45 deg");
   dj1->set_angle(180.0 * 3.141259265358973/180);
-  std::cout << "coords after set_angle 180 deg" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle dj1 180 deg");
+  dj2->set_angle(0.0 * 3.141259265358973/180);
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle dj2 0 deg");
+  dj1->set_angle(0.0 * 3.141259265358973/180);
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle dj1 0 deg");
   kf->set_coordinates_safe( rbs[1], IMP::algebra::Vector3D( 0, 0, 1 ) );
-  std::cout << "coords after set_rbs[1] = 0,0,1" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-  std::cout << "dihedral = " << dj1->get_angle() << std::endl;
-
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle set_rbs[1] = 0,0,1");
   dj1->set_angle(0.0 * 3.141259265358973/180);
-  std::cout << "coords after set_angle 0 deg" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle 0 deg");
   dj1->set_angle(180.0 * 3.141259265358973/180);
-  std::cout << "coords after set_angle 180 deg" << std::endl;
-  std::cout << kf->get_coordinates_safe( rbs[0] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[1] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[2] )
-            << ", "
-            << kf->get_coordinates_safe( rbs[3] )
-            << std::endl;
-
-
+  print_info(kf, rbs, pj0, dj1, dj2, pj3, "set_angle 180 deg");
 }
 
 
@@ -506,12 +469,12 @@ int main(int argc, char **argv)
   IMP::core::RigidBodies rbs1;
   IMP::Pointer<IMP::Model> m1 = build_model_no_pdb(rbs1);
   //  test_model_with_rbs(m1, rbs1);
-  //  test_dihedral(m1, rbs1);
+  test_dihedral(m1, rbs1);
 
   IMP::core::RigidBodies rbs2;
   IMP::atom::Hierarchy mhd2;
-  IMP::Pointer<IMP::Model> m2 = build_model_pdb(fname, rbs2, mhd2);
-  test_pdb_model(m2, rbs2, true, mhd2);
+  //IMP::Pointer<IMP::Model> m2 = build_model_pdb(fname, rbs2, mhd2);
+  //test_pdb_model(m2, rbs2, true, mhd2);
   //test_model_with_rbs(m2, rbs2, true, mhd);
   //test_dihedral(m2, rbs2);
 }

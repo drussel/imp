@@ -45,15 +45,6 @@ TransformationJoint : public Joint{
   void set_transformation_child_to_parent
     (IMP::algebra::Transformation3D transformation);
 
- protected:
-  /**
-     sets the joint transformation to the transformation from the
-     child reference frame to the parent reference frame.
-
-     @note It is assumed that external coordinates are updated before
-           calling this function.
-   */
-  virtual void update_joint_from_cartesian_witnesses() ;
 
 };
 

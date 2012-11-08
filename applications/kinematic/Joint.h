@@ -26,6 +26,7 @@ class KinematicForest;
 /**
     Abstract class for joints between rigid bodies in a kinematic
     tree.
+    // TODO: make abstract
 */
 class  IMPCOREEXPORT Joint
 : public IMP::base::Object
@@ -108,8 +109,6 @@ public:
   /**
      Updates the reference frame of the rigid body directly downstream
      of this joint
-
-    // TODO: validate test - must be buggy :)
   */
   virtual void
     update_child_node_reference_frame() const;
@@ -124,8 +123,8 @@ public:
            calling this function.
      @note Witness particles do not necessarily belong to the child or
            parent rigid bodes.
-   */
-  virtual void update_joint_from_cartesian_witnesses() = 0;
+  */
+  virtual void update_joint_from_cartesian_witnesses();
 
 private:
     RigidBody parent_;

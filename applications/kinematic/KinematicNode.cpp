@@ -9,7 +9,7 @@
 #include "KinematicForest.h"
 #include "KinematicNode.h"
 #include <IMP/core/rigid_bodies.h>
-#include "joints.h"
+#include "Joint.h"
 #include <IMP/exception.h>
 
 IMPCORE_BEGIN_NAMESPACE
