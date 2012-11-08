@@ -22,9 +22,24 @@
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/base/check_macros.h>
 
+// TODO: for debug only = remove later
+#define RAD_2_DEG(a) 180*a/IMP::algebra::PI
+#define DEG_2_RAD(a) a*IMP::algebra::PI/180
+
 IMPCORE_BEGIN_NAMESPACE
 
 class KinematicForest;
+
+inline void nice_print_trans(const IMP::algebra::Transformation3D& T, std::string description)
+{
+  std::pair< IMP::algebra::Vector3D, double > aa;
+  aa = IMP::algebra::get_axis_and_angle( T.get_rotation() );
+  std::cout << description << "axis = " << aa.first
+            << "; angle = " << RAD_2_DEG(aa.second) << " deg"
+                  << "; translation = " << T.get_translation()
+            << std::endl;
+}
+
 
 /********************** RevoluteJoint ***************/
 
@@ -92,8 +107,7 @@ public Joint{
       this protected method updates the rot_axis_unit_vector_
       and rot_axis_origin_ variables based on the cartesian witnesses
       appropriate for a specific implementation of this abstract class,
-      using global coordinates (assuming the parent ref frame and the
-      cartesian witnesses global coordinates are all updated)
+      using parent coordinates, assuming all caresian witnesses are updated
   */
   virtual void update_axis_of_rotation_from_cartesian_witnesses() = 0;
 
@@ -116,47 +130,33 @@ public Joint{
            calling this function.
    */
   virtual void update_joint_from_cartesian_witnesses(){
+    update_axis_of_rotation_from_cartesian_witnesses();
     angle_ = get_current_angle_from_cartesian_witnesses();
     last_updated_angle_ = angle_;
   }
 
   /**
-     Returns the transformation matrix for roatating a vector in
-     global coordinates about the axis of the joint, in a way that
+     Returns the transformation matrix for rotating a vector in
+     parent coordinates about the axis of the joint, in a way that
      would bring the cartesian witnesses to the correct joint angle
      (as measured by get_angle_from_cartesian_witnesses() ).
-
-     @note it is assumed that the cartesian witnesses for the joint axis of
-     rotation (used in update_axis_of_rotation_from_cartesian_witnesses())
-     all have updated XYZ coordinates.
    */
   IMP::algebra::Transformation3D
-    get_rotation_about_joint() const
+    get_rotation_about_joint_in_parent_coordinates() const
     {
-      const_cast<RevoluteJoint*>(this)
-        ->update_axis_of_rotation_from_cartesian_witnesses();
-      std::cout << "get_rotation " << angle_ << ", last_updated_angle = "
-                << last_updated_angle_ << std::endl;
+      std::cout << "get_rotation " << RAD_2_DEG(angle_) << ", last_updated_angle = "
+                << RAD_2_DEG(last_updated_angle_) << std::endl;
       // rotate by the difference from last_updated_angle_
       IMP::algebra::Rotation3D R =
         IMP::algebra::get_rotation_about_normalized_axis
         ( rot_axis_unit_vector_, angle_ - last_updated_angle_ );
       IMP::algebra::Transformation3D R_origin =
         IMP::algebra::get_rotation_about_point(rot_axis_origin_, R);
-      std::pair< IMP::algebra::Vector3D, double > aa;
-      aa = IMP::algebra::get_axis_and_angle( R );
-      std::cout << "R: "
-                << "axis = " << aa.first
-                << "; angle = " << aa.second * 180.0 / 3.141256 << " deg"
-                << std::endl;
-      aa = IMP::algebra::get_axis_and_angle( R_origin.get_rotation() );
-      std::cout << "R_origin: "
-                << "axis = " << aa.first
-                << "; angle = " << aa.second * 180.0 / 3.141256 << " deg"
-                << "; translation = " << R_origin.get_translation()
-                << std::endl;
 
-   return R_origin;
+      // debug prints
+      nice_print_trans(R_origin, "R_origin: ");
+
+      return R_origin;
     }
 
 
@@ -169,10 +169,10 @@ public Joint{
   // (or is that so?)
   mutable double last_updated_angle_;
 
-  // the unit vector around which the joint revolves in global coords
+  // the unit vector around which the joint revolves in parent coords
   IMP::algebra::Vector3D rot_axis_unit_vector_;
 
-  // the joint origin of rotation in global coords
+  // the joint origin of rotation in parent coords
   IMP::algebra::Vector3D rot_axis_origin_;
 };
 
@@ -205,17 +205,27 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
  protected:
   /**
       updates the rot_axis_unit_vector_ and rot_axis_origin_ variables
-      in global coordinates based on the witnesses b_ and c_,
+      in parent coordinates based on the witnesses b_ and c_,
       using b_-c_ as the axis of rotation
+      @it is assumed b_ and c_ have update cartesian coordinates
   */
   virtual void update_axis_of_rotation_from_cartesian_witnesses(){
+    using namespace IMP::algebra;
     IMP_USAGE_CHECK
-      ( IMP::algebra::get_distance( b_.get_coordinates(), c_.get_coordinates() )
+      ( get_distance( b_.get_coordinates(), c_.get_coordinates() )
         > 1e-12 ,
         "witnesses b and c must be non identical beyone numerical error" );
-    rot_axis_origin_ = b_.get_coordinates();
-    IMP::algebra::Vector3D v = c_.get_coordinates() - b_.get_coordinates();
+    ReferenceFrame3D rf_parent = get_parent_node().get_reference_frame();
+    nice_print_trans(rf_parent.get_transformation_to(), "Parent trans: ");
+    rot_axis_origin_ = rf_parent.get_local_coordinates( b_.get_coordinates() );
+    std::cout << "global b_ " << b_.get_coordinates()
+              <<  " and local parent b_ " << rot_axis_origin_ << std::endl;
+    Vector3D v =
+      rf_parent.get_local_coordinates( c_.get_coordinates() )
+      - rf_parent.get_local_coordinates( b_.get_coordinates() );
     rot_axis_unit_vector_ = v.get_unit_vector();
+    std::cout << "local axis of rot unnorm " << v
+              <<  " global axis " << c_.get_coordinates() - b_.get_coordinates() << std::endl;
   };
 
   /**
@@ -273,9 +283,22 @@ class  IMPCOREEXPORT BondAngleRevoluteJoint : public RevoluteJoint{
      coordinates
   */
   virtual void update_axis_of_rotation_from_cartesian_witnesses(){
-    rot_axis_unit_vector_ =
-      IMP::core::get_perpendicular_vector(a_, b_, c_).get_unit_vector();
-    rot_axis_origin_ = b_.get_coordinates() ;
+    using namespace IMP::algebra;
+
+    IMP_USAGE_CHECK
+      ( get_distance( b_.get_coordinates(), c_.get_coordinates() )
+        > 1e-12 ,
+        "witnesses b and c must be non identical beyond numerical error" );
+    IMP_USAGE_CHECK
+      ( get_distance( b_.get_coordinates(), a_.get_coordinates() )
+        > 1e-12 ,
+        "witnesses b and a must be non identical beyond numerical error" );
+  ReferenceFrame3D rf_parent = get_parent_node().get_reference_frame();
+  Vector3D v = rf_parent.get_local_coordinates
+    ( IMP::core::get_perpendicular_vector(a_, b_, c_) );
+  rot_axis_unit_vector_ = v.get_unit_vector();
+  rot_axis_origin_ = rf_parent.get_local_coordinates
+    ( b_.get_coordinates() );
   };
 
  private:

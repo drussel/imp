@@ -107,11 +107,6 @@ void test_pdb_model(IMP::Model* model,
   }
   std::cout << std::endl;
 
-
-  // IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, psi0,
-  //         (rbs[0], rbs[1],
-  //          rbs[0].get_member(0) /*N*/, rbs[0].get_member(1) /*CA*/,
-  //          rbs[0].get_member(2) /*C2*/, rbs[1].get_member(0) /*C*/) );
   IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, phi1,
           (rbs[0], rbs[1],
            rbs[0].get_member(2) /*C*/, rbs[1].get_member(0) /*N*/,
@@ -135,28 +130,28 @@ void test_pdb_model(IMP::Model* model,
   kf->add_edge(phi3);
   kf->add_edge(phi4);
   double phi1_init =  phi1->get_angle();
-  double phi2_init =  phi2->get_angle();
-  std::cout << "Phi1 " << phi1->get_angle() << std::endl;
-  std::cout << "Phi2 " << phi2->get_angle() << " transformation "
+  double phi3_init =  phi3->get_angle();
+  std::cout << "Phi1 " << RAD_2_DEG(phi1->get_angle()) << std::endl;
+  std::cout << "Phi2 " << RAD_2_DEG(phi2->get_angle()) << " transformation "
             << phi2-> get_transformation_child_to_parent() <<std::endl;
-  std::cout << "Phi3 " << phi3->get_angle() << std::endl;
-   phi1->set_angle(90 * IMP::algebra::PI / 180.0);
-   phi2->set_angle(240 * IMP::algebra::PI / 180.0);
+  std::cout << "Phi3 " << RAD_2_DEG(phi3->get_angle()) << std::endl;
+  phi1->set_angle(DEG_2_RAD(150.0));
+  phi3->set_angle(DEG_2_RAD(240.0));
 
   kf->update_all_external_coordinates();
-  std::cout << "Phi1 " << phi1->get_angle() << std::endl;
-  std::cout << "Phi2 " << phi2->get_angle() << " transformation "
+  std::cout << "Phi1 " << RAD_2_DEG(phi1->get_angle()) << std::endl;
+  std::cout << "Phi2 " << RAD_2_DEG(phi2->get_angle()) << " transformation "
             << phi2-> get_transformation_child_to_parent() << std::endl;
-  std::cout << "Phi3 " << phi3->get_angle() << std::endl;
+  std::cout << "Phi3 " << RAD_2_DEG(phi3->get_angle()) << std::endl;
   IMP::atom::write_pdb
     (mhd, "./after_set_phi1_to_120deg.pdb");
   phi1->set_angle(phi1_init);
-  phi2->set_angle(phi2_init);
+  phi3->set_angle(phi3_init);
   kf->update_all_external_coordinates();
-  std::cout << "Phi1 " << phi1->get_angle() << std::endl;
-  std::cout << "Phi2 " << phi2->get_angle() << " transformation "
+  std::cout << "Phi1 " << RAD_2_DEG(phi1->get_angle()) << std::endl;
+  std::cout << "Phi2 " << RAD_2_DEG(phi2->get_angle()) << " transformation "
             << phi2-> get_transformation_child_to_parent() << std::endl;
-  std::cout << "Phi3 " << phi3->get_angle() << std::endl;
+  std::cout << "Phi3 " << RAD_2_DEG(phi3->get_angle()) << std::endl;
 
  IMP::atom::write_pdb
     (mhd, "./after_set_phi1_back.pdb");
@@ -468,13 +463,13 @@ int main(int argc, char **argv)
 
   IMP::core::RigidBodies rbs1;
   IMP::Pointer<IMP::Model> m1 = build_model_no_pdb(rbs1);
-  //  test_model_with_rbs(m1, rbs1);
+  // test_model_with_rbs(m1, rbs1);
   test_dihedral(m1, rbs1);
 
   IMP::core::RigidBodies rbs2;
   IMP::atom::Hierarchy mhd2;
-  //IMP::Pointer<IMP::Model> m2 = build_model_pdb(fname, rbs2, mhd2);
-  //test_pdb_model(m2, rbs2, true, mhd2);
+  IMP::Pointer<IMP::Model> m2 = build_model_pdb(fname, rbs2, mhd2);
+  test_pdb_model(m2, rbs2, true, mhd2);
   //test_model_with_rbs(m2, rbs2, true, mhd);
   //test_dihedral(m2, rbs2);
 }

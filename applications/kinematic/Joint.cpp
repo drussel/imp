@@ -59,6 +59,7 @@ Joint::update_child_node_reference_frame() const
   RigidBody child_rb = RigidBody(child_.get_particle());
   child_rb.set_reference_frame
     ( ReferenceFrame3D( tr_child_to_global ) );
+  std::cout << "new child ref frame " << tr_child_to_global << std::endl;
 }
 
 void

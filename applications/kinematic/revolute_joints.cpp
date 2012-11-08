@@ -37,7 +37,7 @@ RevoluteJoint::~RevoluteJoint()
 
 // assumes angle and parent reference frame are updated
 // and uses witnesses to get axis of rotation
-// TODO: mergw with Joint::update_child... and separate
+// TODO: merge with Joint::update_child... and separate
 //       different parts only?
 void
 RevoluteJoint::update_child_node_reference_frame() const
@@ -45,48 +45,26 @@ RevoluteJoint::update_child_node_reference_frame() const
   using namespace IMP::algebra;
   std::cout
     << "Updating child node reference frame of RevoluteJoint with angle "
-    << angle_ * 180 / 3.151426 <<
-    " and last updated angle " <<
-    last_updated_angle_* 180 / 3.151426
-    << std::endl;
+    << RAD_2_DEG(angle_) << " and last updated angle "
+    << RAD_2_DEG(last_updated_angle_) << std::endl;
 
   // Preparations:
-  Transformation3D R = get_rotation_about_joint();
-  ReferenceFrame3D parent_rf =
-    get_parent_node().get_reference_frame();
-  ReferenceFrame3D child_rf =
-    get_child_node().get_reference_frame();
-  const Transformation3D& tr_parent_to_global =
-    parent_rf.get_transformation_to();
-  const Transformation3D& tr_global_to_parent =
-    parent_rf.get_transformation_from();
+  Transformation3D R = get_rotation_about_joint_in_parent_coordinates();
   const Transformation3D& tr_child_to_parent_old =
     get_transformation_child_to_parent_no_checks();
-  RigidBody child_rb = RigidBody(get_child_node().get_particle());
 
   // Actual stuff - propagate parent transformation + rotation to child:
-  std::cout << "old child to parent " << tr_child_to_parent_old << std::endl;
-  std::cout << "old parent to global " << tr_parent_to_global << std::endl;
-  std::cout << "old ref frame " << child_rf.get_transformation_to()
-            << std::endl;
-  std::cout << "rotation " << R << std::endl;
-  Transformation3D tr_child_to_global_new =
-    R * tr_parent_to_global * tr_child_to_parent_old;
-  std::cout << "new ref frame " << tr_child_to_global_new << std::endl;
-  // TODO: should we add a set_reference_frame_lazy() variant? this
-  // has effects that need to be thought through
-  child_rb.set_reference_frame
-    ( ReferenceFrame3D( tr_child_to_global_new ) );
+  Transformation3D tr_child_to_parent_new =
+    R * tr_child_to_parent_old;
   last_updated_angle_ = angle_;
   const_cast<RevoluteJoint*>(this)
     ->set_transformation_child_to_parent_no_checks
-    (tr_global_to_parent * tr_child_to_global_new);
+    ( tr_child_to_parent_new );
 
-  // IMP_USAGE_CHECK( angle_ == get_current_angle_from_cartesian_witnesses() ,
-  //                  "It was expected that the actual angle "
-  //                  << get_current_angle_from_cartesian_witnesses()
-  //                  << " and the set angle " << angle_
-  //                  << " would be equal");
+  Joint::update_child_node_reference_frame();
+
+
+  std::cout << "new child_to_parent trans " << tr_child_to_parent_new << std::endl;
 }
 
 
