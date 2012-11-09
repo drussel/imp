@@ -23,12 +23,12 @@ IMP_SWIG_OBJECT( IMP::kinematics, CompositeJoint, CompositeJoints);
 /* Wrap our own classes. Each header in the module should be listed here with a
    %include line.*/
 
-#%include "IMP/kinematics/Joint.h"
-#%include "IMP/kinematics/TransformationJoint.h"
-#%include "IMP/kinematics/PrismaticJoint.h"
-#%include "IMP/kinematics/CompositeJoint.h"
-#%include "IMP/kinematics/revolute_joints.h"
-#%include "IMP/kinematics/KinematicForest.h"
+%include "IMP/kinematics/Joint.h"
+%include "IMP/kinematics/TransformationJoint.h"
+%include "IMP/kinematics/PrismaticJoint.h"
+%include "IMP/kinematics/CompositeJoint.h"
+%include "IMP/kinematics/revolute_joints.h"
+%include "IMP/kinematics/KinematicForest.h"
 
 namespace IMP {
   namespace kinematics {
@@ -38,7 +38,7 @@ namespace IMP {
   }
 }
 
-/* Import the function from _randomize.py */
+/* Import python code from inner folders if need be */
 %pythoncode %{
 # from _randomize import *
 %}

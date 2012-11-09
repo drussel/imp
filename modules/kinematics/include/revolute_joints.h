@@ -31,7 +31,8 @@ IMPKINEMATICS_BEGIN_NAMESPACE
 
 class KinematicForest;
 
-inline void nice_print_trans(const IMP::algebra::Transformation3D& T, std::string description)
+inline void nice_print_trans(const IMP::algebra::Transformation3D& T,
+                             std::string description)
 {
   std::pair< IMP::algebra::Vector3D, double > aa;
   aa = IMP::algebra::get_axis_and_angle( T.get_rotation() );

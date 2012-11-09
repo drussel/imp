@@ -75,6 +75,7 @@ public:
 
  protected:
 
+#ifndef SWIG
     /**
        returns the transformation of a vector from the child
        reference frame to the parent reference frame, without any checks
@@ -84,6 +85,7 @@ public:
     get_transformation_child_to_parent_no_checks() const {
     return tr_child_to_parent_;
   }
+#endif
 
 
   /***************** setter methods: ***************/
