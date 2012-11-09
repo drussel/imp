@@ -19,6 +19,7 @@
 #include <IMP/core/internal/dihedral_helpers.h>
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/base/check_macros.h>
+#include <IMP/base/swig_macros.h>
 
 IMPKINEMATICS_BEGIN_NAMESPACE
 
@@ -55,37 +56,34 @@ public:
     return owner_kf_;
   }
 
-#ifndef SWIG
   /**
      returns the transformation of a vector from the child
      reference frame to the parent reference frame in a safe way
      (= after updating internal coordinates if needed)
   */
-  virtual const IMP::algebra::Transformation3D&
+IMP_NO_SWIG(virtual)
+  const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent() const;
 
-#endif
-
   IMP::core::RigidBody  get_parent_node() const
-  { return parent_; }
+    { return parent_; }
 
   IMP::core::RigidBody get_child_node() const
-  { return child_; }
+    { return child_; }
 
 
  protected:
 
-#ifndef SWIG
     /**
        returns the transformation of a vector from the child
        reference frame to the parent reference frame, without any checks
        (= without updating internal coordinates even if needed)
     */
-  virtual const IMP::algebra::Transformation3D&
+IMP_NO_SWIG(virtual)
+ const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent_no_checks() const {
     return tr_child_to_parent_;
   }
-#endif
 
 
   /***************** setter methods: ***************/
