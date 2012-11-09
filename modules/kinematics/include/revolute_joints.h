@@ -10,11 +10,12 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_REVOLUTE_JOINTS_H
-#define IMPCORE_REVOLUTE_JOINTS_H
+#ifndef IMPKINEMATICS_REVOLUTE_JOINTS_H
+#define IMPKINEMATICS_REVOLUTE_JOINTS_H
 
-#include "KinematicNode.h"
-#include "Joint.h"
+#include "kinematics_config.h"
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/Joint.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -23,10 +24,10 @@
 #include <IMP/base/check_macros.h>
 
 // TODO: for debug only = remove later
-#define RAD_2_DEG(a) 180*a/IMP::algebra::PI
-#define DEG_2_RAD(a) a*IMP::algebra::PI/180
+#define IMP_RAD_2_DEG(a) 180*a/IMP::algebra::PI
+#define IMP_DEG_2_RAD(a) a*IMP::algebra::PI/180
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 class KinematicForest;
 
@@ -35,7 +36,7 @@ inline void nice_print_trans(const IMP::algebra::Transformation3D& T, std::strin
   std::pair< IMP::algebra::Vector3D, double > aa;
   aa = IMP::algebra::get_axis_and_angle( T.get_rotation() );
   std::cout << description << "axis = " << aa.first
-            << "; angle = " << RAD_2_DEG(aa.second) << " deg"
+            << "; angle = " << IMP_RAD_2_DEG(aa.second) << " deg"
                   << "; translation = " << T.get_translation()
             << std::endl;
 }
@@ -45,7 +46,7 @@ inline void nice_print_trans(const IMP::algebra::Transformation3D& T, std::strin
 
 
 /** Abstract class for all revolute joints **/
-class IMPCOREEXPORT RevoluteJoint :
+class IMPKINEMATICSEXPORT RevoluteJoint :
 public Joint{
  public:
   /**
@@ -55,8 +56,8 @@ public Joint{
      @param parent,child kinematic nodes upstream and downstream (resp.) of this
                     joint
   **/
- RevoluteJoint(RigidBody parent,
-               RigidBody child);
+ RevoluteJoint(IMP::core::RigidBody parent,
+               IMP::core::RigidBody child);
 
 
   // pure virtual dtr to declare as abstrat class for SWIG
@@ -144,8 +145,9 @@ public Joint{
   IMP::algebra::Transformation3D
     get_rotation_about_joint_in_parent_coordinates() const
     {
-      std::cout << "get_rotation " << RAD_2_DEG(angle_) << ", last_updated_angle = "
-                << RAD_2_DEG(last_updated_angle_) << std::endl;
+      std::cout << "get_rotation " << IMP_RAD_2_DEG(angle_)
+                << ", last_updated_angle = "
+                << IMP_RAD_2_DEG(last_updated_angle_) << std::endl;
       // rotate by the difference from last_updated_angle_
       IMP::algebra::Rotation3D R =
         IMP::algebra::get_rotation_about_normalized_axis
@@ -181,7 +183,7 @@ public Joint{
 /********************** DihedralAngleRevoluteJoint ***************/
 
 
-class  IMPCOREEXPORT
+class  IMPKINEMATICSEXPORT
 DihedralAngleRevoluteJoint : public RevoluteJoint{
  public:
   /**
@@ -199,8 +201,8 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
            and also that d is not upstream of it
      */
   DihedralAngleRevoluteJoint
-    (RigidBody parent, RigidBody child,
-     XYZ a, XYZ b, XYZ c, XYZ d);
+    (IMP::core::RigidBody parent, IMP::core::RigidBody child,
+     IMP::core::XYZ a, IMP::core::XYZ b, IMP::core::XYZ c, IMP::core::XYZ d);
 
  protected:
   /**
@@ -225,7 +227,8 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
       - rf_parent.get_local_coordinates( b_.get_coordinates() );
     rot_axis_unit_vector_ = v.get_unit_vector();
     std::cout << "local axis of rot unnorm " << v
-              <<  " global axis " << c_.get_coordinates() - b_.get_coordinates() << std::endl;
+              <<  " global axis " << c_.get_coordinates() - b_.get_coordinates()
+              << std::endl;
   };
 
   /**
@@ -238,15 +241,15 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
 
 
  private:
-    XYZ a_;
-    XYZ b_;
-    XYZ c_;
-    XYZ d_;
+    IMP::core::XYZ a_;
+    IMP::core::XYZ b_;
+    IMP::core::XYZ c_;
+    IMP::core::XYZ d_;
 };
 
 /********************** BondAngleRevoluteJoint ***************/
 
-class  IMPCOREEXPORT BondAngleRevoluteJoint : public RevoluteJoint{
+class  IMPKINEMATICSEXPORT BondAngleRevoluteJoint : public RevoluteJoint{
  public:
   /**
      constructs a joint that controls the angle a-b-c. The joint
@@ -264,8 +267,8 @@ class  IMPCOREEXPORT BondAngleRevoluteJoint : public RevoluteJoint{
            it or inside it.
   */
   BondAngleRevoluteJoint
-    (RigidBody parent, RigidBody child,
-     XYZ a, XYZ b, XYZ c);
+    (IMP::core::RigidBody parent, IMP::core::RigidBody child,
+     IMP::core::XYZ a, IMP::core::XYZ b, IMP::core::XYZ c);
 
  protected:
 
@@ -302,9 +305,9 @@ class  IMPCOREEXPORT BondAngleRevoluteJoint : public RevoluteJoint{
   };
 
  private:
-    XYZ a_;
-    XYZ b_;
-    XYZ c_;
+    IMP::core::XYZ a_;
+    IMP::core::XYZ b_;
+    IMP::core::XYZ c_;
 };
 
 
@@ -313,6 +316,6 @@ IMP_OBJECTS(RevoluteJoint, RevoluteJoints);
 IMP_OBJECTS(DihedralAngleRevoluteJoint, DihedralAngleRevoluteJoints);
 IMP_OBJECTS(BondAngleRevoluteJoint, BondAngleRevolteJoints);
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_REVOLUTE_JOINTS_H */
+#endif  /* IMPKINEMATICS_REVOLUTE_JOINTS_H */

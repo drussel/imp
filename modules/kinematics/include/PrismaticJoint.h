@@ -6,11 +6,12 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_PRISMATIC_JOINT_H
-#define IMPCORE_PRISMATIC_JOINT_H
+#ifndef IMPKINEMATICS_PRISMATIC_JOINT_H
+#define IMPKINEMATICS_PRISMATIC_JOINT_H
 
-#include "KinematicNode.h"
-#include "Joint.h"
+#include "kinematics_config.h"
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/Joint.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -18,14 +19,14 @@
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/base/check_macros.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 /********************** PrismaticJoint ***************/
 
 /**
    joint in which too rigid bodies may slide along a line
 */
-class IMPCOREEXPORT PrismaticJoint : public Joint{
+class IMPKINEMATICSEXPORT PrismaticJoint : public Joint{
  public:
   /********* Constructors ********/
   /**
@@ -33,15 +34,15 @@ class IMPCOREEXPORT PrismaticJoint : public Joint{
      to b, which serve as witnesses for the joint transformation
      (a is associated with the parent and b with the child)
   */
- PrismaticJoint(RigidBody parent, RigidBody child,
-                XYZ a, XYZ b);
+ PrismaticJoint(IMP::core::RigidBody parent, IMP::core::RigidBody child,
+                IMP::core::XYZ a, IMP::core::XYZ b);
 
   /**
      Create a prismatic joint whose axis of translation is between
      the reference framess of parent and child, who also
      serve as witnesses for the joint transformation
   */
- PrismaticJoint(RigidBody parent, RigidBody child) :
+ PrismaticJoint(IMP::core::RigidBody parent, IMP::core::RigidBody child) :
   PrismaticJoint(parent, child, parent, child) {  }
 
  public:
@@ -78,14 +79,14 @@ class IMPCOREEXPORT PrismaticJoint : public Joint{
 
  private:
 
-  XYZ a_; // prismatic joint from point, associated with parent
-  XYZ b_; // prismatic joint to point, associated with child
+  IMP::core::XYZ a_; // prismatic joint from point, associated with parent
+  IMP::core::XYZ b_; // prismatic joint to point, associated with child
   double l_; // the length of the prismatic joint
 
 };
 
 IMP_OBJECTS(PrismaticJoint, PrismaticJoints);
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_PRISMATIC_JOINT_H */
+#endif  /* IMPKINEMATICS_PRISMATIC_JOINT_H */

@@ -10,21 +10,21 @@
  */
 
 
-#include "KinematicForest.h"
-#include "KinematicNode.h"
-#include "revolute_joints.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/revolute_joints.h>
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/algebra/Transformation3D.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
 /********************** Revolute Joint ***************/
 
 RevoluteJoint::RevoluteJoint
-( RigidBody parent, RigidBody child  )
+( IMP::core::RigidBody parent, IMP::core::RigidBody child  )
   : Joint(parent, child)
 {
   //      ss=new RevoluteJointScoreState(p, ...); // TODO: implement that?
@@ -95,8 +95,9 @@ RevoluteJoint::set_angle(double angle) {
 
 DihedralAngleRevoluteJoint
 ::DihedralAngleRevoluteJoint
-(RigidBody parent, RigidBody child,
- XYZ a, XYZ b, XYZ c, XYZ d) :
+(IMP::core::RigidBody parent, IMP::core::RigidBody child,
+ IMP::core::XYZ a, IMP::core::XYZ b,
+ IMP::core::XYZ c, IMP::core::XYZ d) :
   RevoluteJoint(parent, child),
   a_(a), b_(b), c_(c), d_(d) // TODO: are b_ and c_ redundant?
 {
@@ -121,8 +122,8 @@ DihedralAngleRevoluteJoint
 // control the bond angle a-b-c
 BondAngleRevoluteJoint
 ::BondAngleRevoluteJoint
-(RigidBody parent, RigidBody child,
- XYZ a, XYZ b, XYZ c) :
+(IMP::core::RigidBody parent, IMP::core::RigidBody child,
+ IMP::core::XYZ a, IMP::core::XYZ b, IMP::core::XYZ c) :
   RevoluteJoint(parent, child),
   a_(a), b_(b), c_(c)
 {
@@ -141,4 +142,4 @@ BondAngleRevoluteJoint
 
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

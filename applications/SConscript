@@ -1,7 +1,6 @@
 Import('env')
 
-applications=[ 'kinematic',
-               'EMageFit',
+applications=[ 'EMageFit',
                 'foxs',
               'integrative_docking',
               'saxs_tools',

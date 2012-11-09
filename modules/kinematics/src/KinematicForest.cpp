@@ -10,15 +10,15 @@
  */
 
 #include <IMP/Model.h>
-#include "KinematicForest.h"
+#include <IMP/kinematics/KinematicForest.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/base/warning_macros.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
 KinematicForest::KinematicForest(Model* m) :
-  Object("IMP_CORE_KINEMATIC_FOREST"),
+  Object("IMP_KINEMATICS_KINEMATIC_FOREST"),
   m_(m),
   is_internal_coords_updated_(true),
   is_external_coords_updated_(true)
@@ -27,7 +27,7 @@ KinematicForest::KinematicForest(Model* m) :
 
 // build an entire tree from an existing hierarchy
 KinematicForest::KinematicForest(Model* m, IMP::atom::Hierarchy hierarchy) :
-  Object("IMP_CORE_KINEMATIC_FOREST"),
+  Object("IMP_KINEMATICS_KINEMATIC_FOREST"),
   m_(m){
   // TODO: implement
   IMP_NOT_IMPLEMENTED;
@@ -40,8 +40,8 @@ void
 KinematicForest::add_edge(Joint* joint)
 {
   joint->set_owner_kf( this );
-  RigidBody parent_rb = joint->get_parent_node();
-  RigidBody child_rb = joint->get_child_node();
+  IMP::core::RigidBody parent_rb = joint->get_parent_node();
+  IMP::core::RigidBody child_rb = joint->get_child_node();
   KinematicNode parent_kn, child_kn;
   // decorate parent and store here
   {
@@ -105,4 +105,4 @@ void KinematicForest::do_show(std::ostream & os) const
 }
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

@@ -9,14 +9,14 @@
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/core/rigid_bodies.h>
-#include "KinematicForest.h"
 #include <IMP/core/rigid_bodies.h>
-#include "PrismaticJoint.h"
-#include "TransformationJoint.h"
-#include "revolute_joints.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/PrismaticJoint.h>
+#include <IMP/kinematics/TransformationJoint.h>
+#include <IMP/kinematics/revolute_joints.h>
 #include <string>
 
-using namespace IMP::core;
+using namespace IMP::kinematics;
 
 IMP::core::RigidBody create_rigid_particle
 (IMP::Model* m, double x, double y, double z)
@@ -107,24 +107,24 @@ void test_pdb_model(IMP::Model* model,
   }
   std::cout << std::endl;
 
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, phi1,
+  IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, phi1,
           (rbs[0], rbs[1],
            rbs[0].get_member(2) /*C*/, rbs[1].get_member(0) /*N*/,
            rbs[1].get_member(1) /*CA*/, rbs[1].get_member(2) /*C*/) );
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, phi2,
+  IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, phi2,
           (rbs[1], rbs[2],
            rbs[1].get_member(2) /*C*/, rbs[2].get_member(0) /*N*/,
            rbs[2].get_member(1) /*CA*/, rbs[2].get_member(2) /*C*/) );
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, phi3,
+  IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, phi3,
           (rbs[2], rbs[3],
            rbs[2].get_member(2) /*C*/, rbs[3].get_member(0) /*N*/,
            rbs[3].get_member(1) /*CA*/, rbs[3].get_member(2) /*C*/) );
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, phi4,
+  IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, phi4,
           (rbs[3], rbs[4],
            rbs[3].get_member(2) /*C*/, rbs[4].get_member(0) /*N*/,
            rbs[4].get_member(1) /*CA*/, rbs[4].get_member(2) /*C*/) );
 
-  IMP_NEW(IMP::core::KinematicForest, kf, (model) );
+  IMP_NEW(IMP::kinematics::KinematicForest, kf, (model) );
   kf->add_edge(phi1);
   kf->add_edge(phi2);
   kf->add_edge(phi3);
@@ -173,10 +173,10 @@ void test_model_with_rbs(IMP::Model* model,
             << rbs[1].get_coordinates()
             << std::endl;
 
-  IMP_NEW(IMP::core::PrismaticJoint, pj, (rbs[0], rbs[1]));
-  IMP_NEW(IMP::core::TransformationJoint, tj, (rbs[1], rbs[2]));
+  IMP_NEW(IMP::kinematics::PrismaticJoint, pj, (rbs[0], rbs[1]));
+  IMP_NEW(IMP::kinematics::TransformationJoint, tj, (rbs[1], rbs[2]));
 
-  IMP_NEW(IMP::core::KinematicForest, kf, (model) );
+  IMP_NEW(IMP::kinematics::KinematicForest, kf, (model) );
   kf->add_edge(pj);
   kf->add_edge(tj);
 
@@ -349,7 +349,7 @@ void print_transformation
 }
 
 void print_info(KinematicForest* kf,
-                RigidBodies& rbs,
+                IMP::core::RigidBodies& rbs,
                 PrismaticJoint* pj0,
                 DihedralAngleRevoluteJoint* dj1,
                 DihedralAngleRevoluteJoint* dj2,
@@ -414,14 +414,14 @@ void test_dihedral
                    << rbs.size(), ValueException)
 
   // joints
-  IMP_NEW(IMP::core::PrismaticJoint, pj0, (rbs[0], rbs[1]));
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, dj1,
+  IMP_NEW(IMP::kinematics::PrismaticJoint, pj0, (rbs[0], rbs[1]));
+  IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, dj1,
           (rbs[1], rbs[2], rbs[0], rbs[1], rbs[2], rbs[3]));
-  IMP_NEW(IMP::core::DihedralAngleRevoluteJoint, dj2,
+  IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, dj2,
           (rbs[2], rbs[3], rbs[1], rbs[2], rbs[3], rbs[4]));
-  IMP_NEW(IMP::core::PrismaticJoint, pj3, (rbs[3], rbs[4]));
+  IMP_NEW(IMP::kinematics::PrismaticJoint, pj3, (rbs[3], rbs[4]));
   // forest
-  IMP_NEW(IMP::core::KinematicForest, kf, (model) );
+  IMP_NEW(IMP::kinematics::KinematicForest, kf, (model) );
   kf->add_edge(pj0);
   kf->add_edge(dj1);
   kf->add_edge(dj2);

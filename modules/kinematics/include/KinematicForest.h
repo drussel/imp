@@ -9,13 +9,14 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_KINEMATIC_FOREST_H
-#define IMPCORE_KINEMATIC_FOREST_H
+#ifndef IMPKINEMATICS_KINEMATIC_FOREST_H
+#define IMPKINEMATICS_KINEMATIC_FOREST_H
 
+#include "kinematics_config.h"
 #include <IMP/Model.h>
-#include "KinematicNode.h"
-#include "Joint.h"
-#include "TransformationJoint.h"
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/Joint.h>
+#include <IMP/kinematics/TransformationJoint.h>
 #include <IMP/base/Object.h>
 #include <IMP/Decorator.h>
 #include <IMP/compatibility/set.h>
@@ -27,10 +28,10 @@
 #include <queue>
 #include <algorithm>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
-class IMPCOREEXPORT KinematicForest
+class IMPKINEMATICSEXPORT KinematicForest
 : public base::Object // or ModelObject?
 {
  public:
@@ -247,6 +248,6 @@ IMP_OBJECT(KinematicForest);
 IMP_OBJECTS(KinematicForest, KinematicForests);
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_KINEMATIC_FOREST_H */
+#endif  /* IMPKINEMATICS_KINEMATIC_FOREST_H */

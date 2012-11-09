@@ -8,11 +8,12 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_TRANSFORMATION_JOINT_H
-#define IMPCORE_TRANSFORMATION_JOINT_H
+#ifndef IMPKINEMATICS_TRANSFORMATION_JOINT_H
+#define IMPKINEMATICS_TRANSFORMATION_JOINT_H
 
-#include "KinematicNode.h"
-#include "Joint.h"
+#include "kinematics_config.h"
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/Joint.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -20,7 +21,7 @@
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/base/check_macros.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
 
@@ -30,11 +31,11 @@ IMPCORE_BEGIN_NAMESPACE
 /* /\** A joint with a completely non-constrained transformation */
 /*     between parent and child nodes reference frames */
 /* *\/ */
-class  IMPCOREEXPORT
+class  IMPKINEMATICSEXPORT
 TransformationJoint : public Joint{
  public:
-  TransformationJoint(RigidBody parent,
-                      RigidBody child);
+  TransformationJoint(IMP::core::RigidBody parent,
+                      IMP::core::RigidBody child);
 
   /**
      Sets the transfromation from parent to child reference frame,
@@ -50,6 +51,6 @@ TransformationJoint : public Joint{
 
 IMP_OBJECTS(TransformationJoint, TransformationJoints);
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_TRANSFORMATION_JOINT_H */
+#endif  /* IMPKINEMATICS_TRANSFORMATION_JOINT_H */

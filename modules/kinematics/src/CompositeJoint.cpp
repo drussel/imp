@@ -8,22 +8,22 @@
  */
 
 
-#include "KinematicForest.h"
-#include "KinematicNode.h"
-#include "CompositeJoint.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/CompositeJoint.h>
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/algebra/Transformation3D.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
 
 /********************** CompositeJoint ***************/
 
 CompositeJoint::CompositeJoint
-(RigidBody parent, RigidBody child, Joints joints )
+(IMP::core::RigidBody parent, IMP::core::RigidBody child, Joints joints )
   : TransformationJoint(parent, child)
 {
   set_joints( joints );
@@ -63,4 +63,4 @@ void CompositeJoint::update_joint_from_cartesian_witnesses() {
 }
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

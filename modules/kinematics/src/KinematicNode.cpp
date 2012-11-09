@@ -6,13 +6,13 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#include "KinematicForest.h"
-#include "KinematicNode.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/KinematicNode.h>
 #include <IMP/core/rigid_bodies.h>
-#include "Joint.h"
+#include <IMP/kinematics/Joint.h>
 #include <IMP/exception.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
 
@@ -27,15 +27,15 @@ KinematicNode::setup_particle
     IMP_THROW( "Kinematic node must have a valid owner kinematic forest",
                IMP::ValueException );
   }
-  if ( RigidMember::particle_is_instance(p) ) {
+  if ( IMP::core::RigidMember::particle_is_instance(p) ) {
     // see also RigidBody::add_member
     IMP_THROW("RigidMemer cannot be set as KinematicNode at this point,"
               << " in order to guarantee coherent coordinates update",
               IMP::ValueException);
   }
 
-  if ( !RigidBody::particle_is_instance(p) ) {
-    RigidBody::setup_particle(p, ParticlesTemp() );
+  if ( ! IMP::core::RigidBody::particle_is_instance(p) ) {
+    IMP::core::RigidBody::setup_particle(p, ParticlesTemp() );
   }
   p->get_model()->add_attribute(get_owner_key(),
                                 p->get_index(),
@@ -125,4 +125,4 @@ KinematicNode::set_in_joint(Joint* j)
 }
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

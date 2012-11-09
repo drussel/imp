@@ -8,20 +8,20 @@
  */
 
 
-#include "KinematicForest.h"
-#include "KinematicNode.h"
-#include "TransformationJoint.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/TransformationJoint.h>
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/algebra/Transformation3D.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 /********************** Transformation Joint ***************/
 
 TransformationJoint::TransformationJoint
-(RigidBody parent, RigidBody child)
+(IMP::core::RigidBody parent, IMP::core::RigidBody child)
   :  Joint(parent, child)
 {
 }
@@ -42,4 +42,4 @@ TransformationJoint::set_transformation_child_to_parent
 }
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

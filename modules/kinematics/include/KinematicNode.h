@@ -6,15 +6,16 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_KINEMATIC_NODE_H
-#define IMPCORE_KINEMATIC_NODE_H
+#ifndef IMPKINEMATICS_KINEMATIC_NODE_H
+#define IMPKINEMATICS_KINEMATIC_NODE_H
 
+#include "kinematics_config.h"
 #include <IMP/core/rigid_bodies.h>
-#include "Joint.h"
+#include <IMP/kinematics/Joint.h>
 
 #include <IMP/exception.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 class KinematicForest;
 
@@ -25,10 +26,10 @@ class KinematicForest;
    A KinematicNode is a rigid body that is connected by a joint to other
    rigid bodies
 */
-class IMPCOREEXPORT KinematicNode : public RigidBody{
+class IMPKINEMATICSEXPORT KinematicNode : public IMP::core::RigidBody{
   friend class KinematicForest;
 
-  IMP_DECORATOR(KinematicNode, RigidBody);
+  IMP_DECORATOR(KinematicNode, IMP::core::RigidBody);
 
  public:
 
@@ -72,19 +73,19 @@ class IMPCOREEXPORT KinematicNode : public RigidBody{
 
   static ObjectKey get_owner_key()
   {
-    static ObjectKey k("core_kinematic_node_owner");
+    static ObjectKey k("kinematics__kinematic_node_owner");
     return k;
   }
 
   static ObjectKey get_in_joint_key()
   {
-    static ObjectKey k("core_kinematic_node_in_joint");
+    static ObjectKey k("kinematics__kinematic_node_in_joint");
     return k;
   }
 
   static ObjectsKey get_out_joints_key()
   {
-    static ObjectsKey k("core_kinematic_node_out_joint");
+    static ObjectsKey k("kinematics__kinematic_node_out_joint");
     return k;
   }
 
@@ -137,8 +138,8 @@ KinematicNode::get_out_joints() {
 
 
 //IMP_DECORATORS_DEF(KinematicNode, KinematicNodes);
-IMP_DECORATORS(KinematicNode, KinematicNodes, RigidBody);
+IMP_DECORATORS(KinematicNode, KinematicNodes, IMP::core::RigidBody);
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_KINEMATIC_NODE_H */
+#endif  /* IMPKINEMATICS_KINEMATIC_NODE_H */

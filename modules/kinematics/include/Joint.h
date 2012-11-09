@@ -8,10 +8,11 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_JOINT_H
-#define IMPCORE_JOINT_H
+#ifndef IMPKINEMATICS_JOINT_H
+#define IMPKINEMATICS_JOINT_H
 
-#include "KinematicNode.h"
+#include "kinematics_config.h"
+#include <IMP/kinematics/KinematicNode.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -19,7 +20,7 @@
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/base/check_macros.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 class KinematicForest;
 
@@ -28,7 +29,7 @@ class KinematicForest;
     tree.
     // TODO: make abstract
 */
-class  IMPCOREEXPORT Joint
+class  IMPKINEMATICSEXPORT Joint
 : public IMP::base::Object
 {
   friend class KinematicForest;
@@ -44,7 +45,7 @@ public:
      @param child rigid body downstream of this joint
      @note we currently assume that a parent cannot be switched
    */
-  Joint(RigidBody parent, RigidBody child);
+  Joint(IMP::core::RigidBody parent, IMP::core::RigidBody child);
 
   /***************** getter methods: ***************/
 
@@ -65,10 +66,10 @@ public:
 
 #endif
 
-  RigidBody  get_parent_node() const
+  IMP::core::RigidBody  get_parent_node() const
   { return parent_; }
 
-  RigidBody get_child_node() const
+  IMP::core::RigidBody get_child_node() const
   { return child_; }
 
 
@@ -127,14 +128,14 @@ public:
   virtual void update_joint_from_cartesian_witnesses();
 
 private:
-    RigidBody parent_;
-    RigidBody child_;
-    IMP::algebra::Transformation3D tr_child_to_parent_;
-    KinematicForest* owner_kf_; // the tree that manages updates to this joint
+  IMP::core::RigidBody parent_;
+  IMP::core::RigidBody child_;
+  IMP::algebra::Transformation3D tr_child_to_parent_;
+  KinematicForest* owner_kf_; // the tree that manages updates to this joint
 };
 
 IMP_OBJECTS(Joint, Joints);
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_JOINT_H */
+#endif  /* IMPKINEMATICS_JOINT_H */

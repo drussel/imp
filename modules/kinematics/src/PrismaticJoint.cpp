@@ -7,23 +7,23 @@
  */
 
 #include <IMP/core/rigid_bodies.h>
-#include "KinematicForest.h"
-#include "KinematicNode.h"
-#include "PrismaticJoint.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/PrismaticJoint.h>
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/algebra/Transformation3D.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 
 
 /********************** Prismatic Joint ***************/
 
 PrismaticJoint::PrismaticJoint
-(RigidBody parent, RigidBody child,
- XYZ a, XYZ b) :
+(IMP::core::RigidBody parent, IMP::core::RigidBody child,
+ IMP::core::XYZ a, IMP::core::XYZ b) :
   Joint(parent, child), a_(a), b_(b)
 {
   update_joint_from_cartesian_witnesses();
@@ -85,4 +85,4 @@ PrismaticJoint::update_joint_from_cartesian_witnesses()
 
 
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

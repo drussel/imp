@@ -8,21 +8,21 @@
  */
 
 
-#include "KinematicForest.h"
-#include "KinematicNode.h"
-#include "Joint.h"
+#include <IMP/kinematics/KinematicForest.h>
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/Joint.h>
 #include <IMP/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/algebra/Transformation3D.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 /********************** Joint ***************/
 
 Joint::Joint
-(RigidBody parent, RigidBody child) :
-  Object("IMP_CORE_JOINT"),
+(IMP::core::RigidBody parent, IMP::core::RigidBody child) :
+  Object("IMP_KINEMATICS_JOINT"),
   parent_(parent), child_(child), owner_kf_(nullptr)
 {
   update_joint_from_cartesian_witnesses();
@@ -56,7 +56,7 @@ Joint::update_child_node_reference_frame() const
 
   // TODO: should we add a set_reference_frame_lazy() variant? this
   // has effects that need to be thought through
-  RigidBody child_rb = RigidBody(child_.get_particle());
+  IMP::core::RigidBody child_rb = IMP::core::RigidBody(child_.get_particle());
   child_rb.set_reference_frame
     ( ReferenceFrame3D( tr_child_to_global ) );
   std::cout << "new child ref frame " << tr_child_to_global << std::endl;
@@ -85,4 +85,4 @@ Joint::do_show(std::ostream & os) const
   os << "(Joint " << child_ << " to " << parent_ << ")";
 }
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE

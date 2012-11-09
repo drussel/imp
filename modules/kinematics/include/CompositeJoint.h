@@ -8,11 +8,12 @@
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
-#ifndef IMPCORE_COMPOSITE_JOINT_H
-#define IMPCORE_COMPOSITE_JOINT_H
+#ifndef IMPKINEMATICS_COMPOSITE_JOINT_H
+#define IMPKINEMATICS_COMPOSITE_JOINT_H
 
-#include "KinematicNode.h"
-#include "Joint.h"
+#include "kinematics_config.h"
+#include <IMP/kinematics/KinematicNode.h>
+#include <IMP/kinematics/TransformationJoint.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -20,7 +21,7 @@
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/base/check_macros.h>
 
-IMPCORE_BEGIN_NAMESPACE
+IMPKINEMATICS_BEGIN_NAMESPACE
 
 class KinematicForest;
 
@@ -30,7 +31,7 @@ class KinematicForest;
     A joint that combines several inner joints, acting on the same
     pair of rigid bodies
 */
-class  IMPCOREEXPORT CompositeJoint : public TransformationJoint
+class  IMPKINEMATICSEXPORT CompositeJoint : public TransformationJoint
 {
   /**
      Constructs a composite joint between parent and child,
@@ -46,7 +47,9 @@ class  IMPCOREEXPORT CompositeJoint : public TransformationJoint
                         parent and child as the composite joint.
   */
   CompositeJoint
-    (RigidBody parent, RigidBody child, Joints joints = Joints() );
+    (IMP::core::RigidBody parent,
+     IMP::core::RigidBody child,
+     Joints joints = Joints() );
 
   /**
      adds a joint at the end of the list of joints (closest to the child
@@ -123,6 +126,6 @@ class  IMPCOREEXPORT CompositeJoint : public TransformationJoint
 
 IMP_OBJECTS(CompositeJoint, CompositeJoints);
 
-IMPCORE_END_NAMESPACE
+IMPKINEMATICS_END_NAMESPACE
 
-#endif  /* IMPCORE_COMPOSITE_JOINT_H */
+#endif  /* IMPKINEMATICS_COMPOSITE_JOINT_H */
