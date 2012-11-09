@@ -61,6 +61,8 @@ public:
      reference frame to the parent reference frame in a safe way
      (= after updating internal coordinates if needed)
   */
+  // hack to make it compile on swig - this should be fixed as it might
+  // cause some pathologies
 IMP_NO_SWIG(virtual)
   const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent() const;
@@ -79,7 +81,9 @@ IMP_NO_SWIG(virtual)
        reference frame to the parent reference frame, without any checks
        (= without updating internal coordinates even if needed)
     */
-IMP_NO_SWIG(virtual)
+  // hack to make it compile on swig - this should be fixed as it might
+  // cause some pathologies
+  IMP_NO_SWIG(virtual)
  const IMP::algebra::Transformation3D&
     get_transformation_child_to_parent_no_checks() const {
     return tr_child_to_parent_;
