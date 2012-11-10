@@ -36,10 +36,10 @@ inline void nice_print_trans(const IMP::algebra::Transformation3D& T,
 {
   std::pair< IMP::algebra::Vector3D, double > aa;
   aa = IMP::algebra::get_axis_and_angle( T.get_rotation() );
-  std::cout << description << "axis = " << aa.first
-            << "; angle = " << IMP_RAD_2_DEG(aa.second) << " deg"
-                  << "; translation = " << T.get_translation()
-            << std::endl;
+  IMP_LOG( VERBOSE, description << "axis = " << aa.first
+           << "; angle = " << IMP_RAD_2_DEG(aa.second) << " deg"
+           << "; translation = " << T.get_translation()
+           << std::endl );
 }
 
 
@@ -92,15 +92,15 @@ public Joint{
   double get_angle() const;
 
  protected:
-#ifndef SWIG
+  //#ifndef SWIG
   // in global coordinates
-  IMP::algebra::Vector3D const& get_rot_axis_origin() const
+  const IMP::algebra::Vector3D& get_rot_axis_origin() const
     { return rot_axis_origin_; }
 
   // in global coordinates
-  IMP::algebra::Vector3D const& get_rot_axis_unit_vector() const
+  const IMP::algebra::Vector3D& get_rot_axis_unit_vector() const
     { return rot_axis_unit_vector_; }
-#endif
+  //#endif
 
   /****************** general protected methods ***************/
 
@@ -125,16 +125,14 @@ public Joint{
 
 
   /**
-     Update the stored angle from the four cartesian witnesses given upon
-     construction.
-
-     @note It is assumed that external coordinates are updated before
-           calling this function.
+     Update the joint internal parameters based on external reference frames
+     of witnesses and rigid bodies, assuming external parameters are updated
    */
   virtual void update_joint_from_cartesian_witnesses(){
     update_axis_of_rotation_from_cartesian_witnesses();
     angle_ = get_current_angle_from_cartesian_witnesses();
     last_updated_angle_ = angle_;
+    Joint::update_joint_from_cartesian_witnesses();
   }
 
   /**
@@ -146,9 +144,9 @@ public Joint{
   IMP::algebra::Transformation3D
     get_rotation_about_joint_in_parent_coordinates() const
     {
-      std::cout << "get_rotation " << IMP_RAD_2_DEG(angle_)
-                << ", last_updated_angle = "
-                << IMP_RAD_2_DEG(last_updated_angle_) << std::endl;
+      IMP_LOG( VERBOSE, "get_rotation " << IMP_RAD_2_DEG(angle_)
+               << ", last_updated_angle = "
+               << IMP_RAD_2_DEG(last_updated_angle_) << std::endl );
       // rotate by the difference from last_updated_angle_
       IMP::algebra::Rotation3D R =
         IMP::algebra::get_rotation_about_normalized_axis
@@ -221,15 +219,15 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
     ReferenceFrame3D rf_parent = get_parent_node().get_reference_frame();
     nice_print_trans(rf_parent.get_transformation_to(), "Parent trans: ");
     rot_axis_origin_ = rf_parent.get_local_coordinates( b_.get_coordinates() );
-    std::cout << "global b_ " << b_.get_coordinates()
-              <<  " and local parent b_ " << rot_axis_origin_ << std::endl;
+    IMP_LOG( VERBOSE, "global b_ " << b_.get_coordinates()
+             <<  " and local parent b_ " << rot_axis_origin_ << std::endl);
     Vector3D v =
       rf_parent.get_local_coordinates( c_.get_coordinates() )
       - rf_parent.get_local_coordinates( b_.get_coordinates() );
     rot_axis_unit_vector_ = v.get_unit_vector();
-    std::cout << "local axis of rot unnorm " << v
-              <<  " global axis " << c_.get_coordinates() - b_.get_coordinates()
-              << std::endl;
+    IMP_LOG( VERBOSE, "local axis of rot unnorm " << v
+             <<  " global axis " << c_.get_coordinates() - b_.get_coordinates()
+             << std::endl );
   };
 
   /**

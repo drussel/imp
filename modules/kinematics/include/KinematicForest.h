@@ -97,9 +97,11 @@ IMP_OBJECT(KinematicForest);
   }
 
   void update_all_internal_coordinates(){
+    IMP_LOG(VERBOSE, "updating internal coords needed?" << std::endl);
     if(is_internal_coords_updated_){
       return;
     }
+    IMP_LOG(VERBOSE, "updating!" << std::endl);
     for(unsigned int i = 0; i < joints_.size(); i++){
       joints_[i]->update_joint_from_cartesian_witnesses();
     }

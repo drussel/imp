@@ -131,27 +131,27 @@ void test_pdb_model(IMP::Model* model,
   kf->add_edge(phi4);
   double phi1_init =  phi1->get_angle();
   double phi3_init =  phi3->get_angle();
-  std::cout << "Phi1 " << RAD_2_DEG(phi1->get_angle()) << std::endl;
-  std::cout << "Phi2 " << RAD_2_DEG(phi2->get_angle()) << " transformation "
+  std::cout << "Phi1 " << IMP_RAD_2_DEG(phi1->get_angle()) << std::endl;
+  std::cout << "Phi2 " << IMP_RAD_2_DEG(phi2->get_angle()) << " transformation "
             << phi2-> get_transformation_child_to_parent() <<std::endl;
-  std::cout << "Phi3 " << RAD_2_DEG(phi3->get_angle()) << std::endl;
-  phi1->set_angle(DEG_2_RAD(150.0));
-  phi3->set_angle(DEG_2_RAD(240.0));
+  std::cout << "Phi3 " << IMP_RAD_2_DEG(phi3->get_angle()) << std::endl;
+  phi1->set_angle(IMP_DEG_2_RAD(150.0));
+  phi3->set_angle(IMP_DEG_2_RAD(240.0));
 
   kf->update_all_external_coordinates();
-  std::cout << "Phi1 " << RAD_2_DEG(phi1->get_angle()) << std::endl;
-  std::cout << "Phi2 " << RAD_2_DEG(phi2->get_angle()) << " transformation "
+  std::cout << "Phi1 " << IMP_RAD_2_DEG(phi1->get_angle()) << std::endl;
+  std::cout << "Phi2 " << IMP_RAD_2_DEG(phi2->get_angle()) << " transformation "
             << phi2-> get_transformation_child_to_parent() << std::endl;
-  std::cout << "Phi3 " << RAD_2_DEG(phi3->get_angle()) << std::endl;
+  std::cout << "Phi3 " << IMP_RAD_2_DEG(phi3->get_angle()) << std::endl;
   IMP::atom::write_pdb
     (mhd, "./after_set_phi1_to_120deg.pdb");
   phi1->set_angle(phi1_init);
   phi3->set_angle(phi3_init);
   kf->update_all_external_coordinates();
-  std::cout << "Phi1 " << RAD_2_DEG(phi1->get_angle()) << std::endl;
-  std::cout << "Phi2 " << RAD_2_DEG(phi2->get_angle()) << " transformation "
+  std::cout << "Phi1 " << IMP_RAD_2_DEG(phi1->get_angle()) << std::endl;
+  std::cout << "Phi2 " << IMP_RAD_2_DEG(phi2->get_angle()) << " transformation "
             << phi2-> get_transformation_child_to_parent() << std::endl;
-  std::cout << "Phi3 " << RAD_2_DEG(phi3->get_angle()) << std::endl;
+  std::cout << "Phi3 " << IMP_RAD_2_DEG(phi3->get_angle()) << std::endl;
 
  IMP::atom::write_pdb
     (mhd, "./after_set_phi1_back.pdb");

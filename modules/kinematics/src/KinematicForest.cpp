@@ -47,7 +47,6 @@ KinematicForest::add_edge(Joint* joint)
   {
     Particle* parent_p = parent_rb.get_particle();
     if(!KinematicNode::particle_is_instance( parent_p ) ) {
-      std::cout << "Setting up parent" << std::endl;
       parent_kn = KinematicNode::setup_particle( parent_p, this );
       nodes_.insert( parent_kn );
       roots_.insert( parent_kn );

@@ -45,7 +45,7 @@ Joint::update_child_node_reference_frame() const
   // TODO: make this efficient - indexing? lazy? update flag?
   using namespace IMP::algebra;
 
-  std::cout << "Joint::update_child_node_reference_frame()" << std::endl;
+  IMP_LOG(VERBOSE, "Joint::update_child_node_reference_frame()" << std::endl);
   ReferenceFrame3D parent_rf = parent_.get_reference_frame();
   const Transformation3D& tr_parent_to_global =
     parent_rf.get_transformation_to();
@@ -59,7 +59,7 @@ Joint::update_child_node_reference_frame() const
   IMP::core::RigidBody child_rb = IMP::core::RigidBody(child_.get_particle());
   child_rb.set_reference_frame
     ( ReferenceFrame3D( tr_child_to_global ) );
-  std::cout << "new child ref frame " << tr_child_to_global << std::endl;
+  IMP_LOG( VERBOSE, "new child ref frame " << tr_child_to_global << std::endl );
 }
 
 void

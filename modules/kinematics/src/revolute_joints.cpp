@@ -43,10 +43,10 @@ void
 RevoluteJoint::update_child_node_reference_frame() const
 {
   using namespace IMP::algebra;
-  std::cout
-    << "Updating child node reference frame of RevoluteJoint with angle "
-    << IMP_RAD_2_DEG(angle_) << " and last updated angle "
-    << IMP_RAD_2_DEG(last_updated_angle_) << std::endl;
+  IMP_LOG( VERBOSE,
+           "Updating child node reference frame of RevoluteJoint with angle "
+           << IMP_RAD_2_DEG(angle_) << " and last updated angle "
+           << IMP_RAD_2_DEG(last_updated_angle_) << std::endl );
 
   // Preparations:
   Transformation3D R = get_rotation_about_joint_in_parent_coordinates();
@@ -64,8 +64,8 @@ RevoluteJoint::update_child_node_reference_frame() const
   Joint::update_child_node_reference_frame();
 
 
-  std::cout << "new child_to_parent trans " << tr_child_to_parent_new
-            << std::endl;
+  IMP_LOG( VERBOSE, "new child_to_parent trans " << tr_child_to_parent_new
+           << std::endl);
 }
 
 

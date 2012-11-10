@@ -94,8 +94,12 @@ IMP_NO_SWIG(virtual)
 
  protected:
 
+  /** this sets the kinematic forest that manages this joint,
+      and also declares it as used (\see Object::set_was_used()
+  */
   void set_owner_kf(KinematicForest* kf) {
     owner_kf_ = kf;
+    Object::set_was_used(true);
   }
 
   /**
