@@ -119,5 +119,37 @@ class Test(IMP.test.TestCase):
         self.assert_rb_coords_good( kf, rbs, right_coords )
 
 
+    def test_composite_joint(self):
+        """
+        test a joint that composes a prismatic and dihedral joints
+        """
+#        IMP.set_log_level(IMP.VERBOSE)
+        (m, rbs) = self.create_model_with_rbs( [ [0,0,0], [1,0,0],
+                                                 [1,1,0], [0,1,0] ] )
+        # Construct kinematic forest
+        kf = IMP.kinematics.KinematicForest(m)
+        kf.set_was_used(True)
+        j01 = IMP.kinematics.Joint( rbs[0], rbs[1] )
+        pj12 = IMP.kinematics.PrismaticJoint( rbs[1], rbs[2] )
+        dj12 = IMP.kinematics.DihedralAngleRevoluteJoint( rbs[1], rbs[2],rbs[0],
+                                                          rbs[1],rbs[2],rbs[3] )
+        cj12 = IMP.kinematics.CompositeJoint ( rbs[1], rbs[2], [pj12, dj12] )
+#, [pj12, dj12] )
+        j23 = IMP.kinematics.Joint( rbs[2], rbs[3] )
+        kf.add_edge( j01 )
+        kf.add_edge( cj12 )
+        kf.add_edge( j23 )
+        self.assertAlmostEqual( pj12.get_length(), 1.0, 10)
+        self.assertAlmostEqual( dj12.get_angle(), 0.0, 10)
+        pj12.set_length(10.0);
+        print "After set length(10.0):"
+        for rb in rbs:
+            print kf.get_coordinates_safe(rb)
+        print "After set angle(90.0):"
+        dj12.set_angle(math.pi/2)
+        for rb in rbs:
+            print kf.get_coordinates_safe(rb)
+
+
 if __name__ == '__main__':
     IMP.test.main()
