@@ -64,17 +64,6 @@ public Joint{
   // pure virtual dtr to declare as abstrat class for SWIG
  virtual ~RevoluteJoint() = 0;
 
- /****** general public methods **********/
- public:
-
- /**
-    Updates the reference frame of the child node by this joint
-    angle, assuming the parent reference frame and the witnesses
-    that affect update_axis_of_rotation_from_cartesian_witnesses()
-    are all updated already
-  */
- virtual void update_child_node_reference_frame() const;
-
 
  /******* getter / setter methods *********/
  public:
@@ -105,6 +94,14 @@ public Joint{
   /****************** general protected methods ***************/
 
  protected:
+  /**
+     Updates the reference frame of the child node by this joint
+     angle, assuming the parent reference frame and the witnesses
+     that affect update_axis_of_rotation_from_cartesian_witnesses()
+     are all updated already
+  */
+  virtual void update_child_node_reference_frame() const;
+
   /**
       this protected method updates the rot_axis_unit_vector_
       and rot_axis_origin_ variables based on the cartesian witnesses

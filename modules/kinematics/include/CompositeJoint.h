@@ -13,7 +13,7 @@
 
 #include "kinematics_config.h"
 #include <IMP/kinematics/KinematicNode.h>
-#include <IMP/kinematics/TransformationJoint.h>
+#include <IMP/kinematics/Joint.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
@@ -31,8 +31,9 @@ class KinematicForest;
     A joint that combines several inner joints, acting on the same
     pair of rigid bodies
 */
-class  IMPKINEMATICSEXPORT CompositeJoint : public TransformationJoint
+class IMPKINEMATICSEXPORT CompositeJoint : public Joint
 {
+ public:
   /**
      Constructs a composite joint between parent and child,
      with the specified list of inner joints connecting them.
@@ -57,7 +58,7 @@ class  IMPKINEMATICSEXPORT CompositeJoint : public TransformationJoint
      @note the joint must have the same parent and child as the composite
            joint
    */
-  void add_downstream_joint(IMP::Pointer<Joint> j) {
+  void add_downstream_joint(Joint* j) {
     IMP_ALWAYS_CHECK( j->get_parent_node() == this->get_parent_node() &&
                       j->get_child_node() == this->get_child_node(),
                       "inner joint within a composite joint must have"
@@ -72,7 +73,7 @@ class  IMPKINEMATICSEXPORT CompositeJoint : public TransformationJoint
      @note the joint must have the same parent and child as the composite
            joint
    */
-  void add_upstream_joint(IMP::Pointer<Joint> j) {
+  void add_upstream_joint(Joint* j) {
     IMP_ALWAYS_CHECK( j->get_parent_node() == this->get_parent_node() &&
                       j->get_child_node() == this->get_child_node(),
                       "inner joint within a composite joint must have"
@@ -98,10 +99,22 @@ class  IMPKINEMATICSEXPORT CompositeJoint : public TransformationJoint
      returns the list of inner joints, ordered from the parent
      rigid body downstream to the child rigid body
   */
-  Joints& get_inner_joints() {
+  const Joints& get_inner_joints() const {
     return joints_;
   }
 
+#ifndef SWIG
+  /**
+     returns the list of inner joints, ordered from the parent
+     rigid body downstream to the child rigid body
+  */
+  Joints& get_inner_joints() {
+    return joints_;
+  }
+#endif
+
+
+ protected:
   /**
      update the child node reference frame by applying all the
      inner joints

@@ -41,6 +41,7 @@ CompositeJoint::update_child_node_reference_frame() const
   for(int i = (int)joints_.size() - 1; i >= 0; i++) {
     joints_[i]->update_child_node_reference_frame();
   }
+  Joint::update_child_node_reference_frame();
 }
 
 
@@ -59,7 +60,7 @@ void CompositeJoint::update_joint_from_cartesian_witnesses() {
   for(unsigned int i = 0; i < joints_.size(); i++){
     joints_[i]->update_joint_from_cartesian_witnesses();
   }
-  TransformationJoint::update_joint_from_cartesian_witnesses();
+  Joint::update_joint_from_cartesian_witnesses();
 }
 
 
