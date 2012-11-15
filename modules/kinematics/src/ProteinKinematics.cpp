@@ -9,6 +9,7 @@
 
 #include <IMP/kinematics/ProteinKinematics.h>
 
+#include <IMP/atom/dihedrals.h>
 #include <IMP/exception.h>
 
 #include <boost/graph/connected_components.hpp>
@@ -16,16 +17,70 @@
 IMPKINEMATICS_BEGIN_NAMESPACE
 
 ProteinKinematics::ProteinKinematics(IMP::atom::Hierarchy mhd,
-                          const std::vector<IMP::atom::Atoms>& dihedral_angles):
+                                     bool flexible_backbone,
+                                     bool flexible_side_chains) :
+  ProteinKinematics(mhd,
+                    IMP::atom::get_by_type(mhd, IMP::atom::RESIDUE_TYPE),
+                    std::vector<IMP::atom::Atoms>(),
+                    flexible_backbone,
+                    flexible_side_chains)
+{}
+
+ProteinKinematics::ProteinKinematics(IMP::atom::Hierarchy mhd,
+                          const IMP::atom::Residues& flexible_residues,
+                          const std::vector<IMP::atom::Atoms>& dihedral_angles,
+                          bool flexible_backbone,
+                          bool flexible_side_chains) :
   mhd_(mhd),
   atom_particles_(IMP::atom::get_by_type(mhd_, IMP::atom::ATOM_TYPE)),
   graph_(atom_particles_.size())
 {
+  IMP_NEW(IMP::kinematics::KinematicForest, kf_, (mhd_.get_model()) );
 
+  // 1.
   build_topology_graph();
+
+  // 2. define and mark rotatable dihedral angles
   mark_rotatable_angles(dihedral_angles);
+
+  // get the angles
+  std::vector<IMP::atom::Atoms> phi_angles, psi_angles;
+  std::vector<IMP::atom::Residue> phi_residues, psi_residues;
+  if(flexible_backbone) {
+    for(unsigned int i=0; i<flexible_residues.size(); i++) {
+      IMP::atom::Atoms phi_atoms =
+        IMP::atom::get_phi_dihedral_atoms(flexible_residues[i]);
+      if(phi_atoms.size() == 4) {
+        phi_angles.push_back(phi_atoms);
+        phi_residues.push_back(flexible_residues[i]);
+      }
+
+      IMP::atom::Atoms psi_atoms =
+        IMP::atom::get_psi_dihedral_atoms(flexible_residues[i]);
+      if(psi_atoms.size() == 4) {
+        psi_angles.push_back(psi_atoms);
+        psi_residues.push_back(flexible_residues[i]);
+      }
+    }
+    mark_rotatable_angles(phi_angles);
+    mark_rotatable_angles(psi_angles);
+  }
+  if(flexible_side_chains) {
+    // TODO
+  }
+
+  // 3.
   build_rigid_bodies();
-  add_joints(dihedral_angles);
+
+  // 4. add joints to kf
+  add_dihedral_joints(dihedral_angles);
+  if(flexible_backbone) {
+    add_dihedral_joints(phi_residues, PHI, phi_angles);
+    add_dihedral_joints(psi_residues, PSI, psi_angles);
+  }
+  if(flexible_side_chains) {
+    // TODO
+  }
 }
 
 void ProteinKinematics::build_topology_graph() {
@@ -47,6 +102,7 @@ void ProteinKinematics::build_topology_graph() {
     boost::add_edge(atom_index1, atom_index2, graph_);
   }
 
+  // TODO: add IMP_CHECK on this code
   std::vector<int> component(boost::num_vertices(graph_));
   unsigned int num = boost::connected_components(graph_, &component[0]);
   std::cerr << "CC NUM before removal of rotatable bonds = "
@@ -58,19 +114,19 @@ void ProteinKinematics::mark_rotatable_angles(
   for(unsigned int i=0; i<dihedral_angles.size(); i++) {
 
     // get the ParticleIndex and map it to graph node
-    IMP::Particle* p1 = dihedral_angles[i][1].get_particle();
-    IMP::Particle* p2 = dihedral_angles[i][2].get_particle();
+    IMP::ParticleIndex p1 = dihedral_angles[i][1].get_particle_index();
+    IMP::ParticleIndex p2 = dihedral_angles[i][2].get_particle_index();
     int atom_index1 = 0;
     int atom_index2 = 0;
-    if(particle_index_to_node_map_.find(p1->get_index()) !=
+    if(particle_index_to_node_map_.find(p1) !=
        particle_index_to_node_map_.end()) {
-      atom_index1 = particle_index_to_node_map_[p1->get_index()];
+      atom_index1 = particle_index_to_node_map_[p1];
     } else {
       IMP_THROW("cannot find node index for angle", IMP::ValueException);
     }
-    if(particle_index_to_node_map_.find(p2->get_index()) !=
+    if(particle_index_to_node_map_.find(p2) !=
        particle_index_to_node_map_.end()) {
-      atom_index2 = particle_index_to_node_map_[p2->get_index()];
+      atom_index2 = particle_index_to_node_map_[p2];
     } else {
       IMP_THROW("cannot find node index for angle", IMP::ValueException);
     }
@@ -110,33 +166,82 @@ void ProteinKinematics::build_rigid_bodies() {
   }
 }
 
-void ProteinKinematics::add_joints(
+void ProteinKinematics::add_dihedral_joints(
                       const std::vector<IMP::atom::Atoms>& dihedral_angles) {
   for(unsigned int i=0; i<dihedral_angles.size(); i++) {
-
-    // get the ParticleIndex and map it to graph node
-    IMP::Particle* p1 = dihedral_angles[i][1].get_particle();
-    IMP::Particle* p2 = dihedral_angles[i][2].get_particle();
-
-    if(IMP::core::RigidMember::particle_is_instance(p1) &&
-       IMP::core::RigidMember::particle_is_instance(p2)) {
-      IMP::core::RigidBody rb1 = IMP::core::RigidMember(p1).get_rigid_body();
-      IMP::core::RigidBody rb2 = IMP::core::RigidMember(p2).get_rigid_body();
-
-      IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, joint,
-              (rb1, rb2,
-               IMP::core::XYZ(dihedral_angles[i][0].get_particle()),
-               IMP::core::XYZ(dihedral_angles[i][1].get_particle()),
-               IMP::core::XYZ(dihedral_angles[i][2].get_particle()),
-               IMP::core::XYZ(dihedral_angles[i][3].get_particle())));
-
-      joints_.push_back(joint);
-
-    } else {
-      IMP_THROW("cannot find rigid bodies for dihedral angle",
-                IMP::ValueException);
-    }
+    add_dihedral_joint(IMP::atom::get_residue(dihedral_angles[i][1]),
+                       OTHER,
+                       dihedral_angles[i]);
   }
 }
+
+void ProteinKinematics::add_dihedral_joints(
+                       const std::vector<IMP::atom::Residue>& residues,
+                       ProteinAngleType angle_type,
+                       const std::vector<IMP::atom::Atoms>& dihedral_angles) {
+
+  for(unsigned int i=0; i<dihedral_angles.size(); i++)
+    add_dihedral_joint(residues[i], angle_type, dihedral_angles[i]);
+}
+
+void ProteinKinematics::add_dihedral_joint(const IMP::atom::Residue r,
+                                           ProteinAngleType angle_type,
+                                           const IMP::atom::Atoms& atoms) {
+
+  IMP::Particle* p1 = atoms[1].get_particle();
+  IMP::Particle* p2 = atoms[2].get_particle();
+
+  // TODO: check to DEBUG only check?
+  if(IMP::core::RigidMember::particle_is_instance(p1) &&
+     IMP::core::RigidMember::particle_is_instance(p2)) {
+    IMP::core::RigidBody rb1 = IMP::core::RigidMember(p1).get_rigid_body();
+    IMP::core::RigidBody rb2 = IMP::core::RigidMember(p2).get_rigid_body();
+
+    IMP_NEW(IMP::kinematics::DihedralAngleRevoluteJoint, joint,
+            (rb1, rb2,
+             IMP::core::XYZ(atoms[0].get_particle()),
+             IMP::core::XYZ(atoms[1].get_particle()),
+             IMP::core::XYZ(atoms[2].get_particle()),
+             IMP::core::XYZ(atoms[3].get_particle())));
+
+    joints_.push_back(joint);
+    kf_->add_edge(joint);
+    joint_map_.add_joint(r, angle_type, joint);
+  } else {
+    IMP_THROW("cannot find rigid bodies for dihedral angle",
+              IMP::ValueException);
+  }
+}
+
+
+Joint* ProteinKinematics::AngleToJointMap::get_joint(const IMP::atom::Residue r,
+                                             ProteinAngleType angle_type) const
+{
+  IMP::ParticleIndex pi = r.get_particle_index();
+  IMP_INTERNAL_CHECK(residue_to_joints_.find(pi) != residue_to_joints_.end(),
+                     "Can't find joints for residue\n");
+  const ResidueJoints& res_joints = residue_to_joints_.find(pi)->second;
+  IMP_INTERNAL_CHECK(res_joints.size() > angle_type,
+                     "Can't find a joint for residue");
+  return res_joints[angle_type];
+}
+
+void ProteinKinematics::AngleToJointMap::add_joint(const IMP::atom::Residue r,
+                                                   ProteinAngleType angle_type,
+                                                   Joint* joint) {
+  IMP::ParticleIndex pi = r.get_particle_index();
+  if(residue_to_joints_.find(pi) == residue_to_joints_.end()) {
+    ResidueJoints residue_joints(angle_type+1, nullptr);
+    residue_joints[angle_type] = joint;
+    residue_to_joints_[pi] = residue_joints;
+  } else {
+    ResidueJoints& residue_joints = residue_to_joints_[pi];
+    if(residue_joints.size() <= angle_type) {
+      residue_joints.resize(angle_type+1, nullptr);
+    }
+    residue_joints[angle_type] = joint;
+  }
+}
+
 
 IMPKINEMATICS_END_NAMESPACE

@@ -16,6 +16,7 @@
 
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Atom.h>
+#include <IMP/compatibility/nullptr.h>
 
 #include <vector>
 #include <iostream>
@@ -31,18 +32,21 @@ typedef boost::adjacency_list <boost::vecS,
                                boost::no_property,
     boost::property<boost::edge_color_t, boost::default_color_type> > Graph;
 
-typedef boost::graph_traits<Graph>::vertex_descriptor MyVertex;
-
 class IMPKINEMATICSEXPORT ProteinKinematics {
 public:
   /* Constructors */
 
   // all phi/psi rotatable
-  ProteinKinematics(IMP::atom::Hierarchy mhd);
+  ProteinKinematics(IMP::atom::Hierarchy mhd,
+                    bool flexible_backbone = true,
+                    bool flexible_side_chains = false);
 
   // only torsions from dihedral_angles list are rotatable
   ProteinKinematics(IMP::atom::Hierarchy mhd,
-                    const std::vector<IMP::atom::Atoms>& dihedral_angles);
+                    const IMP::atom::Residues& flexible_residues,
+                    const std::vector<IMP::atom::Atoms>& dihedral_angles,
+                    bool flexible_backbone = true,
+                    bool flexible_side_chains = false);
 
 
   /* Access methods */
@@ -71,20 +75,58 @@ public:
 
 
 private:
+
+  enum ProteinAngleType { PHI, PSI, CHI1, CHI2, CHI3, CHI4, OTHER, TOTAL };
+
   void build_topology_graph();
 
   void mark_rotatable_angles(
                         const std::vector<IMP::atom::Atoms>& dihedral_angles);
 
   void build_rigid_bodies();
-  void add_joints(const std::vector<IMP::atom::Atoms>& dihedral_angles);
+
+  void add_dihedral_joints(
+                          const std::vector<IMP::atom::Atoms>& dihedral_angles);
+
+  void add_dihedral_joints(const std::vector<IMP::atom::Residue>& residues,
+                           ProteinAngleType angle_type,
+                          const std::vector<IMP::atom::Atoms>& dihedral_angles);
+
+  void add_dihedral_joint(const IMP::atom::Residue r,
+                          ProteinAngleType angle_type,
+                          const IMP::atom::Atoms& atoms);
 
   /* Joint access methods */
-  DihedralAngleRevoluteJoint* get_phi_joint(const IMP::atom::Residue r) const;
+  DihedralAngleRevoluteJoint* get_phi_joint(const IMP::atom::Residue r) const {
+    return (DihedralAngleRevoluteJoint*)joint_map_.get_joint(r, PHI);
+  }
 
-  DihedralAngleRevoluteJoint* get_psi_joint(const IMP::atom::Residue r) const;
+  DihedralAngleRevoluteJoint* get_psi_joint(const IMP::atom::Residue r) const {
+    return (DihedralAngleRevoluteJoint*)joint_map_.get_joint(r, PSI);
+  }
 
-  DihedralAngleRevoluteJoints get_joints(const IMP::atom::Residue r) const;
+  //DihedralAngleRevoluteJoints get_joints(const IMP::atom::Residue r) const;
+
+  // map between residue phi/psi and joints
+  class AngleToJointMap {
+  public:
+    // Joint access
+    Joint* get_joint(const IMP::atom::Residue r,
+                     ProteinAngleType angle_type) const;
+
+    // store Joint
+    void add_joint(const IMP::atom::Residue r,
+                   ProteinAngleType angle_type,
+                   Joint* joint);
+
+  private:
+    /* mapping to phi/psi/chi for a specific residue.
+       the joints are stored using ProteinAngleType as an index */
+    typedef std::vector<Joint*> ResidueJoints;
+    /* mapping between residue and its joints */
+    IMP::compatibility::map<IMP::ParticleIndex,
+                            ResidueJoints> residue_to_joints_;
+  };
 
  private:
   // protein hierarchy
@@ -106,7 +148,10 @@ private:
   // joints
   std::vector<DihedralAngleRevoluteJoint*> joints_;
 
+  KinematicForest* kf_;
+
   // map between residue phi/psi and joints
+  AngleToJointMap joint_map_;
 };
 
 IMPKINEMATICS_END_NAMESPACE
