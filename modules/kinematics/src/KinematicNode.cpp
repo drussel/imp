@@ -124,5 +124,8 @@ KinematicNode::set_in_joint(Joint* j)
     }
 }
 
+void KinematicNode::show(std::ostream &out) const {
+  RigidBody::show(out);
+}
 
 IMPKINEMATICS_END_NAMESPACE

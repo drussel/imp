@@ -13,6 +13,7 @@
 #include "kinematics_config.h"
 
 #include <IMP/kinematics/revolute_joints.h>
+#include <IMP/kinematics/KinematicForest.h>
 
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Atom.h>
@@ -65,10 +66,12 @@ public:
 
   void set_phi(const IMP::atom::Residue r, double angle) {
     get_phi_joint(r)->set_angle(angle);
+    kf_->update_all_external_coordinates();
   }
 
   void set_psi(const IMP::atom::Residue r, double angle) {
     get_psi_joint(r)->set_angle(angle);
+    kf_->update_all_external_coordinates();
   }
 
   // TODO: add chi
@@ -148,9 +151,9 @@ private:
   // joints
   std::vector<DihedralAngleRevoluteJoint*> joints_;
 
-  KinematicForest* kf_;
+  IMP::base::Pointer<IMP::kinematics::KinematicForest> kf_;
 
-  // map between residue phi/psi and joints
+  // map between residue phi/psi/chis and joints
   AngleToJointMap joint_map_;
 };
 

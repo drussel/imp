@@ -24,7 +24,7 @@ IMPKINEMATICS_BEGIN_NAMESPACE
 
 CompositeJoint::CompositeJoint
 (IMP::core::RigidBody parent, IMP::core::RigidBody child, Joints joints )
-  : TransformationJoint(parent, child)
+  : Joint(parent, child)
 {
   set_joints( joints );
   update_joint_from_cartesian_witnesses();

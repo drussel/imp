@@ -35,7 +35,7 @@ ProteinKinematics::ProteinKinematics(IMP::atom::Hierarchy mhd,
   atom_particles_(IMP::atom::get_by_type(mhd_, IMP::atom::ATOM_TYPE)),
   graph_(atom_particles_.size())
 {
-  IMP_NEW(IMP::kinematics::KinematicForest, kf_, (mhd_.get_model()) );
+  kf_ = new IMP::kinematics::KinematicForest(mhd_.get_model());
 
   // 1.
   build_topology_graph();
@@ -65,6 +65,11 @@ ProteinKinematics::ProteinKinematics(IMP::atom::Hierarchy mhd,
     mark_rotatable_angles(phi_angles);
     mark_rotatable_angles(psi_angles);
   }
+
+  std::vector<IMP::atom::Atoms> chi1_angles, chi2_angles,
+    chi3_angles, chi4_angles;
+  std::vector<IMP::atom::Residue> chi1_residues, chi2_residues,
+    chi3_residues, chi4_residues;
   if(flexible_side_chains) {
     // TODO
   }
@@ -79,8 +84,13 @@ ProteinKinematics::ProteinKinematics(IMP::atom::Hierarchy mhd,
     add_dihedral_joints(psi_residues, PSI, psi_angles);
   }
   if(flexible_side_chains) {
-    // TODO
+    add_dihedral_joints(chi1_residues, CHI1, chi1_angles);
+    add_dihedral_joints(chi2_residues, CHI2, chi2_angles);
+    add_dihedral_joints(chi3_residues, CHI3, chi3_angles);
+    add_dihedral_joints(chi4_residues, CHI4, chi4_angles);
   }
+
+  std::cerr << joints_.size() << " joints were constructed " << std::endl;
 }
 
 void ProteinKinematics::build_topology_graph() {
@@ -164,6 +174,7 @@ void ProteinKinematics::build_rigid_bodies() {
     rbd.set_coordinates_are_optimized(true);
     rbs_.push_back(rbd);
   }
+  std::cerr << rbs_.size() << " rigid bodies were created " << std::endl;
 }
 
 void ProteinKinematics::add_dihedral_joints(
