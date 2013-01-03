@@ -30,20 +30,9 @@ SingletonContainerSet
   set_singleton_containers(in);
 }
 
-
-bool
-SingletonContainerSet
-::get_contains_particle(Particle* vt) const {
-  for (SingletonContainerConstIterator it= singleton_containers_begin();
-       it != singleton_containers_end(); ++it) {
-    if ((*it)->get_contains_particle(vt)) return true;
-  }
-  return false;
-}
-
 void SingletonContainerSet::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_particles()
+  out << get_number_of_singleton_containers()
       << " containers" << std::endl;
 }
 
@@ -58,11 +47,11 @@ ParticleIndexes SingletonContainerSet::get_indexes() const {
   return sum;
 }
 
-ParticleIndexes SingletonContainerSet::get_all_possible_indexes() const {
+ParticleIndexes SingletonContainerSet::get_range_indexes() const {
   ParticleIndexes sum;
   for (SingletonContainerConstIterator it= singleton_containers_begin();
        it != singleton_containers_end(); ++it) {
-    ParticleIndexes cur=(*it)->get_all_possible_indexes();
+    ParticleIndexes cur=(*it)->get_range_indexes();
     sum.insert(sum.end(), cur.begin(), cur.end());
   }
   return sum;
@@ -75,54 +64,34 @@ IMP_LIST_IMPL(SingletonContainerSet,
               SingletonContainers);
 
 
-void SingletonContainerSet::apply(const SingletonModifier *sm) const {
+void SingletonContainerSet::do_apply(const SingletonModifier *sm) const {
   for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i) {
     get_singleton_container(i)->apply(sm);
   }
 }
 
-void SingletonContainerSet::apply(const SingletonDerivativeModifier *sm,
-                               DerivativeAccumulator &da) const {
+ParticleIndexes SingletonContainerSet::get_all_possible_indexes() const {
+  ParticleIndexes ret;
   for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i) {
-    get_singleton_container(i)->apply(sm, da);
-  }
-}
-
-double SingletonContainerSet::evaluate(const SingletonScore *s,
-                                       DerivativeAccumulator *da) const {
-  return template_evaluate(s, da);
-}
-
-double SingletonContainerSet::evaluate_if_good(const SingletonScore *s,
-                                               DerivativeAccumulator *da,
-                                               double max) const {
-  return template_evaluate_if_good(s, da, max);
-}
-
-
-ParticlesTemp SingletonContainerSet::get_all_possible_particles() const {
-  ParticlesTemp ret;
-  for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i) {
-    ParticlesTemp cur= get_singleton_container(i)
-        ->get_all_possible_particles();
-    ret+=cur;
+    ret+= get_singleton_container(i)
+        ->get_all_possible_indexes();
   }
   return ret;
 }
 
-bool SingletonContainerSet::get_is_changed() const {
-  for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i) {
-    if (get_singleton_container(i)->get_is_changed()) return true;
-  }
-  return Container::get_is_changed();
-}
-
-
-ContainersTemp SingletonContainerSet::get_input_containers() const {
-  return ContainersTemp(singleton_containers_begin(),
-                        singleton_containers_end());
-}
 void SingletonContainerSet::do_before_evaluate() {
+  for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i) {
+    if (get_singleton_container(i)->get_is_changed()) {
+      set_is_changed(true);
+      return;
+    }
+  }
+  set_is_changed(false);
+}
+
+ModelObjectsTemp SingletonContainerSet::do_get_inputs() const {
+  return ModelObjectsTemp(singleton_containers_begin(),
+                        singleton_containers_end());
 }
 
 IMPCONTAINER_END_NAMESPACE

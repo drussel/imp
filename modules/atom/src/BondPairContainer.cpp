@@ -20,27 +20,6 @@ BondPairContainer
                 "BondPairContainer%1%"), sc_(sc){
 }
 
-
-bool
-BondPairContainer::get_is_changed() const {
-  return sc_->get_is_changed();
-}
-
-
-bool BondPairContainer
-::get_contains_particle_pair(const ParticlePair& pp) const {
-  if (!Bonded::particle_is_instance(pp[0])
-      || ! Bonded::particle_is_instance(pp[1])) {
-    return false;
-  }
-
-  Bonded ba(pp[0]);
-  Bonded bb(pp[1]);
-  Bond bd=get_bond(ba, bb);
-  return sc_->get_contains_particle(bd);
-}
-
-
 ParticleIndexPairs
 BondPairContainer::get_indexes() const {
   ParticleIndexes ia= sc_->get_indexes();
@@ -58,19 +37,19 @@ void BondPairContainer::do_show(std::ostream &out) const {
 }
 
 
-ParticlesTemp BondPairContainer::get_all_possible_particles() const {
-  ParticlesTemp ret(3*sc_->get_number_of_particles());
-  ParticlesTemp scapp= sc_->get_all_possible_particles();
+ParticleIndexes BondPairContainer::get_all_possible_indexes() const {
+  ParticleIndexes scapp= sc_->get_all_possible_indexes();
+  ParticleIndexes ret(3*scapp.size());
   for (unsigned int i=0; i< scapp.size(); ++i) {
     ret[i*3]= scapp[i];
-    ret[i*3+1]= Bond(scapp[i]).get_bonded(0);
-    ret[i*3+2]= Bond(scapp[i]).get_bonded(1);
+    ret[i*3+1]= Bond(get_model(), scapp[i]).get_bonded(0).get_particle_index();
+    ret[i*3+2]= Bond(get_model(), scapp[i]).get_bonded(1).get_particle_index();
   }
   return ret;
 }
 
-ParticleIndexPairs BondPairContainer::get_all_possible_indexes() const {
-  ParticleIndexes ia= sc_->get_all_possible_indexes();
+ParticleIndexPairs BondPairContainer::get_range_indexes() const {
+  ParticleIndexes ia= sc_->get_range_indexes();
   ParticleIndexPairs ret; ret.reserve(ia.size());
   for (unsigned int i=0; i< ia.size(); ++i) {
     Bond b(get_model(), ia[i]);
@@ -88,6 +67,7 @@ ContainersTemp BondPairContainer::get_input_containers() const {
   return ContainersTemp(1, sc_);
 }
 void BondPairContainer::do_before_evaluate() {
+  set_is_changed(sc_->get_is_changed());
 }
 
 

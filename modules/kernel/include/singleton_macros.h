@@ -13,34 +13,9 @@
 
 #include "internal/TupleRestraint.h"
 #include "internal/functors.h"
+#include "container_macros.h"
+#include "input_output_macros.h"
 #include <algorithm>
-
-
-#define IMP_SINGLETON_SCORE_BASE(Name)                                 \
-  IMP_IMPLEMENT_INLINE(double evaluate_indexes(Model *m,                \
-                                 const ParticleIndexes &ps, \
-                                               DerivativeAccumulator *da) \
-                       const, {                                         \
-                         IMP::internal::ScoreAccumulator<Name> sa(m,    \
-                                                                  this, \
-                                                                  da);  \
-                         sa(ps);                                        \
-                         return sa.get_score();                         \
-                       });                                              \
-  IMP_IMPLEMENT_INLINE(double                                           \
-                       evaluate_if_good_indexes(Model *m,               \
-                                 const ParticleIndexes &ps, \
-                                                DerivativeAccumulator *da, \
-                                                double max) const, {    \
-                         IMP::internal::ScoreAccumulatorIfGood<Name> sa(m, \
-                                                                        this, \
-                                                                        max, \
-                                                                        da); \
-                         sa(ps);                                        \
-                         return sa.get_score();                         \
-                       });                                              \
-  IMP_OBJECT(Name)
-
 
 
 //! Declare the functions needed for a SingletonScore
@@ -68,9 +43,8 @@
     IMP_UNUSED(max);                                                    \
     return evaluate_index(m, p, da);                                    \
                        });                                              \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle*p) const) ;  \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle *) const) ; \
-  IMP_SINGLETON_SCORE_BASE(Name)
+  IMP_BACKWARDS_MACRO_INPUTS;                                           \
+  IMP_OBJECT(Name)
 
 //! Declare the functions needed for a SingletonScore
 /** In addition to the methods declared and defined by IMP_SINGLETON_SCORE,
@@ -83,43 +57,29 @@
 #define IMP_SIMPLE_SINGLETON_SCORE(Name)                               \
   IMP_IMPLEMENT(double evaluate(Particle* p,    \
                                 DerivativeAccumulator *da) const);      \
-  IMP_IMPLEMENT_INLINE(double evaluate(Model *m,                        \
-                                  ParticleIndex p,  \
-                                       DerivativeAccumulator *da) const, { \
-    return evaluate(IMP::internal::get_particle(m,p), da);              \
+  IMP_IMPLEMENT_INLINE(ModelObjectsTemp                                 \
+                       do_get_inputs(Model *m,                          \
+                                     const ParticleIndexes &pis) const, { \
+                         ModelObjectsTemp ret;                          \
+                         ret+=IMP::get_particles(m, pis);               \
+                         return ret;                                    \
                        });                                              \
-  IMP_IMPLEMENT_INLINE(double evaluate_if_good_index(Model *m,          \
-                          ParticleIndex p,                       \
-                          DerivativeAccumulator *da,                    \
-                                                     double max) const, { \
-    IMP_UNUSED(max);                                                    \
-    return evaluate_index(m, p, da);                                    \
-                       });                                              \
-  IMP_IMPLEMENT_INLINE(ParticlesTemp get_input_particles(Particle*p) const, { \
-    return ParticlesTemp(1,p);                                          \
-    });                                                                 \
-  IMP_IMPLEMENT_INLINE(ContainersTemp get_input_containers(Particle *) const, \
-  {                                                                     \
-    return ContainersTemp();                                            \
-  });                                                                   \
-  IMP_IMPLEMENT_INLINE(Restraints create_current_decomposition\
-  (Particle* vt) const, {                                      \
- return  IMP::internal::create_score_current_decomposition(this, vt); \
+  IMP_IMPLEMENT_INLINE(Restraints do_create_current_decomposition          \
+                       (Model *m,                                       \
+                        ParticleIndex vt) const, {           \
+      return  IMP::internal::create_score_current_decomposition(this, m, vt); \
                        });                                        \
-  IMP_SINGLETON_SCORE_BASE(Name)
+  IMP_OBJECT(Name)
 
 
 
 //! Declare the functions needed for a complex SingletonScore
 /** In addition to the methods done by IMP_OBJECT(), it declares
-    - IMP::SingletonScore::evaluate()
-    - IMP::SingletonScore::get_input_particles()
-    - IMP::SingletonScore::get_output_particles()
-    - IMP::SingletonScore::evaluate_if_good
+    - IMP::SingletonScore::evaluate_index()
+    - IMP::SingletonScore::do_get_inputs()
+    - IMP::SingletonScore::evaluate_if_good_index()
 */
 #define IMP_COMPOSITE_SINGLETON_SCORE(Name)                            \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle *p) const);  \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle *p) const); \
   IMP_IMPLEMENT_INLINE(double evaluate(Particle* p,     \
                                        DerivativeAccumulator *da) const, { \
     return evaluate_index(IMP::internal::get_model(p),                  \
@@ -131,7 +91,36 @@
                           ParticleIndex p,                       \
                           DerivativeAccumulator *da,                    \
                                               double max) const);       \
-  IMP_SINGLETON_SCORE_BASE(Name)
+  IMP_IMPLEMENT_INLINE(double evaluate_indexes(Model *m,                \
+                                        const ParticleIndexes &p,       \
+                                        DerivativeAccumulator *da,      \
+                                        unsigned int lower_bound,       \
+                                               unsigned int upper_bound) const,\
+  {                                                                     \
+    double ret=0;                                                       \
+    for (unsigned int i=lower_bound; i < upper_bound; ++i) {            \
+      ret+= evaluate_index(m, p[i], da);                                \
+    }                                                                   \
+    return ret;                                                         \
+  });                                                                   \
+  IMP_IMPLEMENT_INLINE(double                                           \
+                       evaluate_if_good_indexes(Model *m,               \
+                         const ParticleIndexes &p,                      \
+                         DerivativeAccumulator *da,                     \
+                         double max,                                    \
+                         unsigned int lower_bound,                      \
+                         unsigned int upper_bound) const, {             \
+    double ret=0;                                                       \
+    for (unsigned int i=lower_bound; i < upper_bound; ++i) {            \
+      ret+= evaluate_if_good_index(m, p[i], da, max-ret);               \
+      if (ret>max) return std::numeric_limits<double>::max();           \
+    }                                                                   \
+    return ret;                                                         \
+                       });                                              \
+  IMP_IMPLEMENT(ModelObjectsTemp                                        \
+  do_get_inputs(Model *m,                                               \
+                const ParticleIndexes &pis) const );        \
+   IMP_OBJECT(Name)
 
 //! Declare the functions needed for a complex SingletonScore
 /** In addition to the methods done by IMP_OBJECT(), it declares
@@ -141,8 +130,6 @@
     - IMP::SingletonScore::evaluate_if_good
 */
 #define IMP_INDEX_SINGLETON_SCORE(Name)                                \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle *p) const);  \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle *p) const); \
   IMP_IMPLEMENT_INLINE(double evaluate(Particle* p,\
                                         DerivativeAccumulator *da) const, { \
     return evaluate_index(IMP::internal::get_model(p),                  \
@@ -150,15 +137,46 @@
                   da);                                                  \
                         });                                             \
   IMP_IMPLEMENT(double evaluate_index(Model *m, ParticleIndex p,\
-                                      DerivativeAccumulator *da) const); \
+                                      DerivativeAccumulator *da) \
+                const IMP_FINAL);                         \
   IMP_IMPLEMENT_INLINE(double evaluate_if_good_index(Model *m,         \
                           ParticleIndex p,                      \
                           DerivativeAccumulator *da,                    \
                                                       double max) const, { \
     IMP_UNUSED(max);                                                    \
     return evaluate_index(m, p, da);                                    \
-                        });                                             \
-  IMP_SINGLETON_SCORE_BASE(Name)
+                       });                                              \
+  IMP_IMPLEMENT_INLINE(double                                           \
+  evaluate_indexes(Model *m,                                            \
+                   const ParticleIndexes &p,                            \
+                   DerivativeAccumulator *da,                           \
+                   unsigned int lower_bound,                            \
+                   unsigned int upper_bound) const IMP_FINAL, \
+  {                                                                     \
+    double ret=0;                                                       \
+    for (unsigned int i=lower_bound; i < upper_bound; ++i) {            \
+      ret+= evaluate_index(m, p[i], da);                                \
+    }                                                                   \
+    return ret;                                                         \
+  });                                                                   \
+  IMP_IMPLEMENT_INLINE(double                                           \
+                       evaluate_if_good_indexes(Model *m,               \
+                         const ParticleIndexes &p,                      \
+                         DerivativeAccumulator *da,                     \
+                         double max,                                    \
+                         unsigned int lower_bound,                      \
+                         unsigned int upper_bound) const, {             \
+    double ret=0;                                                       \
+    for (unsigned int i=lower_bound; i < upper_bound; ++i) {            \
+      ret+= evaluate_if_good_index(m, p[i], da, max-ret);               \
+      if (ret>max) return std::numeric_limits<double>::max();           \
+    }                                                                   \
+    return ret;                                                         \
+                       });                                              \
+  IMP_IMPLEMENT(ModelObjectsTemp                                        \
+  do_get_inputs(Model *m,                                               \
+                const ParticleIndexes &pis) const);        \
+  IMP_OBJECT(Name)
 
 
 
@@ -191,19 +209,19 @@
    }                                                                    \
    return ret;                                                          \
                        });                                              \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle*) const);    \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle*) const);  \
+  IMP_BACKWARDS_MACRO_INPUTS;                                           \
   IMP_OBJECT(Name)
 
 
 //! Declare the functions needed for a SingletonPredicate
-/** In addition to the methods done by IMP_OBJECT, it declares
-    - IMP::SingletonPredicate::get_value_index()
-    - IMP::SingletonPredicate::get_input_particles()
-    - IMP::SingletonPredicate::get_output_particles()
+/** In addition to the methods done by IMP_OBJECT, it defines
+    - IMP::SingletonPredicate::get_value_index() based on the return_value
+    parameter
+    - IMP::SingletonPredicate::do_get_inputs() based on the return_inputs
+    parameter
 */
-#define IMP_INDEX_SINGLETON_PREDICATE(Name, gv)                        \
-  IMP_IMPLEMENT_INLINE(int get_value(Particle* a) const, { \
+#define IMP_INDEX_SINGLETON_PREDICATE(Name, return_value, return_inputs) \
+  IMP_IMPLEMENT_INLINE(int get_value(Particle* a) const, {    \
     return get_value_index(IMP::internal::get_model(a),                 \
                      IMP::internal::get_index(a));                      \
     });                                                                 \
@@ -218,7 +236,7 @@
   IMP_IMPLEMENT_INLINE(int get_value_index(Model *m,                    \
                                            ParticleIndex pi)\
                        const, {                                         \
-    gv;                                                                 \
+                         return_value;                                  \
                        })                                               \
   IMP_IMPLEMENT_INLINE(Ints get_value_index(Model *m,                   \
                                 const ParticleIndexes &o) const, { \
@@ -244,13 +262,12 @@
                                                                  m, value)), \
                ps.end());                                               \
                        });                                              \
-  IMP_IMPLEMENT_INLINE(ParticlesTemp get_input_particles(Particle*p) const, { \
-   return ParticlesTemp(1, p);                                          \
-    });                                                                 \
-  IMP_IMPLEMENT_INLINE(ContainersTemp get_input_containers(Particle*) const, { \
-   return ContainersTemp();                                             \
-    });                                                                 \
- IMP_OBJECT_INLINE(Name,IMP_UNUSED(out),)
+  IMP_IMPLEMENT_INLINE(ModelObjectsTemp                                 \
+  do_get_inputs(Model *m,                                               \
+                const ParticleIndexes &pi) const, {                     \
+    return_inputs;                                                      \
+                       });                                              \
+  IMP_OBJECT_INLINE(Name,IMP_UNUSED(out),)
 
 
 //! Declare the functions needed for a SingletonModifier
@@ -265,114 +282,58 @@
                                         ParticleIndex a) const, {\
     return Name::apply(IMP::internal::get_particle(m,a));               \
     })                                                                  \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle*) const);    \
-  IMP_IMPLEMENT(ParticlesTemp get_output_particles(Particle*) const);   \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle*) const);  \
-  IMP_IMPLEMENT(ContainersTemp get_output_containers(Particle*) const); \
+  IMP_BACKWARDS_MACRO_INPUTS;                                                 \
+  IMP_BACKWARDS_MACRO_OUTPUTS;                                                \
   IMP_OBJECT(Name)
 
-//! Declare the functions needed for a SingletonModifier
-/** In addition to the methods done by IMP_OBJECT, it declares
-    - IMP::SingletonDerivativeModifier::apply()
-    - IMP::SingletonDerivativeModifier::get_input_particles()
-    - IMP::SingletonDerivativeModifier::get_output_particles()
-*/
+//! Use IMP_SINGLETON_MODIFIER() instead
 #define IMP_SINGLETON_DERIVATIVE_MODIFIER(Name)                        \
-  IMP_IMPLEMENT(void apply(Particle* a,\
-                           DerivativeAccumulator&da) const);            \
-  IMP_IMPLEMENT_INLINE(void apply_index(Model *m,                       \
-                                        ParticleIndex a,  \
-                                        DerivativeAccumulator&da) const, { \
-    return Name::apply(IMP::internal::get_particle(m,a), da);           \
-                       });                                              \
-  IMP_IMPLEMENT_INLINE(void apply_indexes(Model *m,\
-                                          const ParticleIndexes &ps,    \
-                                          DerivativeAccumulator&da) const, { \
-                         IMP::internal::ModifierDerivativeApplier<Name>(m, \
-                                                                        this,\
-                                                                        da) \
-                           (ps);                                        \
-                       });                                              \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle*) const);    \
-  IMP_IMPLEMENT(ParticlesTemp get_output_particles(Particle*) const);   \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle*) const);  \
-  IMP_IMPLEMENT(ContainersTemp get_output_containers(Particle*) const); \
-  IMP_OBJECT(Name)
-
+  IMP_SINGLETON_MODIFIER(Name)
 
 
 //! Declare the functions needed for a SingletonModifier
 /** In addition to the methods done by IMP_OBJECT, it declares
     - IMP::SingletonModifier::apply(IMP::Particle*)
-    - IMP::SingletonModifier::get_input_particles()
-    - IMP::SingletonModifier::get_output_particles()
+    - IMP::SingletonModifier::get_inputs()
+    - IMP::SingletonModifier::get_outputs()
 */
-#define IMP_INDEX_SINGLETON_MODIFIER(Name)                     \
+#define IMP_INDEX_SINGLETON_MODIFIER(Name)                 \
   IMP_IMPLEMENT_INLINE(void apply(Particle* a) const, {  \
     apply_index(IMP::internal::get_model(a),                            \
                 IMP::internal::get_index(a));                           \
     });                                                                 \
-  IMP_IMPLEMENT(void apply_index(Model *m,\
-                                 ParticleIndex a) const);   \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle*) const);    \
-  IMP_IMPLEMENT(ParticlesTemp get_output_particles(Particle*) const);   \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle*) const);  \
-  IMP_IMPLEMENT(ContainersTemp get_output_containers(Particle*) const); \
+  IMP_IMPLEMENT(void apply_index(Model *m,                              \
+                                 ParticleIndex a)\
+                const IMP_FINAL);                          \
+  IMP_IMPLEMENT_INLINE(void apply_indexes(Model *m,                     \
+                                          const ParticleIndexes &o,     \
+                                          unsigned int lower_bound,     \
+                                          unsigned int upper_bound)\
+                       const IMP_FINAL,                    \
+  {                                                                     \
+    for (unsigned int i=lower_bound; i < upper_bound; ++i) {            \
+      apply_index(m, o[i]);                                             \
+    }                                                                   \
+  });                                                                   \
+  IMP_IMPLEMENT(ModelObjectsTemp do_get_inputs(Model *m,                \
+                                    const ParticleIndexes &pis) const); \
+  IMP_IMPLEMENT(ModelObjectsTemp do_get_outputs(Model *m,               \
+                                    const ParticleIndexes &pis) const); \
   IMP_OBJECT(Name)
 
-//! Declare the functions needed for a SingletonModifier
-/** In addition to the methods done by IMP_OBJECT, it declares
-    - IMP::SingletonDerivativeModifier::apply()
-    - IMP::SingletonDerivativeModifier::get_input_particles()
-    - IMP::SingletonDerivativeModifier::get_output_particles()
-*/
-#define IMP_INDEX_SINGLETON_DERIVATIVE_MODIFIER(Name)                        \
-  IMP_IMPLEMENT_INLINE(void apply(Particle* a,\
-                                  DerivativeAccumulator&da) const, {    \
-    apply_index(IMP::internal::get_model(a),                            \
-                IMP::internal::get_index(a), da);                       \
-                       });                                              \
-  IMP_IMPLEMENT(void apply_index(Model *m, ParticleIndex a,\
-                                 DerivativeAccumulator&da) const);      \
-  IMP_IMPLEMENT_INLINE(void apply_indexes(Model *m,\
-                                          const ParticleIndexes &ps,    \
-                                          DerivativeAccumulator&da) const, { \
-    for (unsigned int i=0; i< ps.size(); ++i) {                         \
-      Name::apply_index(m, ps[i], da);                                  \
-    }                                                                   \
-                       });                                              \
-  IMP_IMPLEMENT(ParticlesTemp get_input_particles(Particle*) const);    \
-  IMP_IMPLEMENT(ParticlesTemp get_output_particles(Particle*) const);   \
-  IMP_IMPLEMENT(ContainersTemp get_input_containers(Particle*) const);  \
-  IMP_IMPLEMENT(ContainersTemp get_output_containers(Particle*) const); \
-  IMP_OBJECT(Name)
+//! Use IMP_INDEX_SINGLETON_MODIFIER instead
+#define IMP_INDEX_SINGLETON_DERIVATIVE_MODIFIER(Name)  \
+  IMP_INDEX_SINGLETON_MODIFIER(Name)
 
 
 
 
 #ifndef IMP_DOXYGEN
 #define IMP_IMPLEMENT_SINGLETON_CONTAINER(Name)                        \
-  void apply(const SingletonModifier *sm) const {                       \
-    for_each(IMP::internal::ModifierApplier<SingletonModifier>          \
-             (get_model(), sm));                                        \
-  }                                                                     \
-  void apply(const SingletonDerivativeModifier *sm,                     \
-             DerivativeAccumulator &da) const {                         \
-    for_each(IMP::internal                                              \
-             ::ModifierDerivativeApplier<SingletonDerivativeModifier>   \
-             (get_model(), sm, da));                                    \
-  }                                                                     \
-  double evaluate(const SingletonScore *s,                              \
-                  DerivativeAccumulator *da) const {                    \
-    return for_each(IMP::internal::ScoreAccumulator<SingletonScore>     \
-                    (get_model(), s, da)).get_score();                  \
-  }                                                                     \
-  double evaluate_if_good(const SingletonScore *s,                      \
-                          DerivativeAccumulator *da, double max) const { \
-    return for_each(IMP::internal::ScoreAccumulatorIfGood<SingletonScore> \
-                    (get_model(), s, max, da)).get_score();             \
-  }                                                                     \
-  ParticlesTemp get_all_possible_particles() const;                     \
+  IMP_IMPLEMENT_INLINE(void do_apply(const SingletonModifier *sm) const, {\
+    apply_generic(sm);                                                  \
+  });                                                                   \
+  IMP_IMPLEMENT(ParticleIndexes get_all_possible_indexes() const);      \
   IMP_OBJECT(Name)
 #endif
 
@@ -382,7 +343,6 @@
 
 //! Declare the needed functions for a SingletonContainer
 /** In addition to the methods of IMP_OBJECT, it declares
-    - IMP::SingletonContainer::get_contains_particle_particle()
     - IMP::SingletonContainer::get_number_of_particle_particles()
     - IMP::SingletonContainer::get_particle_particle()
     - IMP::SingletonContainer::apply()
@@ -397,14 +357,17 @@ Functor for_each(Functor f);
     that applied the functor to each thing in the container.
 */
 #define IMP_SINGLETON_CONTAINER(Name)                                  \
-  IMP_IMPLEMENT(bool get_is_changed() const);                           \
-  IMP_IMPLEMENT(bool get_contains_particle(Particle* p)   \
-                const);                                                 \
   IMP_IMPLEMENT(ParticleIndexes get_indexes() const);                   \
-  IMP_IMPLEMENT(ParticleIndexes get_all_possible_indexes() const);      \
+  IMP_IMPLEMENT(ParticleIndexes get_range_indexes() const);      \
   IMP_IMPLEMENT(void do_before_evaluate());                             \
   IMP_IMPLEMENT(ParticlesTemp get_input_particles() const);             \
   IMP_IMPLEMENT(ContainersTemp get_input_containers() const);           \
+  IMP_IMPLEMENT_INLINE(ModelObjectsTemp do_get_inputs() const, {        \
+    ModelObjects ret;                                                   \
+    ret+=get_input_containers();                                        \
+    ret+=get_input_particles();                                         \
+    return ret;                                                         \
+  });                                                                   \
   IMP_IMPLEMENT_SINGLETON_CONTAINER(Name)
 
 
@@ -417,15 +380,7 @@ Functor for_each(Functor f);
 #define IMP_ACTIVE_SINGLETON_CONTAINER(Name)                           \
   IMP_SINGLETON_CONTAINER(name)
 
-/** These macros avoid various inefficiencies.
-
-    The macros take the name of the sequence and the operation to
-    peform. The item in the sequence is called _1, it's index is _2.
-    Use it like
-    \code
-    IMP_FOREACH_PARTICLE(sc, std::cout << "Item " << _2
-    << " is " << _1->get_name() << std::endl);
-    \endcode
+/** Use IMP_CONTAINER_FOREACH() instead.
 */
 #define IMP_FOREACH_SINGLETON(sequence, operation) do {                \
     IMP::ParticlesTemp imp_all=sequence->get();   \
@@ -441,39 +396,9 @@ Functor for_each(Functor f);
 
 
 
-/** These macros avoid various inefficiencies.
-
-    The macros take the name of the sequence and the operation to
-    peform. The item in the sequence is called _1, it's index is _2.
-    Use it like
-    \code
-    IMP_FOREACH_PARTICLE(sc, std::cout << "Item " << _2
-                         << " is _1->get_name() << std::endl);
-    \endcode
+/** Use IMP_CONTAINER_FOREACH() instead.
 */
 #define IMP_FOREACH_SINGLETON_INDEX(sequence, operation)               \
-  do {                                                                  \
-    if (sequence->get_provides_access()) {                              \
-      const ParticleIndexes &imp_foreach_access                         \
-        =sequence->get_access();                                        \
-      for (unsigned int _2=0; _2< imp_foreach_access.size(); ++_2) {    \
-        IMP::ParticleIndex _1= imp_foreach_access[_2];          \
-        bool imp_foreach_break=false;                                   \
-        operation                                                       \
-          if (imp_foreach_break) { break;}                              \
-      }                                                                 \
-    } else {                                                            \
-      ParticleIndexes imp_foreach_indexes              \
-        =sequence->get_indexes();                                       \
-      for (unsigned int _2=0;                                           \
-           _2 != imp_foreach_indexes.size();                            \
-           ++_2) {                                                      \
-        IMP::ParticleIndex _1= imp_foreach_indexes[_2];            \
-        bool imp_foreach_break=false;                                   \
-        operation                                                       \
-          if (imp_foreach_break) break;                                 \
-      }                                                                 \
-    }                                                                   \
-  } while (false)
+  IMP_CONTAINER_FOREACH(SingletonContainer, sequence, operation)
 
 #endif  /* IMPKERNEL_SINGLETON_MACROS_H */

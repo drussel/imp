@@ -54,13 +54,15 @@ class PairContainerTest(IMP.test.TestCase):
             p=self.create_particle_pair(m)
             f= f+ gs.evaluate(p, None)
             c.add_particle_pair(p)
-            r= IMP.container.PairsRestraint(gs, c)
-            r.set_was_used(True)
+        r= IMP.container.PairsRestraint(gs, c)
+        r.set_was_used(True)
         m.add_restraint(r)
+        self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
         self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
         p=self.create_particle_pair(m)
         f= f+ gs.evaluate(p,None)
         c.add_particle_pair(p)
+        self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
         self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
 
 

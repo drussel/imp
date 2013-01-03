@@ -22,26 +22,36 @@ PredicatePairsRestraint
   predicate_(pred), input_(input), updated_(false),
   error_on_unknown_(true){}
 
+void
+PredicatePairsRestraint
+::do_add_score_and_derivatives(ScoreAccumulator sa) const {
+  update_lists_if_necessary();
+  for (unsigned int i=0; i< restraints_.size(); ++i) {
+    restraints_[i]->add_score_and_derivatives(sa);
+  }
+#pragma omp taskwait
+}
+
 double
 PredicatePairsRestraint
-::unprotected_evaluate(DerivativeAccumulator *da) const {
-  update_lists_if_necessary();
+::get_last_score() const {
   double ret=0;
   for (unsigned int i=0; i< restraints_.size(); ++i) {
-    ret+=restraints_[i]->unprotected_evaluate(da);
+    ret+=restraints_[i]->get_last_score();
   }
   return ret;
 }
 
-ParticlesTemp PredicatePairsRestraint
-::get_input_particles() const {
-  // not correct, but correct is complicated
-  return input_->get_all_possible_particles();
-}
-ContainersTemp PredicatePairsRestraint
-::get_input_containers() const {
-  // List containers don't do anything interesting
-  return ContainersTemp(1, input_);
+ModelObjectsTemp PredicatePairsRestraint
+::do_get_inputs() const {
+  ModelObjectsTemp ret;
+  ret+= predicate_->get_inputs(get_model(),
+                               input_->get_all_possible_indexes());
+ for (unsigned int i=0; i< restraints_.size(); ++i) {
+    ret+=restraints_[i]->get_inputs();
+  }
+  ret.push_back(input_);
+  return ret;
 }
 
 Restraints PredicatePairsRestraint
@@ -69,7 +79,7 @@ bool PredicatePairsRestraint
   Map::const_iterator it= containers_.find(bin);
   if (it == containers_.end()) {
     if (unknown_container_) {
-      unknown_container_->add_particle_pair(index);
+      unknown_container_->add(index);
       return true;
     } else if (error_on_unknown_) {
       IMP_THROW("Invalid predicate value of " << bin
@@ -80,7 +90,7 @@ bool PredicatePairsRestraint
       return false;
     }
   } else {
-    it->second->add_particle_pair(index);
+    it->second->add(index);
     return true;
   }
 }
@@ -89,11 +99,11 @@ void PredicatePairsRestraint
   if (updated_ && !input_->get_is_changed()) return;
   updated_=true;
   if (unknown_container_) {
-    unknown_container_->clear_particle_pairs();
+    unknown_container_->clear();
   }
   for (Map::const_iterator it= containers_.begin();
        it != containers_.end(); ++it) {
-    it->second->clear_particle_pairs();
+    it->second->clear();
   }
   int dropped=0;
   IMP_FOREACH_PAIR_INDEX(input_, {

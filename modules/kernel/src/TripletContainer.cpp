@@ -14,6 +14,7 @@
 #include "IMP/internal/InternalListTripletContainer.h"
 #include "IMP/TripletModifier.h"
 #include "IMP/internal/container_helpers.h"
+#include "IMP/triplet_macros.h"
 
 IMP_BEGIN_NAMESPACE
 
@@ -26,6 +27,54 @@ TripletContainer::TripletContainer(Model *m, std::string name):
 TripletContainer::~TripletContainer(){
 }
 
+#if IMP_USE_DEPRECATED
+bool TripletContainer
+::get_contains_particle_triplet(ParticleTriplet v) const {
+  IMP_DEPRECATED_FUNCTION(something else);
+  ParticleIndexTriplet iv= IMP::internal::get_index(v);
+  IMP_FOREACH_TRIPLET_INDEX(this, {
+      if (_1 == iv) return true;
+    });
+  return false;
+}
+
+ParticleTripletsTemp TripletContainer
+::get_particle_triplets() const {
+  return IMP::internal::get_particle(get_model(),
+                                     get_indexes());
+}
+
+unsigned int TripletContainer
+::get_number_of_particle_triplets() const {
+  IMP_DEPRECATED_FUNCTION(IMP_CONTAINER_FOREACH());
+  return get_number();
+}
+
+ParticleTriplet TripletContainer
+::get_particle_triplet(unsigned int i) const {
+  IMP_DEPRECATED_FUNCTION(IMP_CONTAINER_FOREACH());
+  return get(i);
+}
+#endif
+
+bool TripletContainer
+::get_provides_access() const {
+  validate_readable();
+  return do_get_provides_access();
+}
+
+void TripletContainer
+::apply_generic(const TripletModifier *m) const {
+  apply(m);
+}
+
+void TripletContainer
+::apply(const TripletModifier *sm) const {
+  validate_readable();
+  do_apply(sm);
+}
+
+
 TripletContainerAdaptor
 ::TripletContainerAdaptor(TripletContainer *c): P(c){}
 TripletContainerAdaptor
@@ -34,9 +83,8 @@ TripletContainerAdaptor
   Model *m=internal::get_model(t);
   IMP_NEW(internal::InternalListTripletContainer, c,
           (m, name));
-  c->set_particle_triplets(t);
+  c->set(IMP::internal::get_index(t));
   P::operator=(c);
 }
-
 
 IMP_END_NAMESPACE

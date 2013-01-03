@@ -361,4 +361,73 @@ IMP_REQUIRE_SEMICOLON_CLASS(list##lcname)
 #define IMP_CONTAINER_DEPENDENCIES(Name, input_deps)
 #endif
 
+#define IMP_CONTAINER_FOREACH_LOOP(ContainerType, container,            \
+                                   operation, tname)                    \
+      for (unsigned int _2=0; _2< imp_foreach_indexes.size(); ++_2) {   \
+        tname ContainerType::ContainedIndexType _1                      \
+          = imp_foreach_indexes[_2];                                    \
+        bool imp_foreach_break=false;                                   \
+        operation;                                                      \
+        if (imp_foreach_break) { break;}                                \
+      }                                                                 \
+
+#define IMP_CONTAINER_FOREACH_IMPL(ContainerType, container,            \
+                                   operation, tname)                    \
+  do {                                                                  \
+    if (container->get_provides_access()) {                             \
+      const tname ContainerType::ContainedIndexTypes&                   \
+        imp_foreach_indexes =container->get_access();                   \
+      IMP_CONTAINER_FOREACH_LOOP(ContainerType, container,              \
+                                 operation, tname);                     \
+    } else {                                                            \
+      tname ContainerType::ContainedIndexTypes                          \
+        imp_foreach_indexes =container->get_indexes();                  \
+      IMP_CONTAINER_FOREACH_LOOP(ContainerType, container,              \
+                                 operation, tname);                     \
+    }                                                                   \
+  } while (false)
+
+/** See IMP_CONTAINER_FOREACH().
+
+    This version is for use in a template function. See
+    IMP_FOREACH_INDEX() for another version.
+*/
+#define IMP_CONTAINER_FOREACH_TEMPLATE(ContainerType, container, operation) \
+  IMP_CONTAINER_FOREACH_IMPL(ContainerType, container, operation, typename)
+
+/** These macros avoid various inefficiencies.
+
+    The macros take the name of the container and the operation to
+    peform. In operation, _1 is used to refer to the item using its
+    ContainedIndexType (e.g., IMP::ParticleIndex in SingletonContainer,
+    or IMP::ParticleIndexPair in PairContainer).
+    The location of this item in the container itself is _2.
+    Use it like:
+    \code
+    IMP_CONTAINER_FOREACH(SingletonContainer, sc, std::cout << "Item "
+    << _2 << " has particle index " << _1 << std::endl);
+    \endcode
+
+    See IMP_CONTAINER_FOREACH_TEMPLATE() if you want to use it in a template
+    function.
+*/
+#define IMP_CONTAINER_FOREACH(ContainerType, container, operation)      \
+ IMP_CONTAINER_FOREACH_IMPL(ContainerType, container, operation, )
+
+/** Provide a block that can have efficient, direct access to the contents
+    of the container in the variable imp_indexes.
+*/
+#define IMP_CONTAINER_ACCESS(ContainerType, container, operation)       \
+  do {                                                                  \
+    if (container->get_provides_access()) {                             \
+      const ContainerType::ContainedIndexTypes&                         \
+        imp_indexes =container->get_access();                           \
+      operation;                                                        \
+    } else {                                                            \
+      ContainerType::ContainedIndexTypes                                \
+        imp_indexes =container->get_indexes();                          \
+        operation;                                                      \
+    }                                                                   \
+  } while (false)
+
 #endif  /* IMPKERNEL_CONTAINER_MACROS_H */

@@ -28,20 +28,9 @@ CLASSNAMEContainerSet
   set_CLASSFUNCTIONNAME_containers(in);
 }
 
-
-bool
-CLASSNAMEContainerSet
-::get_contains_FUNCTIONNAME(ARGUMENTTYPE vt) const {
-  for (CLASSNAMEContainerConstIterator it= CLASSFUNCTIONNAME_containers_begin();
-       it != CLASSFUNCTIONNAME_containers_end(); ++it) {
-    if ((*it)->get_contains_FUNCTIONNAME(vt)) return true;
-  }
-  return false;
-}
-
 void CLASSNAMEContainerSet::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_FUNCTIONNAMEs()
+  out << get_number_of_CLASSFUNCTIONNAME_containers()
       << " containers" << std::endl;
 }
 
@@ -56,11 +45,11 @@ PLURALINDEXTYPE CLASSNAMEContainerSet::get_indexes() const {
   return sum;
 }
 
-PLURALINDEXTYPE CLASSNAMEContainerSet::get_all_possible_indexes() const {
+PLURALINDEXTYPE CLASSNAMEContainerSet::get_range_indexes() const {
   PLURALINDEXTYPE sum;
   for (CLASSNAMEContainerConstIterator it= CLASSFUNCTIONNAME_containers_begin();
        it != CLASSFUNCTIONNAME_containers_end(); ++it) {
-    PLURALINDEXTYPE cur=(*it)->get_all_possible_indexes();
+    PLURALINDEXTYPE cur=(*it)->get_range_indexes();
     sum.insert(sum.end(), cur.begin(), cur.end());
   }
   return sum;
@@ -73,54 +62,34 @@ IMP_LIST_IMPL(CLASSNAMEContainerSet,
               CLASSNAMEContainers);
 
 
-void CLASSNAMEContainerSet::apply(const CLASSNAMEModifier *sm) const {
+void CLASSNAMEContainerSet::do_apply(const CLASSNAMEModifier *sm) const {
   for (unsigned int i=0; i< get_number_of_CLASSFUNCTIONNAME_containers(); ++i) {
     get_CLASSFUNCTIONNAME_container(i)->apply(sm);
   }
 }
 
-void CLASSNAMEContainerSet::apply(const CLASSNAMEDerivativeModifier *sm,
-                               DerivativeAccumulator &da) const {
+ParticleIndexes CLASSNAMEContainerSet::get_all_possible_indexes() const {
+  ParticleIndexes ret;
   for (unsigned int i=0; i< get_number_of_CLASSFUNCTIONNAME_containers(); ++i) {
-    get_CLASSFUNCTIONNAME_container(i)->apply(sm, da);
-  }
-}
-
-double CLASSNAMEContainerSet::evaluate(const CLASSNAMEScore *s,
-                                       DerivativeAccumulator *da) const {
-  return template_evaluate(s, da);
-}
-
-double CLASSNAMEContainerSet::evaluate_if_good(const CLASSNAMEScore *s,
-                                               DerivativeAccumulator *da,
-                                               double max) const {
-  return template_evaluate_if_good(s, da, max);
-}
-
-
-ParticlesTemp CLASSNAMEContainerSet::get_all_possible_particles() const {
-  ParticlesTemp ret;
-  for (unsigned int i=0; i< get_number_of_CLASSFUNCTIONNAME_containers(); ++i) {
-    ParticlesTemp cur= get_CLASSFUNCTIONNAME_container(i)
-        ->get_all_possible_particles();
-    ret+=cur;
+    ret+= get_CLASSFUNCTIONNAME_container(i)
+        ->get_all_possible_indexes();
   }
   return ret;
 }
 
-bool CLASSNAMEContainerSet::get_is_changed() const {
-  for (unsigned int i=0; i< get_number_of_CLASSFUNCTIONNAME_containers(); ++i) {
-    if (get_CLASSFUNCTIONNAME_container(i)->get_is_changed()) return true;
-  }
-  return Container::get_is_changed();
-}
-
-
-ContainersTemp CLASSNAMEContainerSet::get_input_containers() const {
-  return ContainersTemp(CLASSFUNCTIONNAME_containers_begin(),
-                        CLASSFUNCTIONNAME_containers_end());
-}
 void CLASSNAMEContainerSet::do_before_evaluate() {
+  for (unsigned int i=0; i< get_number_of_CLASSFUNCTIONNAME_containers(); ++i) {
+    if (get_CLASSFUNCTIONNAME_container(i)->get_is_changed()) {
+      set_is_changed(true);
+      return;
+    }
+  }
+  set_is_changed(false);
+}
+
+ModelObjectsTemp CLASSNAMEContainerSet::do_get_inputs() const {
+  return ModelObjectsTemp(CLASSFUNCTIONNAME_containers_begin(),
+                        CLASSFUNCTIONNAME_containers_end());
 }
 
 IMPCONTAINER_END_NAMESPACE

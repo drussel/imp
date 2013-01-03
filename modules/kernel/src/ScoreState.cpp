@@ -9,6 +9,7 @@
 #include "IMP/ScoreState.h"
 #include "IMP/Model.h"
 #include "IMP/container_base.h"
+#include "IMP/input_output.h"
 #include "IMP/internal/utility.h"
 #include <algorithm>
 #include <cmath>
@@ -32,17 +33,6 @@ ScoreState::ScoreState(Model *m, std::string name) :
 void ScoreState::before_evaluate() {
   do_before_evaluate();
 }
-
-ModelObjectsTemp ScoreState::do_get_inputs() const {
-  return ModelObjectsTemp(get_input_particles())
-    + ModelObjectsTemp(get_input_containers());
-}
-ModelObjectsTemp ScoreState::do_get_outputs() const {
-  return  ModelObjectsTemp(get_output_particles())
-    + ModelObjectsTemp(get_output_containers());
-}
-void ScoreState::do_update_dependencies(const DependencyGraph &,
-                                        const DependencyGraphVertexIndex &) {}
 
 void ScoreState::after_evaluate(DerivativeAccumulator *da) {
   do_after_evaluate(da);
@@ -78,6 +68,23 @@ ScoreStatesTemp get_update_order( ScoreStatesTemp in) {
   }
   return in;
 }
+#ifdef IMP_USE_DEPRECATED
 
-
+ ParticlesTemp ScoreState::get_input_particles() const {
+   IMP_DEPRECATED_FUNCTION(get_inputs());
+   return IMP::get_input_particles(get_inputs());
+ }
+ContainersTemp ScoreState::get_input_containers() const {
+  IMP_DEPRECATED_FUNCTION(get_inputs());
+  return IMP::get_input_containers(get_inputs());
+}
+ParticlesTemp ScoreState::get_output_particles() const {
+  IMP_DEPRECATED_FUNCTION(get_outputs());
+  return IMP::get_output_particles(get_outputs());
+}
+ContainersTemp ScoreState::get_output_containers() const {
+  IMP_DEPRECATED_FUNCTION(get_outputs());
+  return IMP::get_output_containers(get_outputs());
+}
+#endif
 IMP_END_NAMESPACE

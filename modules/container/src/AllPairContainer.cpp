@@ -23,13 +23,6 @@ AllPairContainer::AllPairContainer(SingletonContainerAdaptor c,
   c_(c){
 }
 
-
-
-bool
-AllPairContainer::get_is_changed() const {
-  return c_->get_is_changed();
-}
-
 ParticleIndexPairs
 AllPairContainer::get_indexes() const {
   ParticleIndexes ia= c_->get_indexes();
@@ -43,8 +36,8 @@ AllPairContainer::get_indexes() const {
 }
 
 ParticleIndexPairs
-AllPairContainer::get_all_possible_indexes() const {
-  ParticleIndexes ia= c_->get_all_possible_indexes();
+AllPairContainer::get_range_indexes() const {
+  ParticleIndexes ia= c_->get_range_indexes();
   ParticleIndexPairs ret; ret.reserve(ia.size()*(ia.size()-1)/2);
   for (unsigned int i=0; i< ia.size(); ++i) {
     for (unsigned int j=0; j< i; ++j) {
@@ -54,20 +47,13 @@ AllPairContainer::get_all_possible_indexes() const {
   return ret;
 }
 
-
-bool
-AllPairContainer::get_contains_particle_pair(const ParticlePair &p) const {
-  return c_->get_contains_particle(p[0])
-      && c_->get_contains_particle(p[1]);
-}
-
 void AllPairContainer::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
   out << "container " << *c_ << std::endl;
 }
 
-ParticlesTemp AllPairContainer::get_all_possible_particles() const {
-  return c_->get_all_possible_particles();
+ParticleIndexes AllPairContainer::get_all_possible_indexes() const {
+  return c_->get_all_possible_indexes();
 }
 
 ParticlesTemp AllPairContainer::get_input_particles() const {
@@ -77,5 +63,6 @@ ContainersTemp AllPairContainer::get_input_containers() const {
   return ContainersTemp(1, c_);
 }
 void AllPairContainer::do_before_evaluate() {
+  set_is_changed(c_->get_is_changed());
 }
 IMPCONTAINER_END_NAMESPACE

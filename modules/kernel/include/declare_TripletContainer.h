@@ -25,12 +25,12 @@
 #include <IMP/base/Pointer.h>
 #include <IMP/base/InputAdaptor.h>
 #include <IMP/base/utility_macros.h>
+#include <IMP/base/deprecation_macros.h>
 #include <algorithm>
 
 
 IMP_BEGIN_NAMESPACE
 class TripletModifier;
-class TripletDerivativeModifier;
 class TripletScore;
 
 //! A shared container for Triplets
@@ -47,49 +47,18 @@ public:
   typedef ParticleTripletsTemp ContainedTypes;
   typedef ParticleIndexTriplets ContainedIndexTypes;
   typedef ParticleIndexTriplet ContainedIndexType;
-  /** \note This function may be linear. Be aware of the complexity
-      bounds of your particular container.
-   */
-  virtual bool get_contains_particle_triplet(const ParticleTriplet& v) const =0;
 
-  ParticleTripletsTemp get_particle_triplets() const {
-    return IMP::internal::get_particle(get_model(),
-                                       get_indexes());
-  }
-#ifndef IMP_DOXGEN
-  //! return the number of Triplets in the container
-  /** \note this isn't always constant time
-   */
-  virtual unsigned int get_number_of_particle_triplets() const {
-    return get_number();
-  }
-  /** Return the ith ParticleTriplet of the container.*/
-  virtual ParticleTriplet get_particle_triplet(unsigned int i) const {
-    return get(i);
-  }
-
-#endif
+  //! Just use apply() in the base class
+  void apply_generic(const TripletModifier *m) const;
 
   //! Apply a SingletonModifier to the contents
-  virtual void apply(const TripletModifier *sm) const=0;
-  //! Apply a SingletonModifier to the contents
-  virtual void apply(const TripletDerivativeModifier *sm,
-                     DerivativeAccumulator &da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate(const TripletScore *s,
-                          DerivativeAccumulator *da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate_if_good(const TripletScore *s,
-                                  DerivativeAccumulator *da,
-                                  double max) const=0;
+  void apply(const TripletModifier *sm) const;
 
   /** Get all the indexes contained in the container.*/
   virtual ParticleIndexTriplets get_indexes() const=0;
   /** Get all the indexes that might possibly be contained in the
       container, useful with dynamic containers.*/
-  virtual ParticleIndexTriplets get_all_possible_indexes() const=0;
+  virtual ParticleIndexTriplets get_range_indexes() const=0;
 
 #ifndef IMP_DOXYGEN
   ParticleTripletsTemp get() const {
@@ -101,19 +70,9 @@ public:
     return IMP::internal::get_particle(get_model(),
                                        get_indexes()[i]);
   }
-  /** Return true if the container contains the passed ParticleTriplet.*/
-  bool get_contains(const ParticleTriplet& v) const {
-    return get_contains_particle_triplet(v);
-  }
-  /** Return true if the container contains the passed ParticleTriplet.*/
-  virtual bool get_contains_index(ParticleIndexTriplet v) const {
-    return get_contains_particle_triplet(IMP::internal
-                                     ::get_particle(get_model(),
-                                                    v));
-  }
   unsigned int get_number() const {return get_indexes().size();}
 #ifndef SWIG
-  virtual bool get_provides_access() const {return false;}
+  bool get_provides_access() const;
   virtual const ParticleIndexTriplets& get_access() const {
     IMP_THROW("Object not implemented properly.", base::IndexException);
   }
@@ -128,6 +87,38 @@ public:
 
 #endif
 #endif
+
+  /** Use this for debugging only.
+   */
+  ParticleTripletsTemp get_particle_triplets() const;
+
+#if defined(IMP_USE_DEPRECATED)
+  /** \brief This function is very slow and you should think hard about using
+      it.
+
+      \deprecated This is slow and dependent on the order of elements in the
+      tuple.
+
+      Return whether the container has the given element.*/
+  IMP_DEPRECATED_WARN
+    bool get_contains_particle_triplet(ParticleTriplet v) const;
+
+  /** \deprecated This can be very slow and is probably not useful
+   */
+  IMP_DEPRECATED_WARN unsigned int get_number_of_particle_triplets() const;
+
+  /** \deprecated Use indexes instead and thing about using the
+      IMP_CONTAINER_FOREACH() macro.*/
+  IMP_DEPRECATED_WARN ParticleTriplet
+    get_particle_triplet(unsigned int i) const;
+
+#endif
+
+  IMP_PROTECTED_METHOD(virtual void,
+                       do_apply, (const TripletModifier *sm), const=0,);
+
+  IMP_PROTECTED_METHOD(virtual bool,
+                       do_get_provides_access, (), const, {return false;})
 
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(TripletContainer);
 };

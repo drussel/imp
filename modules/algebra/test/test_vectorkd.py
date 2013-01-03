@@ -9,6 +9,20 @@ class VectorKDTests(IMP.test.TestCase):
         self.assertEqual(v.get_squared_magnitude(), 30.0)
         self.assertAlmostEqual(v.get_magnitude(), math.sqrt(30.0), places=1)
 
+    def test_unit_vector(self):
+        """Check VectorKD get_unit_vector,
+            assuming get_magnitude is correct"""
+        v = IMP.algebra.VectorKD([1.0, 2.0, 3.0, 4.0])
+        v_unit = v.get_unit_vector()
+        self.assertAlmostEqual(v_unit.get_magnitude(), 1.0, places=6)
+        # tests that a tiny vector is converted to a random unit vector
+        for i in range(1,5):
+            tiny_v = IMP.algebra.VectorKD \
+                ([1.0e-16, 2.0e-16, 3.0e-16, 4.0e-16,5.0e-16,6.0e-16])
+            tiny_v_unit = tiny_v.get_unit_vector()
+            self.assertAlmostEqual(tiny_v_unit.get_magnitude(), 1.0, places=6)
+
+
     def test_component(self):
         """Check VectorKD components"""
         v = IMP.algebra.VectorKD([1.0, 2.0, 3.0, 4.0, 5.0])

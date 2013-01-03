@@ -25,12 +25,12 @@
 #include <IMP/base/Pointer.h>
 #include <IMP/base/InputAdaptor.h>
 #include <IMP/base/utility_macros.h>
+#include <IMP/base/deprecation_macros.h>
 #include <algorithm>
 
 
 IMP_BEGIN_NAMESPACE
 class SingletonModifier;
-class SingletonDerivativeModifier;
 class SingletonScore;
 
 //! A shared container for Singletons
@@ -47,49 +47,18 @@ public:
   typedef ParticlesTemp ContainedTypes;
   typedef ParticleIndexes ContainedIndexTypes;
   typedef ParticleIndex ContainedIndexType;
-  /** \note This function may be linear. Be aware of the complexity
-      bounds of your particular container.
-   */
-  virtual bool get_contains_particle(Particle* v) const =0;
 
-  ParticlesTemp get_particles() const {
-    return IMP::internal::get_particle(get_model(),
-                                       get_indexes());
-  }
-#ifndef IMP_DOXGEN
-  //! return the number of Singletons in the container
-  /** \note this isn't always constant time
-   */
-  virtual unsigned int get_number_of_particles() const {
-    return get_number();
-  }
-  /** Return the ith Particle* of the container.*/
-  virtual Particle* get_particle(unsigned int i) const {
-    return get(i);
-  }
-
-#endif
+  //! Just use apply() in the base class
+  void apply_generic(const SingletonModifier *m) const;
 
   //! Apply a SingletonModifier to the contents
-  virtual void apply(const SingletonModifier *sm) const=0;
-  //! Apply a SingletonModifier to the contents
-  virtual void apply(const SingletonDerivativeModifier *sm,
-                     DerivativeAccumulator &da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate(const SingletonScore *s,
-                          DerivativeAccumulator *da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate_if_good(const SingletonScore *s,
-                                  DerivativeAccumulator *da,
-                                  double max) const=0;
+  void apply(const SingletonModifier *sm) const;
 
   /** Get all the indexes contained in the container.*/
   virtual ParticleIndexes get_indexes() const=0;
   /** Get all the indexes that might possibly be contained in the
       container, useful with dynamic containers.*/
-  virtual ParticleIndexes get_all_possible_indexes() const=0;
+  virtual ParticleIndexes get_range_indexes() const=0;
 
 #ifndef IMP_DOXYGEN
   ParticlesTemp get() const {
@@ -101,19 +70,9 @@ public:
     return IMP::internal::get_particle(get_model(),
                                        get_indexes()[i]);
   }
-  /** Return true if the container contains the passed Particle*.*/
-  bool get_contains(Particle* v) const {
-    return get_contains_particle(v);
-  }
-  /** Return true if the container contains the passed Particle*.*/
-  virtual bool get_contains_index(ParticleIndex v) const {
-    return get_contains_particle(IMP::internal
-                                     ::get_particle(get_model(),
-                                                    v));
-  }
   unsigned int get_number() const {return get_indexes().size();}
 #ifndef SWIG
-  virtual bool get_provides_access() const {return false;}
+  bool get_provides_access() const;
   virtual const ParticleIndexes& get_access() const {
     IMP_THROW("Object not implemented properly.", base::IndexException);
   }
@@ -128,6 +87,38 @@ public:
 
 #endif
 #endif
+
+  /** Use this for debugging only.
+   */
+  ParticlesTemp get_particles() const;
+
+#if defined(IMP_USE_DEPRECATED)
+  /** \brief This function is very slow and you should think hard about using
+      it.
+
+      \deprecated This is slow and dependent on the order of elements in the
+      tuple.
+
+      Return whether the container has the given element.*/
+  IMP_DEPRECATED_WARN
+    bool get_contains_particle(Particle* v) const;
+
+  /** \deprecated This can be very slow and is probably not useful
+   */
+  IMP_DEPRECATED_WARN unsigned int get_number_of_particles() const;
+
+  /** \deprecated Use indexes instead and thing about using the
+      IMP_CONTAINER_FOREACH() macro.*/
+  IMP_DEPRECATED_WARN Particle*
+    get_particle(unsigned int i) const;
+
+#endif
+
+  IMP_PROTECTED_METHOD(virtual void,
+                       do_apply, (const SingletonModifier *sm), const=0,);
+
+  IMP_PROTECTED_METHOD(virtual bool,
+                       do_get_provides_access, (), const, {return false;})
 
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(SingletonContainer);
 };

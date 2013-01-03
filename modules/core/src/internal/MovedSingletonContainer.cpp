@@ -14,7 +14,6 @@
 #include <IMP/internal/InternalListSingletonContainer.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/PairScore.h>
-#include <IMP/internal/singleton_helpers.h>
 #include <IMP/base/utility.h>
 
 #include <algorithm>
@@ -46,11 +45,11 @@ void MovedSingletonContainer::do_after_evaluate(DerivativeAccumulator*da) {
   if (reset_all_) {
     do_reset_all();
     ParticleIndexes t;
-    update_list(t);
+    swap(t);
   } else if (reset_moved_) {
     do_reset_moved();
     ParticleIndexes t;
-    update_list(t);
+    swap(t);
   }
   reset_moved_=false;
   reset_all_=false;
@@ -70,22 +69,25 @@ void MovedSingletonContainer::do_before_evaluate()
   } else {
     ParticleIndexes mved= do_get_moved();
     IMP_LOG(TERSE, "Adding to moved list: " << Showable(mved) << std::endl);
-    add_to_list(mved);
+    ParticleIndexes old;
+    swap(old);
+    old+=mved;
+    swap(old);
   }
   IMP_IF_CHECK(base::USAGE_AND_INTERNAL) {
     validate();
   }
 }
 
-ParticlesTemp MovedSingletonContainer::get_all_possible_particles() const {
-  return pc_->get_all_possible_particles();
-}
 ParticleIndexes MovedSingletonContainer::get_all_possible_indexes() const {
   return pc_->get_all_possible_indexes();
 }
+ParticleIndexes MovedSingletonContainer::get_range_indexes() const {
+  return pc_->get_range_indexes();
+}
 
 ParticlesTemp MovedSingletonContainer::get_input_particles() const {
-  return pc_->get_particles();
+  return IMP::get_particles(get_model(), pc_->get_indexes());
 }
 
 ContainersTemp MovedSingletonContainer::get_input_containers() const {
@@ -100,7 +102,7 @@ void MovedSingletonContainer::reset()
 void MovedSingletonContainer::initialize()
 {
   ParticleIndexes pt=do_initialize();
-  update_list(pt);
+  swap(pt);
 }
 
 
@@ -122,14 +124,6 @@ void XYZRMovedSingletonContainer::validate() const {
   ParticleIndexes pis= get_singleton_container()->get_indexes();
   IMP_USAGE_CHECK(pis.size()==backup_.size(),
                   "Backup is not the right size");
-  //using IMP::core::operator<<;
-  // not sure why I need "Showable" all of a sudden, but I do
-  for (unsigned int i=0; i< moved_.size(); ++i) {
-    Particle *p=get_singleton_container()->get_particle(moved_[i]);
-    IMP_CHECK_VARIABLE(p);
-    IMP_USAGE_CHECK(get_contains(p),
-                    "Particle in moved list but not in contents");
-  }
 }
 
 void XYZRMovedSingletonContainer::do_reset_all() {
@@ -158,12 +152,15 @@ ParticleIndexes XYZRMovedSingletonContainer::do_initialize() {
 void XYZRMovedSingletonContainer::do_reset_moved() {
   IMP_OBJECT_LOG;
   std::sort(moved_.begin(), moved_.end());
+  IMP_CONTAINER_ACCESS(SingletonContainer, get_singleton_container(),
+                       {
   for (unsigned int i=0; i< moved_.size(); ++i) {
     // skip duplicates
     if (i > 0 && moved_[i-1]== moved_[i]) continue;
     backup_[moved_[i]]
-        =XYZR(get_singleton_container()->get_particle(moved_[i])).get_sphere();
+      =XYZR(get_model(), imp_indexes[moved_[i]]).get_sphere();
   }
+                       });
   moved_.clear();
 }
 ParticleIndexes XYZRMovedSingletonContainer::do_get_moved() {
@@ -184,25 +181,10 @@ ParticleIndexes XYZRMovedSingletonContainer::do_get_moved() {
     return ret;
   }
 
-double XYZRMovedSingletonContainer
-::do_get_distance_moved(unsigned int i) const {
-  return (backup_[i].get_center()
-          -core::XYZ(get_singleton_container()
-                     ->get_particle(i)).get_coordinates()).get_magnitude()
-    + std::abs(backup_[i].get_radius()
-               - core::XYZR(get_singleton_container()
-                            ->get_particle(i)).get_radius());
-  }
 XYZRMovedSingletonContainer
 ::XYZRMovedSingletonContainer(SingletonContainer *pc,
                               double threshold):
   MovedSingletonContainer(pc, threshold){
-}
-
-
-ParticleIndexes
-XYZRMovedSingletonContainer::get_all_possible_indexes() const {
-  return get_singleton_container()->get_all_possible_indexes();
 }
 
 
@@ -212,9 +194,6 @@ XYZRMovedSingletonContainer::get_all_possible_indexes() const {
 
 void RigidMovedSingletonContainer::validate() const {
   IMP_OBJECT_LOG;
-  normal_moved_->validate();
-  IMP_USAGE_CHECK(rbs_.size()==rbs_backup_.size(),
-                  "Backup is not the right size");
 }
 
 void RigidMovedSingletonContainer::check_estimate(core::RigidBody rbs,
@@ -242,119 +221,75 @@ void RigidMovedSingletonContainer::check_estimate(core::RigidBody rbs,
 }
 
 
+void
+RigidMovedSingletonContainer::do_initialize_particle(ParticleIndex pi) {
+  if (core::RigidMember::particle_is_instance(get_model(),
+                                              pi)) {
+    core::RigidBody rb= core::RigidMember(get_model(), pi).get_rigid_body();
+    ParticleIndex rbpi=rb.get_particle_index();
+    if (rbs_members_.find(rbpi) == rbs_members_.end()) {
+      bodies_.push_back(pi);
+      backup_.push_back(get_data(pi));
+    }
+    rbs_members_[rb.get_particle_index()].push_back(pi);
+  } else {
+    bodies_.push_back(pi);
+    rbs_members_[pi]=ParticleIndexes(1, pi);
+    backup_.push_back(get_data(pi));
+  }
+}
+
 ParticleIndexes RigidMovedSingletonContainer::do_initialize() {
   IMP_OBJECT_LOG;
   ParticleIndexes normal;
-  rbs_.clear();
-  rbs_backup_.clear();
+  backup_.clear();
   rbs_members_.clear();
-  int count=0;
-  IMP_FOREACH_SINGLETON_INDEX(get_singleton_container(),
+  bodies_.clear();
+  IMP_CONTAINER_FOREACH(SingletonContainer,
+                        get_singleton_container(),
                         {
-                          ++count;
-                          if (core::RigidMember
-                              ::particle_is_instance(get_model(),
-                                                     _1)) {
-                            core::RigidBody rb
-                              = core::RigidMember(get_model(),
-                                                  _1).get_rigid_body();
-              if (rbs_members_.find(_1) == rbs_members_.end()) {
-                rbs_.push_back(rb.get_particle_index());
-                rbs_backup_.push_back(get_data(rb.get_particle_index()));
-                rbs_moved_.push_back(_2);
-              }
-              rbs_members_[rb.get_particle_index()].push_back(_1);
-         } else {
-           normal.push_back(_1);
-         }
+                          do_initialize_particle(_1);
                         });
-  normal_->set_particles(normal);
-  normal_moved_->initialize();
-  //backup_.clear();
-  rbs_backup_.resize(count);
   return get_singleton_container()->get_indexes();
 }
 
 void RigidMovedSingletonContainer::do_reset_all() {
   IMP_OBJECT_LOG;
-  ParticleIndexes normal;
-  rbs_.clear();
-  rbs_backup_.clear();
-  rbs_members_.clear();
-  int count=0;
-  IMP_FOREACH_SINGLETON_INDEX(get_singleton_container(),
-                        {
-                          ++count;
-                          if (core::RigidMember
-                              ::particle_is_instance(get_model(),
-                                                     _1)) {
-                            core::RigidBody rb
-                              = core::RigidMember(get_model(),
-                                                  _1).get_rigid_body();
-              if (rbs_members_.find(_1) == rbs_members_.end()) {
-                rbs_.push_back(rb.get_particle_index());
-                rbs_backup_.push_back(get_data(rb.get_particle_index()));
-              }
-              rbs_members_[rb.get_particle_index()].push_back(_1);
-         } else {
-           normal.push_back(_1);
-         }
-                        });
-  normal_->set_particles(normal);
-  normal_moved_->reset();
-  //backup_.clear();
-  rbs_backup_.resize(count);
+  do_initialize();
 }
 void RigidMovedSingletonContainer::do_reset_moved() {
   IMP_OBJECT_LOG;
-  normal_moved_->reset_moved();
-  for (unsigned int i=0; i< rbs_moved_.size(); ++i) {
-    rbs_backup_[rbs_moved_[i]]=get_data(rbs_[rbs_moved_[i]]);
+  for (unsigned int i=0; i< moved_.size(); ++i) {
+    backup_[moved_[i]]=get_data(bodies_[moved_[i]]);
   }
-  rbs_moved_.clear();
+  moved_.clear();
 }
 
 
 ParticleIndexes RigidMovedSingletonContainer::do_get_moved() {
     IMP_OBJECT_LOG;
-    ParticleIndexes ret= normal_moved_->get_indexes();
-    for (unsigned int i=0; i< rbs_.size(); ++i) {
-      RigidBody rb(get_model(), rbs_[i]);
-      if (get_distance_estimate(rbs_[i]) > get_threshold()) {
-        ret.insert(ret.end(), rbs_members_[rbs_[i]].begin(),
-                   rbs_members_[rbs_[i]].end());
-        rbs_moved_.push_back(i);
+    ParticleIndexes ret;
+    for (unsigned int i=0; i< bodies_.size(); ++i) {
+      if (get_distance_estimate(i) > get_threshold()) {
+        ret+= rbs_members_[bodies_[i]];
+        moved_.push_back(i);
       }
     }
     return ret;
   }
 
-double RigidMovedSingletonContainer
-::do_get_distance_moved(unsigned int i) const {
-  Particle *p=get_singleton_container()->get_particle(i);
-  if (core::RigidMember::particle_is_instance(p)) {
-    core::RigidBody rb = core::RigidMember(p).get_rigid_body();
-    return get_distance_estimate(rb.get_particle_index());
-  } else {
-    return normal_moved_->get_distance_moved(p);
-  }
-}
 RigidMovedSingletonContainer
 ::RigidMovedSingletonContainer(SingletonContainer *pc,
                                double threshold):
   MovedSingletonContainer(pc, threshold){
-  normal_= new IMP::internal::InternalDynamicListSingletonContainer(pc,
-                                          "Non-rigid particles %1%");
-  normal_moved_= new XYZRMovedSingletonContainer(normal_, threshold);
 }
-
-
 
 ParticlesTemp RigidMovedSingletonContainer
 ::get_input_particles() const {
   ParticlesTemp ret
-    = MovedSingletonContainer::get_singleton_container()
-    ->get_particles();
+    = IMP::get_particles(get_model(),
+MovedSingletonContainer::get_singleton_container()
+                         ->get_indexes());
   int sz= ret.size();
   for (int i=0; i< sz; ++i) {
     if (RigidMember::particle_is_instance(ret[i])) {
@@ -363,23 +298,6 @@ ParticlesTemp RigidMovedSingletonContainer
   }
   return ret;
 }
-
-ContainersTemp RigidMovedSingletonContainer
-::get_input_containers() const {
-  ContainersTemp ret;
-  ret.push_back(get_singleton_container());
-  ret.push_back(normal_);
-  ret.push_back(normal_moved_);
-  return ret;
-}
-
-ParticleIndexes
-RigidMovedSingletonContainer::get_all_possible_indexes() const {
-  ParticleIndexes ret= normal_moved_->get_all_possible_indexes();
-  ret.insert(ret.end(), rbs_.begin(), rbs_.end());
-  return ret;
-}
-
 
 
 IMPCORE_END_INTERNAL_NAMESPACE

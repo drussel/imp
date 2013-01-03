@@ -14,8 +14,4 @@
 
 IMP_BEGIN_NAMESPACE
 
-PairDerivativeModifier::PairDerivativeModifier(std::string name):
-  Object(name){
-}
-
 IMP_END_NAMESPACE

@@ -17,6 +17,8 @@
 #include "ParticleTuple.h"
 #include "DerivativeAccumulator.h"
 #include "internal/container_helpers.h"
+#include <IMP/base/utility_macros.h>
+#include "input_output_macros.h"
 
 IMP_BEGIN_NAMESPACE
 
@@ -33,16 +35,18 @@ class IMPEXPORT QuadScore : public base::Object
  public:
   typedef ParticleQuad Argument;
   typedef ParticleIndexQuad IndexArgument;
+  typedef const ParticleQuad& PassArgument;
+  typedef const ParticleIndexQuad& PassIndexArgument;
+  typedef QuadModifier Modifier;
   QuadScore(std::string name="QuadScore %1%");
   //! Compute the score and the derivative if needed.
-  virtual double evaluate(const ParticleQuad& vt,
-                          DerivativeAccumulator *da) const =0;
+  IMP_DEPRECATED_WARN
+    virtual double evaluate(const ParticleQuad& vt,
+                            DerivativeAccumulator *da) const;
 
   //! Compute the score and the derivative if needed.
   virtual double evaluate_index(Model *m, const ParticleIndexQuad& vt,
-                                DerivativeAccumulator *da) const {
-    return evaluate(internal::get_particle(m, vt), da);
-  }
+                                DerivativeAccumulator *da) const;
 
   /** Implementations
       for these are provided by the IMP_QUAD_SCORE()
@@ -50,23 +54,15 @@ class IMPEXPORT QuadScore : public base::Object
   */
   virtual double evaluate_indexes(Model *m,
                                   const ParticleIndexQuads &o,
-                                  DerivativeAccumulator *da) const {
-    double ret=0;
-    for (unsigned int i=0; i< o.size(); ++i) {
-      ret+= evaluate_index(m, o[i], da);
-    }
-    return ret;
-  }
-
+                                  DerivativeAccumulator *da,
+                                  unsigned int lower_bound,
+                                  unsigned int upper_bound) const ;
 
   //! Compute the score and the derivative if needed.
   virtual double evaluate_if_good_index(Model *m,
                                         const ParticleIndexQuad& vt,
                                         DerivativeAccumulator *da,
-                                        double max) const {
-    IMP_UNUSED(max);
-    return evaluate_index(m, vt, da);
-  }
+                                        double max)  const;
 
   /** Implementations
       for these are provided by the IMP_QUAD_SCORE()
@@ -75,31 +71,23 @@ class IMPEXPORT QuadScore : public base::Object
   virtual double evaluate_if_good_indexes(Model *m,
                                           const ParticleIndexQuads &o,
                                           DerivativeAccumulator *da,
-                                          double max) const {
-    double ret=0;
-    for (unsigned int i=0; i< o.size(); ++i) {
-      double cur= evaluate_index(m, o[i], da);
-      max-=cur;
-      ret+=cur;
-      if (max<0) break;
-    }
-    return ret;
-  }
-
-  /** Get the set of particles read when applied to the arguments. */
-  virtual ParticlesTemp
-    get_input_particles(Particle *p) const =0;
-
-  /** Get the set of input containers when this modifier is applied to
-      the arguments. */
-  virtual ContainersTemp
-    get_input_containers(Particle *p) const =0;
-
+                                          double max,
+                                          unsigned int lower_bound,
+                                          unsigned int upper_bound)
+    const;
   /** Decompose this pair score acting on the pair into a set of
       restraints. The scoring function and derivatives should
       be equal to the current score. The defualt implementation
       just returns this object bound to the pair.*/
-  Restraints create_current_decomposition(const ParticleQuad& vt) const;
+  Restraints create_current_decomposition(Model *m,
+                                          const ParticleIndexQuad& vt) const;
+
+  /** Overide this to return your own decomposition.*/
+  IMP_PROTECTED_METHOD(virtual Restraints,
+                       do_create_current_decomposition,
+                       (Model *m, const ParticleIndexQuad& vt), const,);
+
+  IMP_INPUTS_DECL(QuadScore);
 
   IMP_REF_COUNTED_DESTRUCTOR(QuadScore);
 };

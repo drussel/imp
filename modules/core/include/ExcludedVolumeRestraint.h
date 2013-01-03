@@ -29,9 +29,8 @@ IMPCORE_BEGIN_NAMESPACE
     restraint prevents the particles from interpenetrating. Such restraints
     are also known as steric clash restraints.
 
-    \note If any of the rigid bodies don't have radii, an appropriate radius
-    will be added. Note, to take advantage of this, the RigidBody
-    must be in the container before the Restraint is added to the model.
+    \note See IMP::container::ClosePairContainer for more information about
+    close pair based scoring functions and \imp.
 
     \note Changing the set of particles in the SingletonContainer is not
     currently supported after the first evaluate call.
@@ -65,6 +64,11 @@ class IMPCOREEXPORT ExcludedVolumeRestraint: public Restraint
 public:
   /** The SingletonContainer contains a set of XYZR particles and RigidMembers.
 
+      The slack is how far the particles must move before the list of close
+      pairs is computed. It does not matter for correctness, just running
+      time. You may want to fiddle with it or use the
+      IMP::container::get_slack_estimate() function.
+
       The spring constant used is k.*/
   ExcludedVolumeRestraint(SingletonContainerAdaptor sc,
                           double k=1, double slack=10,
@@ -76,7 +80,7 @@ public:
   double unprotected_evaluate_if_good(DerivativeAccumulator *da,
                                       double max) const;
 #endif
-  IMP_RESTRAINT(ExcludedVolumeRestraint);
+  IMP_RESTRAINT_2(ExcludedVolumeRestraint);
   Restraints do_create_decomposition() const;
   Restraints do_create_current_decomposition() const;
   IMP_LIST_ACTION(public, PairFilter, PairFilters, pair_filter,

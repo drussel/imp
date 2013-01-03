@@ -3,9 +3,12 @@ import scons_tools.data
 import scons_tools.paths
 import SCons
 import os
-from SCons.Script import File, Action, Dir
+from SCons.Script import File, Action, Dir, PathVariable, GetOption
 
 def _search_for_deps(context, libname, extra_libs, headers, body, possible_deps):
+    if type(headers) != list:
+        headers=[headers]
+    context.Message("Checking for library "+str(libname)+"...")
     for i in range(0,len(possible_deps)+1):
         lc= extra_libs+possible_deps[0:i]
         #print "Trying "+ str(i) +" with " +str(lc)
@@ -18,15 +21,20 @@ def _search_for_deps(context, libname, extra_libs, headers, body, possible_deps)
             #print context.env["CPPPATH"]
         #print context.env['LINKFLAGS']
         #print "checking", libname, lc
-        ret=context.sconf.CheckLibWithHeader(libname, header=headers, call=body, language='CXX',
-                                             autoadd=False)
+        prog=["#include <%s>"%x for x in headers]
+        prog.append("int main(int, char*[]) {")
+        prog.append(body)
+        prog.append("}")
+        ret=context.sconf.TryLink( "\n".join(prog), ".cpp")
         context.env.Replace(LIBS=olibs)
         if ret:
+            context.Result("yes")
             if libname is None:
                 libs = lc
             else:
                 libs = [libname] + lc
             return (True, libs, None)
+    context.Result("no")
     return (False, None, None)
 
 def add_dependency_link_flags(env, dependencies):
@@ -71,7 +79,7 @@ def _get_version(context, name, includepath, versioncpp, versionheader):
         return None
 
 def check_lib(context, name, lib, header, body="", extra_libs=[], versioncpp=None,
-              versionheader=None):
+              versionheader=None, search_build=False):
     if lib is not None and type(lib) != type([]):
         scons_tools.utility.report_error(context.env,
                                          "The lib argument must be given as a list. It was not for "+name)
@@ -83,14 +91,25 @@ def check_lib(context, name, lib, header, body="", extra_libs=[], versioncpp=Non
     #print context.env["LIBPATH"]
     #print context.env["CPPPATH"]
 
+    if not search_build:
+        swap_flags=True
+        oldcpppath= context.env['CPPPATH']
+        oldlibpath= context.env['LIBPATH']
+        cpppath=[x for x in oldcpppath if x != Dir("#/build/include").abspath]
+        libpath=[x for x in oldlibpath if x != Dir("#/build/lib").abspath]
+        context.env.Replace(CPPPATH=cpppath)
+        context.env.Replace(LIBPATH=libpath)
+    else:
+        swap_flags=False
+
     if lib is not None:
         ret=_search_for_deps(context, lib[0], lib[1:], header, body, extra_libs)
     else:
         ret=(context.sconf.CheckHeader(header, language="C++"), [])
     if not ret[0]:
         #context.env.Replace(LINKFLAGS=oldflags)
-        return (ret[0], ret[1], None)
-    if context.env['IMP_OUTER_ENVIRONMENT']['IMP_BUILD_STATIC'] and lib != None:
+        ret= (ret[0], ret[1], None)
+    elif context.env['IMP_OUTER_ENVIRONMENT']['IMP_BUILD_STATIC'] and lib != None:
         scons_tools.utility.make_static_build(context.env)
         if type(lib) == list:
             bret=_search_for_deps(context, lib[0], lib[1:], header, body, extra_libs)
@@ -100,16 +119,21 @@ def check_lib(context, name, lib, header, body="", extra_libs=[], versioncpp=Non
         # should be the sum of the two
         if bret[0]:
             #context.env.Replace(LINKFLAGS=oldflags)
-            return (bret[0], ret[1]+bret[1], _get_version(context, name, None,
+            ret= (bret[0], ret[1]+bret[1], _get_version(context, name, None,
                                                           versioncpp,
                                                           versionheader))
         else:
             #context.env.Replace(LINKFLAGS=oldflags)
-            return (False, [], None)
-    vers= _get_version(context, name, None, versioncpp, versionheader)
+            ret= (False, [], None)
+    else:
+        vers= _get_version(context, name, None, versioncpp, versionheader)
     #print "version", vers
     #context.env.Replace(LINKFLAGS=oldflags)
-    return  (True, ret[1], vers)
+        ret=  (True, ret[1], vers)
+    if swap_flags:
+        context.env.Replace(LIBPATH=oldlibpath)
+        context.env.Replace(CPPPATH=oldcpppath)
+    return ret
 
 def get_dependency_string(name):
     lname= name.lower()
@@ -166,7 +190,8 @@ def _get_info_pkgconfig(context, env,  name, versioncpp, versionheader):
     return (True, libs, version, includepath, libpath)
 
 def _get_info_test(context, env, name, lib, header, body,
-                   extra_libs, versioncpp, versionheader):
+                   extra_libs, versioncpp, versionheader,
+                   search_build=False):
     lcname= get_dependency_string(name)
     #print context.env["LIBPATH"]
     #print context.env["CPPPATH"]
@@ -175,7 +200,8 @@ def _get_info_test(context, env, name, lib, header, body,
                                     body=body,
                                     extra_libs=extra_libs,
                                     versioncpp=versioncpp,
-                                    versionheader=versionheader)
+                                    versionheader=versionheader,
+                                    search_build=search_build)
     if not ret:
         return _get_bad()
     else:
@@ -184,7 +210,7 @@ def _get_info_test(context, env, name, lib, header, body,
 
 def add_external_library(env, name, lib, header, body="", extra_libs=[],
                          versioncpp=None, versionheader=None,
-                         enabled=True, build=None):
+                         enabled=True, build=None, alternate_lib=None):
     tenv= scons_tools.environment.get_test_environment(env)
     lcname= get_dependency_string(name)
     ucname= lcname.upper()
@@ -212,6 +238,10 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                     (ok, libs, version, includepath, libpath)=\
                       _get_info_test(context, env, name, lib, header, body,
                                       extra_libs, versioncpp, versionheader)
+                    if not ok and alternate_lib:
+                        (ok, libs, version, includepath, libpath)=\
+                        _get_info_test(context, env, name, alternate_lib, header, body,
+                                       extra_libs, versioncpp, versionheader)
                     if not ok and build:
                         local=True
                         paths={"builddir":Dir("#/build/").abspath,
@@ -221,11 +251,12 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
                             os.makedirs(paths["workdir"])
 
                         buildscript= build%paths
+                        print buildscript
                         try:
                             os.system(buildscript)
                             (ok, libs, version, includepath, libpath)=\
                              _get_info_test(context, env, name, lib, header, body,
-                                extra_libs, versioncpp, versionheader)
+                                            extra_libs, versioncpp, versionheader, True)
                                  #print "found", ok
                         except:
                             pass
@@ -272,3 +303,44 @@ def add_external_library(env, name, lib, header, body="", extra_libs=[],
             env.Append(IMP_DISABLED=[name])
             env.Append(IMP_CONFIGURATION=[lcname+"='no'"])
         conf.Finish()
+
+def add_external_cmake_library(env, name, lib, header, body="", extra_libs=[],
+                               versioncpp=None, versionheader=None,
+                               enabled=True, alternate_lib=None):
+  if not env.get('cmake', None):
+    vars = env['IMP_VARIABLES']
+    env['IMP_SCONS_EXTRA_VARIABLES'].append('cmake')
+    vars.Add(PathVariable('cmake', 'The cmake command', "cmake", PathVariable.PathAccept))
+    vars.Update(env)
+
+  if env['build']=="debug":
+    cmake_build="DEBUG"
+  else:
+    cmake_build="RELEASE"
+
+  arguments=[]
+  arguments.append("-DCMAKE_INSTALL_PREFIX=%(builddir)s")
+  arguments.append("-DCMAKE_INSTALL_PYTHONDIR=%(builddir)s/lib")
+  arguments.append("%(srcdir)s ")
+  arguments.append("-DCMAKE_INSTALL_LIBDIR=%(builddir)s/lib")
+  arguments.append("-DCMAKE_INSTALL_SWIGDIR=%(builddir)s/swig ")
+  arguments.append("-DCMAKE_BUILD_TYPE="+cmake_build)
+  if env.get("libpath", "") != "":
+    arguments.append("-DCMAKE_LIBRARY_PATH="+env["libpath"])
+  if env.get("includepath", "") != "":
+    arguments.append("-DCMAKE_INCLUDE_PATH="+env["includepath"])
+  if env.get("cxxflags", "") != "":
+    arguments.append("-DCMAKE_CXX_FLAGS=\""+env["cxxflags"]+"\"")
+  if env.get("linkflags", "") != "":
+    arguments.append("-DCMAKE_SHARED_LINKER_FLAGS=\""+env["linkflags"]+"\"")
+
+  cmake= env['cmake']+" "+" ".join(arguments)
+
+  #print cmake
+  add_external_library(env, name, lib, header, body=body, extra_libs=extra_libs,
+                       versioncpp=versioncpp, versionheader=versionheader,
+                       enabled=enabled, alternate_lib=alternate_lib,
+                       build="""cd %(workdir)s
+""" + cmake + """
+    make -j %d
+    make install"""%(int(GetOption('num_jobs'))))

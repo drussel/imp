@@ -25,12 +25,12 @@
 #include <IMP/base/Pointer.h>
 #include <IMP/base/InputAdaptor.h>
 #include <IMP/base/utility_macros.h>
+#include <IMP/base/deprecation_macros.h>
 #include <algorithm>
 
 
 IMP_BEGIN_NAMESPACE
 class PairModifier;
-class PairDerivativeModifier;
 class PairScore;
 
 //! A shared container for Pairs
@@ -47,49 +47,18 @@ public:
   typedef ParticlePairsTemp ContainedTypes;
   typedef ParticleIndexPairs ContainedIndexTypes;
   typedef ParticleIndexPair ContainedIndexType;
-  /** \note This function may be linear. Be aware of the complexity
-      bounds of your particular container.
-   */
-  virtual bool get_contains_particle_pair(const ParticlePair& v) const =0;
 
-  ParticlePairsTemp get_particle_pairs() const {
-    return IMP::internal::get_particle(get_model(),
-                                       get_indexes());
-  }
-#ifndef IMP_DOXGEN
-  //! return the number of Pairs in the container
-  /** \note this isn't always constant time
-   */
-  virtual unsigned int get_number_of_particle_pairs() const {
-    return get_number();
-  }
-  /** Return the ith ParticlePair of the container.*/
-  virtual ParticlePair get_particle_pair(unsigned int i) const {
-    return get(i);
-  }
-
-#endif
+  //! Just use apply() in the base class
+  void apply_generic(const PairModifier *m) const;
 
   //! Apply a SingletonModifier to the contents
-  virtual void apply(const PairModifier *sm) const=0;
-  //! Apply a SingletonModifier to the contents
-  virtual void apply(const PairDerivativeModifier *sm,
-                     DerivativeAccumulator &da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate(const PairScore *s,
-                          DerivativeAccumulator *da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate_if_good(const PairScore *s,
-                                  DerivativeAccumulator *da,
-                                  double max) const=0;
+  void apply(const PairModifier *sm) const;
 
   /** Get all the indexes contained in the container.*/
   virtual ParticleIndexPairs get_indexes() const=0;
   /** Get all the indexes that might possibly be contained in the
       container, useful with dynamic containers.*/
-  virtual ParticleIndexPairs get_all_possible_indexes() const=0;
+  virtual ParticleIndexPairs get_range_indexes() const=0;
 
 #ifndef IMP_DOXYGEN
   ParticlePairsTemp get() const {
@@ -101,19 +70,9 @@ public:
     return IMP::internal::get_particle(get_model(),
                                        get_indexes()[i]);
   }
-  /** Return true if the container contains the passed ParticlePair.*/
-  bool get_contains(const ParticlePair& v) const {
-    return get_contains_particle_pair(v);
-  }
-  /** Return true if the container contains the passed ParticlePair.*/
-  virtual bool get_contains_index(ParticleIndexPair v) const {
-    return get_contains_particle_pair(IMP::internal
-                                     ::get_particle(get_model(),
-                                                    v));
-  }
   unsigned int get_number() const {return get_indexes().size();}
 #ifndef SWIG
-  virtual bool get_provides_access() const {return false;}
+  bool get_provides_access() const;
   virtual const ParticleIndexPairs& get_access() const {
     IMP_THROW("Object not implemented properly.", base::IndexException);
   }
@@ -128,6 +87,38 @@ public:
 
 #endif
 #endif
+
+  /** Use this for debugging only.
+   */
+  ParticlePairsTemp get_particle_pairs() const;
+
+#if defined(IMP_USE_DEPRECATED)
+  /** \brief This function is very slow and you should think hard about using
+      it.
+
+      \deprecated This is slow and dependent on the order of elements in the
+      tuple.
+
+      Return whether the container has the given element.*/
+  IMP_DEPRECATED_WARN
+    bool get_contains_particle_pair(ParticlePair v) const;
+
+  /** \deprecated This can be very slow and is probably not useful
+   */
+  IMP_DEPRECATED_WARN unsigned int get_number_of_particle_pairs() const;
+
+  /** \deprecated Use indexes instead and thing about using the
+      IMP_CONTAINER_FOREACH() macro.*/
+  IMP_DEPRECATED_WARN ParticlePair
+    get_particle_pair(unsigned int i) const;
+
+#endif
+
+  IMP_PROTECTED_METHOD(virtual void,
+                       do_apply, (const PairModifier *sm), const=0,);
+
+  IMP_PROTECTED_METHOD(virtual bool,
+                       do_get_provides_access, (), const, {return false;})
 
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(PairContainer);
 };

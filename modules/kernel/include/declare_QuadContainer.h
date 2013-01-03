@@ -25,12 +25,12 @@
 #include <IMP/base/Pointer.h>
 #include <IMP/base/InputAdaptor.h>
 #include <IMP/base/utility_macros.h>
+#include <IMP/base/deprecation_macros.h>
 #include <algorithm>
 
 
 IMP_BEGIN_NAMESPACE
 class QuadModifier;
-class QuadDerivativeModifier;
 class QuadScore;
 
 //! A shared container for Quads
@@ -47,49 +47,18 @@ public:
   typedef ParticleQuadsTemp ContainedTypes;
   typedef ParticleIndexQuads ContainedIndexTypes;
   typedef ParticleIndexQuad ContainedIndexType;
-  /** \note This function may be linear. Be aware of the complexity
-      bounds of your particular container.
-   */
-  virtual bool get_contains_particle_quad(const ParticleQuad& v) const =0;
 
-  ParticleQuadsTemp get_particle_quads() const {
-    return IMP::internal::get_particle(get_model(),
-                                       get_indexes());
-  }
-#ifndef IMP_DOXGEN
-  //! return the number of Quads in the container
-  /** \note this isn't always constant time
-   */
-  virtual unsigned int get_number_of_particle_quads() const {
-    return get_number();
-  }
-  /** Return the ith ParticleQuad of the container.*/
-  virtual ParticleQuad get_particle_quad(unsigned int i) const {
-    return get(i);
-  }
-
-#endif
+  //! Just use apply() in the base class
+  void apply_generic(const QuadModifier *m) const;
 
   //! Apply a SingletonModifier to the contents
-  virtual void apply(const QuadModifier *sm) const=0;
-  //! Apply a SingletonModifier to the contents
-  virtual void apply(const QuadDerivativeModifier *sm,
-                     DerivativeAccumulator &da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate(const QuadScore *s,
-                          DerivativeAccumulator *da) const=0;
-
-  //! Evaluate a score on the contents
-  virtual double evaluate_if_good(const QuadScore *s,
-                                  DerivativeAccumulator *da,
-                                  double max) const=0;
+  void apply(const QuadModifier *sm) const;
 
   /** Get all the indexes contained in the container.*/
   virtual ParticleIndexQuads get_indexes() const=0;
   /** Get all the indexes that might possibly be contained in the
       container, useful with dynamic containers.*/
-  virtual ParticleIndexQuads get_all_possible_indexes() const=0;
+  virtual ParticleIndexQuads get_range_indexes() const=0;
 
 #ifndef IMP_DOXYGEN
   ParticleQuadsTemp get() const {
@@ -101,19 +70,9 @@ public:
     return IMP::internal::get_particle(get_model(),
                                        get_indexes()[i]);
   }
-  /** Return true if the container contains the passed ParticleQuad.*/
-  bool get_contains(const ParticleQuad& v) const {
-    return get_contains_particle_quad(v);
-  }
-  /** Return true if the container contains the passed ParticleQuad.*/
-  virtual bool get_contains_index(ParticleIndexQuad v) const {
-    return get_contains_particle_quad(IMP::internal
-                                     ::get_particle(get_model(),
-                                                    v));
-  }
   unsigned int get_number() const {return get_indexes().size();}
 #ifndef SWIG
-  virtual bool get_provides_access() const {return false;}
+  bool get_provides_access() const;
   virtual const ParticleIndexQuads& get_access() const {
     IMP_THROW("Object not implemented properly.", base::IndexException);
   }
@@ -128,6 +87,38 @@ public:
 
 #endif
 #endif
+
+  /** Use this for debugging only.
+   */
+  ParticleQuadsTemp get_particle_quads() const;
+
+#if defined(IMP_USE_DEPRECATED)
+  /** \brief This function is very slow and you should think hard about using
+      it.
+
+      \deprecated This is slow and dependent on the order of elements in the
+      tuple.
+
+      Return whether the container has the given element.*/
+  IMP_DEPRECATED_WARN
+    bool get_contains_particle_quad(ParticleQuad v) const;
+
+  /** \deprecated This can be very slow and is probably not useful
+   */
+  IMP_DEPRECATED_WARN unsigned int get_number_of_particle_quads() const;
+
+  /** \deprecated Use indexes instead and thing about using the
+      IMP_CONTAINER_FOREACH() macro.*/
+  IMP_DEPRECATED_WARN ParticleQuad
+    get_particle_quad(unsigned int i) const;
+
+#endif
+
+  IMP_PROTECTED_METHOD(virtual void,
+                       do_apply, (const QuadModifier *sm), const=0,);
+
+  IMP_PROTECTED_METHOD(virtual bool,
+                       do_get_provides_access, (), const, {return false;})
 
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(QuadContainer);
 };

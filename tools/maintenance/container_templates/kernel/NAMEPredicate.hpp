@@ -15,6 +15,7 @@
 #include "ParticleTuple.h"
 #include "DerivativeAccumulator.h"
 #include "internal/container_helpers.h"
+#include "input_output_macros.h"
 
 IMP_BEGIN_NAMESPACE
 
@@ -59,6 +60,13 @@ class IMPEXPORT CLASSNAMEPredicate : public base::Object
     return get_value(internal::get_particle(m, vt));
   }
 
+  //! Enable them to be use as functors
+  /** But beware of slicing.
+   */
+  int operator()(Model *m, PASSINDEXTYPE vt) const {
+    return get_value_index(m, vt);
+  }
+
   /** Implementations
       for these are provided by the IMP_HEADERNAME_PREDICATE()
       macro.
@@ -72,16 +80,7 @@ class IMPEXPORT CLASSNAMEPredicate : public base::Object
     return ret;
   }
 
-
-
-  /** Get the set of particles read when applied to the arguments. */
-  virtual ParticlesTemp
-    get_input_particles(Particle *p) const =0;
-
-  /** Get the set of input containers when this modifier is applied to
-      the arguments. */
-  virtual ContainersTemp
-    get_input_containers(Particle *p) const =0;
+  IMP_INPUTS_DECL(CLASSNAMEPredicate);
 
   IMP_REF_COUNTED_DESTRUCTOR(CLASSNAMEPredicate);
 };

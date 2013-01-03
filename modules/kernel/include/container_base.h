@@ -12,6 +12,7 @@
 #include "kernel_config.h"
 #include "base_types.h"
 #include "Constraint.h"
+#include "particle_index.h"
 #include <IMP/base/utility_macros.h>
 #include <IMP/base/ref_counted_macros.h>
 #include <IMP/base/Object.h>
@@ -48,6 +49,11 @@ class Model;
 class IMPEXPORT Container : public Constraint
 {
   bool changed_;
+#if IMP_BUILD < IMP_FAST
+  bool readable_;
+  bool writeable_;
+#endif
+
   //! This will be reset at the end of evaluate
   IMP_PROTECTED_METHOD(void, set_is_changed, (bool tf),,);
   IMP_PROTECTED_CONSTRUCTOR(Container, (Model *m,
@@ -57,16 +63,24 @@ class IMPEXPORT Container : public Constraint
   /** Get a list of all particles contained in this one,
       given that the input containers are up to date.
   */
-  virtual ParticlesTemp get_all_possible_particles() const=0;
+  virtual ParticleIndexes get_all_possible_indexes() const=0;
+
+  /** \deprecated use get_all_possible_indexes() instead
+   */
+  IMP_DEPRECATED_WARN
+    ParticlesTemp get_all_possible_particles() const {
+    IMP_DEPRECATED_FUNCTION(Use IMP::Container::get_all_possible_indexes()
+                            instead);
+    return IMP::get_particles(get_model(), get_all_possible_indexes());
+  }
 
   /** Return true if the container changed since the last evaluate.*/
-  virtual bool get_is_changed() const {return changed_;}
-  //! Return get_all_possible_particles()
-  virtual ParticlesTemp get_input_particles() const;
-  //! Containers don't have output
-  virtual ParticlesTemp get_output_particles() const;
-  //! Containers don't have output
-  virtual ContainersTemp get_output_containers() const;
+  bool get_is_changed() const;
+
+  //! containers don't have outputs
+  IMP_IMPLEMENT_INLINE(ModelObjectsTemp do_get_outputs() const,{
+      return ModelObjectsTemp();});
+
   //! Reset changed status
   virtual void do_after_evaluate(DerivativeAccumulator *accpt);
 
@@ -75,6 +89,13 @@ class IMPEXPORT Container : public Constraint
       Examples include connectivity.*/
   virtual bool get_is_decomposable() const {return true;}
 
+#if !defined(IMP_DOXYGEN)
+  // methods to implement checking for inputs and outputs
+  void validate_readable() const;
+  void validate_writable() const;
+  void set_is_readable(bool tf);
+  void set_is_writable(bool tf);
+#endif
   IMP_REF_COUNTED_DESTRUCTOR(Container);
 };
 

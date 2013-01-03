@@ -104,10 +104,9 @@ def _get_platform_cxxflags(env):
         # otherwise it whines padding in everything
         ret+=["-Wall", "-Wno-unknown-pragmas"]
         ret+=["-Wno-padded"]
-        if env['cxx11']=="yes":
-            print "WARNING: boost and clang++ C++11 don't see to get along"
-        #if env['cxx11'] != 'no':
-        #    ret+=["-std=c++11"]
+        ret+=["-Wno-c++11-extensions"]
+        if env['cxx11'] == 'yes':
+            ret+=["-std=c++11"]
         if env['build'] == 'fast':
             ret+=["-O3"]
         elif env['build'] == 'release':
@@ -236,6 +235,8 @@ def _propagate_variables(env):
     # adding link flags twice
     env['SHLINKFLAGS'] = env.subst(env['SHLINKFLAGS'])
     env['LDMODULEFLAGS'] = env.subst(env['LDMODULEFLAGS'])
+    if isinstance(env['LDMODULEFLAGS'], str):
+        env['LDMODULEFLAGS'] = env['LDMODULEFLAGS'].split()
 
     if env['IMP_USE_PLATFORM_FLAGS']:
         env.Append(CXXFLAGS= _get_platform_cxxflags(env))
@@ -433,7 +434,7 @@ def add_common_variables(vars, package):
     vars.Add('linkflags', 'Link flags for all linking (e.g. "-lefence"). See pythonlinkflags, arliblinkflags, shliblinkflags.', None)
     vars.Add(EnumVariable('cxx11',
                           'Whether to use C++ 11 support.',
-                          'auto', ['no', 'auto']))
+                          'auto', ['no', 'yes', 'auto']))
     vars.Add('environment', "Add entries to the environment in which tools are run. The variable should be a comma separated list of name=value pairs.", "")
     vars.Add('pythonlinkflags', 'Link flags for linking python libraries (e.g. "-lefence")', "")
     vars.Add('arliblinkflags', 'Link flags for linking static libraries (e.g. "-lefence")', "")
@@ -453,7 +454,7 @@ def add_common_variables(vars, package):
                           'If true, add any compiler and linker arguments that might be needed/desired. If false, only used passed flags (eg only the values in "cxxflags", "linkflags" etc).',
                           True))
     vars.Add(BoolVariable('deprecated',
-                          'Build deprecated classes and functions', False))
+                          'Build deprecated classes and functions', True))
     vars.Add('percppcompilation',
                           'By default, all the .cpp files in a module are merged before building, greatly accelerating the process. This can be turned off globally by setting this variable to "yes" or per module by setting it to a colon separated list of module names, eg "em2d:kernel".', "no")
     vars.Add('pythonsosuffix', 'The suffix for the python libraries.', 'default')
@@ -496,12 +497,12 @@ def add_common_variables(vars, package):
                           'applications that were tested with this scons '
                           'invocation; "separate" will generate a separate '
                           'report for each module or application; '
-                          '"separate:global" is like "separate" but the '
-                          'coverage, rather than just from running a module '
-                          'or application\'s own tests, includes running '
-                          '*all* tests.',
+                          'with ":group" some '
+                          'modules are grouped together for coverage (e.g. '
+                          'much functionality in the kernel is not tested '
+                          'there but in the core module.',
                           'no', ['no', 'single', 'separate',
-                                 'separate:global']))
+                                 'single:group', 'separate:group']))
     #vars.Add(BoolVariable('noexternaldependencies', 'Do not check files in the provided includepath and libpath for changes.', False))
 
 

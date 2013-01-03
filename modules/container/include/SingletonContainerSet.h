@@ -39,121 +39,15 @@ class IMPCONTAINEREXPORT SingletonContainerSet
   SingletonContainerSet(const SingletonContainersTemp &pc,
                         std::string name="SingletonContainerSet %1%");
 
-  bool get_contains_particle(Particle*) const;
-
   /** \brief apply modifer sm to all singleton containers */
-  void apply(const SingletonModifier *sm) const;
+  IMP_IMPLEMENT(void do_apply(const SingletonModifier *sm) const);
 
-  /** \brief apply derivative modifer sm to all singleton containers
-
-      @param[in]   sm the derivate modifier to be applied
-      @param[out]  da derivative accumulator when applying sm
-   */
-  void apply(const SingletonDerivativeModifier *sm,
-             DerivativeAccumulator &da) const;
-
- /** \brief evaluates all singleton containers using singleton score
-
-     @param[in]   s  singleton score to evaluate each singleton container
-     @param[out]  da derivative accumulator when scoring each singleton
-
-     @return the sum of evaluation over all singleton containers
-  */
-  double evaluate(const SingletonScore *s,
-                  DerivativeAccumulator *da) const;
-
- /** \brief evaluates all singleton containers as long as below some maximal
-            score threshold
-
-     Evaluates all singleton containers using singleton score s
-     until the specified maximal total evaluation score is breached,
-     in order to save futile computation time.
-
-     @param[in]   s   singleton score for evaluating each singleton
-                      container
-     @param[out]  da  derivative accumulator when scoring each singleton
-     @param[in]   max the maximal total evaluation score that is allowed
-
-     @return the sum of evaluation at the end of evaluation, or right after
-             the maximal value was first breached
-  */
-  double evaluate_if_good(const SingletonScore *s,
-                          DerivativeAccumulator *da,
-                          double max) const;
-
-  /** \brief apply template derivative modifer sm to all singleton containers
-
-      @param[in]   sm the template derivate modifier to be applied
-      @param[out]  da derivative accumulator when applying sm
-  */
-  template <class SM>
-    void template_apply(const SM *sm,
-                        DerivativeAccumulator &da) const {
-    for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i)
-      {
-        get_singleton_container(i)->apply(sm, da);
-      }
+  template <class M>
+      void apply_generic(const M*m) const {
+    apply(m);
   }
 
-  /** \brief apply template modifer sm to all singleton containers */
-  template <class SM>
-    void template_apply(const SM *sm) const {
-    for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i)
-      {
-        get_singleton_container(i)->apply(sm);
-      }
-  }
-
-  /** \brief evaluates all singleton containers using template singleton
-             score s
-
-      @param[in]   s  the template for scoring each singleton container
-      @param[out]  da derivative accumulator when scoring each singleton
-
-      @return the sum of evaluation over all singleton containers
-  */
-  template <class SS>
-    double template_evaluate(const SS *s,
-                             DerivativeAccumulator *da) const {
-    double ret=0;
-    for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i)
-      {
-        ret+=get_singleton_container(i)->evaluate(s, da);
-      }
-    return ret;
-  }
-
- /** \brief evaluates all singleton containers as long as below some maximal
-            score threshold
-
-     evaluates all singleton containers using template singleton score s,
-     terminates if the specified maximal total evaluation score is breached
-     in order to save futile computation time.
-
-     @param[in]   s   the template for scoring each singleton container
-     @param[out]  da  derivative accumulator when scoring each singleton
-     @param[in]   max the maximal total evaluation score that is allowed
-
-     @return the sum of evaluation at the end of the evaluation, or right after
-             the maximum value was first breached
-  */
-  template <class SS>
-    double template_evaluate_if_good(const SS *s,
-                                 DerivativeAccumulator *da, double max) const {
-    double ret=0;
-    for (unsigned int i=0; i< get_number_of_singleton_containers(); ++i)
-      {
-        double cur=
-          get_singleton_container(i)->evaluate_if_good(s, da, max);
-        ret+=cur;
-        max-=cur;
-        if (max < 0) break;
-      }
-    return ret;
-  }
-
-  bool get_is_changed() const;
-  ParticlesTemp get_all_possible_particles() const;
+  ParticleIndexes get_all_possible_indexes() const;
   IMP_OBJECT(SingletonContainerSet);
 
   /** @name Methods to control the nested container
@@ -171,12 +65,14 @@ class IMPCONTAINEREXPORT SingletonContainerSet
                   },{},
                   );
   /**@}*/
+
 #ifndef IMP_DOXYGEN
   ParticleIndexes get_indexes() const;
-  ParticleIndexes get_all_possible_indexes() const;
-  ContainersTemp get_input_containers() const;
-  void do_before_evaluate();
+  ParticleIndexes get_range_indexes() const;
+  ModelObjectsTemp do_get_inputs() const;
 #endif
+
+  IMP_IMPLEMENT(void do_before_evaluate());
 };
 
 

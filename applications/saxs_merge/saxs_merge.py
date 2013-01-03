@@ -16,26 +16,33 @@ import IMP.gsl
 import IMP.saxs
 
 IMP.set_log_level(0)
+profno = 0
 
-def subsample(data,npoints):
-    """keep min(npoints,len(data)) out of data if npoints>0"""
+def subsample(idx, data, npoints):
+    """keep min(npoints,len(data)) out of data if npoints>0,
+    subsampling evenly along the idx (float) coordinate
+    """
     #defined here because it's used in the class
     Ntot = len(data)
+    if len(idx) != Ntot:
+        raise ValueError
     if npoints >= Ntot or npoints <= 0:
         return data
-    if Ntot % npoints == 0:
-        return data[::(Ntot/npoints)]
-    frac = fractions.Fraction(Ntot,npoints)
-    window=frac.numerator
-    valid=frac.denominator
-    newdata = []
-    for rep in xrange(Ntot/window):
-        indata = data[rep*window:(rep+1)*window]
-        indata = zip(range(len(indata)),indata)
-        outdata = sorted(sample(indata, valid),
-                key = lambda a:a[0])
-        outdata = [a[1] for a in outdata]
-        newdata.extend(outdata)
+    all = zip(idx,data)
+    all.sort()
+    qvals = array([i[0] for i in all])
+    newdata=[]
+    i=0
+    qmin = min(qvals)
+    qmax = max(qvals)
+    for q in linspace(qmin,qmax,num=npoints):
+        if q==qmax:
+            i=Ntot-1
+        else:
+            while qvals[i] <= q:
+                i += 1
+            i -= 1
+        newdata.append(all[i][1])
     return newdata
 
 class FittingError(Exception):
@@ -57,11 +64,12 @@ class SAXSProfile:
         self.intervals = {}
         self.filename = None
 
-    def add_data(self, input, offset=0, positive=False, err=True):
+    def add_data(self, input, offset=0, positive=False, err=True, scale=1):
         """add experimental data to saxs profile.
         offset=i means discard first i columns
         positive=True means only keep intensities that are >0
         err=True means keep only points that have >0 error bar
+        scale is a factor by which to multiply input I and err
         """
         if isinstance(input, str):
             #read all lines
@@ -92,6 +100,9 @@ class SAXSProfile:
             #keep weighted points
             if err and entry[2] <= 0:
                 continue
+            #multiply I and err by scale
+            entry[1] *= scale
+            entry[2] *= scale
             data.append(entry)
         self.data += copy.deepcopy(data)
         self.data.sort(key=lambda a:a[0])
@@ -189,11 +200,11 @@ class SAXSProfile:
                 retval.append(tuple([i,]+cd))
         if colwise:
             keys,values = zip(*retval.items())
-            values = zip(*self._subsample(zip(*values), maxpoints))
+            values = zip(*self._subsample(retval['q'], zip(*values), maxpoints))
             values = map(list, values)
             return dict(zip(keys,values))
         else:
-            return self._subsample(retval,maxpoints)
+            return self._subsample([i[1] for i in retval], retval,maxpoints)
 
     def get_gamma(self):
         return self.gamma
@@ -329,8 +340,8 @@ class SAXSProfile:
         """returns a list of [qmin, qmax, flag_value] lists"""
         return self.intervals[flag]
 
-    def _subsample(self, data, npoints):
-        return subsample(data, npoints)
+    def _subsample(self, q, data, npoints):
+        return subsample(q, data, npoints)
 
     def _setup_gp(self, npoints):
         if npoints <0:
@@ -339,7 +350,7 @@ class SAXSProfile:
         I = self.gp.get_data_mean()
         S = self.gp.get_data_variance()
         err = [S[i][i] for i in xrange(len(S))]
-        q,I,err = zip(*self._subsample(zip(q,I,err),npoints))
+        q,I,err = zip(*self._subsample(q,zip(q,I,err),npoints))
         gp = IMP.isd.GaussianProcessInterpolation(q, I, err,
             self.get_Nreps(), self.functions['mean'],
             self.functions['covariance'], self.particles['sigma2'])
@@ -804,9 +815,19 @@ def parse_filenames(fnames, defaultvalue=10):
             Nreps.append(defaultvalue)
     return files, Nreps
 
-def create_profile(file, nreps):
+def get_global_scaling_factor(file):
+    """get an order of magnitude for 100/I(0)"""
     p=SAXSProfile()
     p.add_data(file, positive=True)
+    data=p.get_raw_data()
+    n=len(data)
+    #take the first 50 points or 10% whichever comes first
+    m=min(int(0.1*n),50)
+    return 100./mean([i[1] for i in data[:m]])
+
+def create_profile(file, nreps, scale=1):
+    p=SAXSProfile()
+    p.add_data(file, positive=True, scale=scale)
     p.set_Nreps(nreps)
     p.set_filename(file)
     return p
@@ -883,6 +904,7 @@ def setup_particles(initvals):
     #set lower bounds for cov particles
     tau.set_lower(0.01)
     sigma.set_lower(0.01)
+    sigma.set_upper(1000.)
     #
     particles = {}
     particles['G'] = G
@@ -923,7 +945,7 @@ def setup_process(data,initvals, subs, maxpoints=-1):
     I = data['I'][::subs]
     err = data['err'][::subs]
     if maxpoints >0:
-        q,I,err = zip(*subsample(zip(q,I,err),maxpoints))
+        q,I,err = zip(*subsample(q,zip(q,I,err),maxpoints))
     gp = IMP.isd.GaussianProcessInterpolation(q, I, err,
             data['N'], functions['mean'], functions['covariance'],
             particles['sigma2'])
@@ -1149,6 +1171,68 @@ def find_fit_covariance(data, initvals, args, verbose):
             print "residuals",q,I,err,gpval,avg,(gpval-avg),(I-avg)
     return initvals
 
+def find_fit_by_minimizing(data, initvals, verbose, lambdalow):
+    model, particles, functions, gp = \
+            setup_process(data, initvals, 1)
+    gpr = IMP.isd.GaussianProcessInterpolationRestraint(gp)
+    model.add_restraint(gpr)
+    meandist = mean(array(data['q'][1:])-array(data['q'][:-1]))
+    particles['lambda'].set_lower(max(2*meandist,lambdalow))
+    particles['lambda'].set_upper(max(data['q'])*10)
+    particles['lambda'].set_nuisance(max(data['q'])/10.)
+    lambdamin = particles['lambda'].get_lower()
+    lambdamax = particles['lambda'].get_upper()
+    particles['sigma2'].set_lower(1)
+    particles['sigma2'].set_upper(1000)
+    particles['sigma2'].set_nuisance(100.0)
+    sigmamin = particles['sigma2'].get_lower()
+    sigmamax = particles['sigma2'].get_upper()
+    particles['tau'].set_lower(0.001)
+    particles['tau'].set_nuisance(10.0)
+    taumin = particles['tau'].get_lower()
+    taumax = 100
+    #print "minimizing"
+    particles['lambda'].set_nuisance_is_optimized(True)
+    particles['sigma2'].set_nuisance_is_optimized(False)
+    particles['tau'].set_nuisance_is_optimized(True)
+    minimas = []
+    while len(minimas) < 5:
+        initm = model.evaluate(False)
+        initt = particles['tau'].get_nuisance()
+        inits = particles['sigma2'].get_nuisance()
+        initl = particles['lambda'].get_nuisance()
+        #steepest descent
+        sd = IMP.core.SteepestDescent(model)
+        sd.optimize(500)
+        #conjugate gradients
+        cg = IMP.core.ConjugateGradients(model)
+        cg.optimize(500)
+        #add to minimas
+        minimas.append((model.evaluate(False), initm,
+            particles['tau'].get_nuisance(), initt,
+            particles['sigma2'].get_nuisance(), inits,
+            particles['lambda'].get_nuisance(), initl))
+        print "--- new min"
+        print "   tau",initt, minimas[-1][2]
+        print "   sig",inits, minimas[-1][4]
+        print "   lam",initl, minimas[-1][6]
+        print "   mod",initm, minimas[-1][0]
+        #draw new random starting position
+        particles['tau'].set_nuisance(
+                exp(random.uniform(log(taumin)+1,log(taumax)-1)))
+        particles['sigma2'].set_nuisance(
+                exp(random.uniform(log(sigmamin)+1,log(sigmamax)-1)))
+        particles['lambda'].set_nuisance(
+                exp(random.uniform(log(lambdamin)+1,log(lambdamax)-1)))
+    minimas.sort(key=lambda a:a[0])
+    print "best is ",minimas[0][0]
+    particles['tau'].set_nuisance(minimas[0][2])
+    particles['sigma2'].set_nuisance(minimas[0][4])
+    particles['lambda'].set_nuisance(minimas[0][6])
+    ene = model.evaluate(False)
+    initvals = dict([(k,v.get_nuisance()) for (k,v) in particles.iteritems()])
+    return initvals
+
 def find_fit_by_gridding(data, initvals, verbose, lambdalow):
     """use the fact that sigma2 can be factored out of the covariance matrix and
     drawn from a gamma distribution. Calculates a 2D grid on lambda (D1) and
@@ -1159,15 +1243,17 @@ def find_fit_by_gridding(data, initvals, verbose, lambdalow):
     gpr = IMP.isd.GaussianProcessInterpolationRestraint(gp)
     model.add_restraint(gpr)
     meandist = mean(array(data['q'][1:])-array(data['q'][:-1]))
-    particles['lambda'].set_lower(max(meandist,lambdalow))
+    particles['lambda'].set_lower(max(2*meandist,lambdalow))
     lambdamin = particles['lambda'].get_lower()
     lambdamax = 100
-    numpoints=25
+    numpoints=30
     gridvalues = []
     particles['tau'].set_lower(0.)
     particles['sigma2'].set_lower(0.)
     #fl=open('grid.txt','w')
-    particles['sigma2'].set_nuisance(1.0)
+    particles['sigma2'].set_nuisance(100.0)
+    particles['sigma2'].set_upper(1000.0)
+    particles['tau'].set_nuisance(10.0)
     #print "gridding"
     experror=0
     for lambdaval in logspace(log(lambdamin),log(lambdamax),
@@ -1175,8 +1261,12 @@ def find_fit_by_gridding(data, initvals, verbose, lambdalow):
         for rel in logspace(-2, 2, num=numpoints):
             particles['lambda'].set_nuisance(lambdaval)
             #set new value of tau**2/sigma
-            sigmaval = particles['sigma2'].get_nuisance()
-            particles['tau'].set_nuisance((rel*sigmaval)**.5)
+            tauval = particles['tau'].get_nuisance()
+            if tauval**2/rel > particles['sigma2'].get_upper():
+                continue
+            particles['sigma2'].set_nuisance(tauval**2/rel)
+            #print "sigma2 has val",particles['sigma2'].get_nuisance(), \
+            #        "tau has val",particles['tau'].get_nuisance()
             #get exponent and compute reduced exponent
             exponent = gpr.get_minus_exponent()
             if isnan(exponent) or exponent <=0:
@@ -1185,13 +1275,21 @@ def find_fit_by_gridding(data, initvals, verbose, lambdalow):
                       "lambda=%f rel=%f exp=%s" % (lambdaval,rel, exponent)
                 experror += 1
                 continue
-            redexp = sigmaval * exponent
-            #compute maximum posterior value for sigma assuming jeffreys prior
-            sigmaval = redexp/(len(data['q'])+2)
-            particles['sigma2'].set_nuisance(sigmaval)
-            #reset tau to correct value and get minimized energy
-            tauval = (rel*sigmaval)**.5
+            redexp = tauval * exponent
+            #compute maximum posterior value for tau**2 assuming jeffreys prior
+            tauval = (redexp/(len(data['q'])+2))**.5
+            sigmaval = tauval**2/rel
+            #print "sigma=",sigmaval,"tau=",tauval,\
+            #        "tau**2/sigma2=",rel,"lambda=",lambdaval
+            if sigmaval > particles['sigma2'].get_upper():
+                #skip value if outside of bounds for sigma
+                continue
             particles['tau'].set_nuisance(tauval)
+            #reset tau to correct value and get minimized energy
+            if sigmaval > particles['sigma2'].get_upper():
+                #skip value if outside of bounds for sigma
+                continue
+            particles['sigma2'].set_nuisance(sigmaval)
             ene = model.evaluate(False)
             gridvalues.append((lambdaval,rel,sigmaval,tauval,ene))
             #fl.write(" ".join(["%f" % i
@@ -1201,8 +1299,10 @@ def find_fit_by_gridding(data, initvals, verbose, lambdalow):
     #print "minimizing"
     if experror >=2:
         print "skipped another " + str(experror-2) + " similar errors"
-    particles['tau'].set_lower(0.001)
-    particles['sigma2'].set_lower(0.001)
+    particles['tau'].set_lower(0.01)
+    particles['tau'].set_upper(1000)
+    particles['sigma2'].set_lower(1.)
+    particles['sigma2'].set_lower(1000)
     if len(gridvalues) == 0:
         raise FittingError
     minval = gridvalues[0][:]
@@ -1210,24 +1310,33 @@ def find_fit_by_gridding(data, initvals, verbose, lambdalow):
         if i[4] < minval[4]:
             minval = i[:]
     minval=list(minval)
-    minval[0]=minval[0]
-    minval[1]=minval[1]
+    #minval[0]=minval[0]
+    #minval[1]=minval[1]
     #print "minimum",minval
-    particles['lambda'].set_nuisance(minval[0])
-    particles['sigma2'].set_nuisance(minval[2])
-    particles['tau'].set_nuisance(minval[3])
     particles['lambda'].set_nuisance_is_optimized(True)
     particles['sigma2'].set_nuisance_is_optimized(True)
     particles['tau'].set_nuisance_is_optimized(True)
+    #do 3 independent minimizations, pick best run
+    bestmin=[]
     for i in xrange(3):
-        do_quasinewton(model,5)
-    ene = model.evaluate(False)
-    newmin = [particles['lambda'].get_nuisance(),None,
-            particles['sigma2'].get_nuisance(),particles['tau'].get_nuisance(),
-            ene]
-    newmin[1]=newmin[3]**2/newmin[2]
-    newmin=tuple(newmin)
-    #print "minimized to",newmin,newmin[4]<=minval[4]
+        particles['lambda'].set_nuisance(minval[0])
+        particles['sigma2'].set_nuisance(minval[2])
+        particles['tau'].set_nuisance(minval[3])
+        do_quasinewton(model,10)
+        bestmin.append((model.evaluate(False),
+            particles['lambda'].get_nuisance(),
+            particles['sigma2'].get_nuisance(),
+            particles['tau'].get_nuisance()))
+    bestmin.sort()
+    particles['lambda'].set_nuisance(bestmin[0][1])
+    particles['sigma2'].set_nuisance(bestmin[0][2])
+    particles['tau'].set_nuisance(bestmin[0][3])
+    #ene = model.evaluate(False)
+    #newmin = [particles['lambda'].get_nuisance(),None,
+    #        particles['sigma2'].get_nuisance(),particles['tau'].get_nuisance(),
+    #        ene]
+    #newmin[1]=newmin[3]**2/newmin[2]
+    #newmin=tuple(newmin)
     initvals = dict([(k,v.get_nuisance()) for (k,v) in particles.iteritems()])
     return initvals
 
@@ -1626,7 +1735,7 @@ def write_summary_file(merge, profiles, args):
             fl.write("  normal model\n")
         else:
             fl.write("  lognormal model\n")
-        fl.write("   gamma : %f\n" % data)
+        fl.write("   gamma : %s\n" % data)
         if args.stop == "rescaling":
             fl.write("  Skipped further steps\n\n")
             continue
@@ -1671,7 +1780,8 @@ def initialize():
     filenames,Nreps = parse_filenames(files, defaultvalue=10)
     args.filenames = filenames
     args.Nreps = Nreps
-    profiles = map(create_profile, filenames, Nreps)
+    scale = get_global_scaling_factor(filenames[-1])
+    profiles = map(create_profile, filenames, Nreps, [scale]*len(filenames))
     #args.bschedule = parse_schedule(args.bschedule)
     #args.eschedule = parse_schedule(args.eschedule)
     return profiles, args
@@ -1803,7 +1913,7 @@ def rescaling(profiles, args):
     #take last as internal reference as there's usually good overlap
     pref = profiles[-1]
     gammas = []
-    for p in profiles:
+    for ctr,p in enumerate(profiles):
         #find intervals where both functions are valid
         p.new_flag('cgood',bool)
         pdata = p.get_data(colwise=True)
@@ -1831,10 +1941,33 @@ def rescaling(profiles, args):
             for i in xrange(numint):
                 qvalues.append((float(i)/(numint-1))*dist + qmin)
         pvalues = p.get_mean(qvalues=qvalues, colwise=True, average=average)
+        if True in map(isnan,pvalues['I']):
+            raise RuntimeError, "Got NAN in I"
+        if True in map(isnan,pvalues['err']):
+            raise RuntimeError, "Got NAN in err"
         prefvalues = pref.get_mean(qvalues=qvalues, colwise=True,
                         average=average)
+        if True in map(isnan,prefvalues['I']):
+            raise RuntimeError, "Got NAN in ref I"
+        if True in map(isnan,prefvalues['err']):
+            raise RuntimeError, "Got NAN in ref err"
         gammas.append(rescale_curves(prefvalues, pvalues,
             normal = use_normal, offset = use_offset))
+        #fl=open('rescale_%d.npy' % ctr, 'w')
+        #import cPickle
+        #cPickle.dump([pvalues,prefvalues],fl)
+        #fl.close()
+        #fl=open('rescale_%d.dat' % ctr, 'w')
+        #for i in xrange(len(pvalues['q'])):
+        #    fl.write("%s " % pvalues['q'][i])
+        #    fl.write("%s " % pvalues['I'][i])
+        #    fl.write("%s " % pvalues['err'][i])
+        #    fl.write("%s " % pvalues['q'][i])
+        #    fl.write("%s " % (gammas[-1][0]*pvalues['I'][i]))
+        #    fl.write("%s " % (gammas[-1][0]*pvalues['err'][i]))
+        #    fl.write("%s " % prefvalues['q'][i])
+        #    fl.write("%s " % prefvalues['I'][i])
+        #    fl.write("%s\n" % prefvalues['err'][i])
     #set gammas wrt reference
     if reference == 'first':
         gr=gammas[0][0]
@@ -1848,10 +1981,13 @@ def rescaling(profiles, args):
         p.set_gamma(gamma)
         p.set_offset(c)
         if verbose >1:
-            print "   ",p.filename,"   gamma = %.3f" % gamma,
+            print "   ",p.filename,"   gamma = %.3G" % gamma,
             if use_offset:
-                print "   offset = %.3f" % c,
+                print "   offset = %.3G" % c,
             print ""
+    if True in map(isnan,gammas[-1]):
+        raise RuntimeError, "Got NAN in rescaling step, try another rescaling " \
+                            "or fitting model."
     return profiles,args
 
 def classification(profiles, args):
@@ -1985,6 +2121,7 @@ def merging(profiles, args):
         if model_comp and maxpointsH > 0 and maxpointsH < len(data['q']):
             print " (subsampled hessian: %d points) " % maxpointsH,
     data['N'] = merge.get_Nreps()
+    #take initial values from the curve which has gamma == 1
     initvals = profiles[-1].get_params()
     mean, initvals, bayes = find_fit(data, initvals, #schedule,
                     verbose, model_comp=model_comp,
@@ -1993,8 +2130,6 @@ def merging(profiles, args):
                     lambdamin=args.lambdamin)
     if verbose > 1 and model_comp:
         print "    => "+mean
-    #take initial values from the curve which has gamma == 1
-    initvals = profiles[-1].get_params()
     model, particles, functions, gp = setup_process(data,initvals,1)
     if bayes:
         merge.set_interpolant(gp, particles, functions, mean, model, bayes,

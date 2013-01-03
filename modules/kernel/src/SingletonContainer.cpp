@@ -14,6 +14,7 @@
 #include "IMP/internal/InternalListSingletonContainer.h"
 #include "IMP/SingletonModifier.h"
 #include "IMP/internal/container_helpers.h"
+#include "IMP/singleton_macros.h"
 
 IMP_BEGIN_NAMESPACE
 
@@ -26,6 +27,54 @@ SingletonContainer::SingletonContainer(Model *m, std::string name):
 SingletonContainer::~SingletonContainer(){
 }
 
+#if IMP_USE_DEPRECATED
+bool SingletonContainer
+::get_contains_particle(Particle* v) const {
+  IMP_DEPRECATED_FUNCTION(something else);
+  ParticleIndex iv= IMP::internal::get_index(v);
+  IMP_FOREACH_SINGLETON_INDEX(this, {
+      if (_1 == iv) return true;
+    });
+  return false;
+}
+
+ParticlesTemp SingletonContainer
+::get_particles() const {
+  return IMP::internal::get_particle(get_model(),
+                                     get_indexes());
+}
+
+unsigned int SingletonContainer
+::get_number_of_particles() const {
+  IMP_DEPRECATED_FUNCTION(IMP_CONTAINER_FOREACH());
+  return get_number();
+}
+
+Particle* SingletonContainer
+::get_particle(unsigned int i) const {
+  IMP_DEPRECATED_FUNCTION(IMP_CONTAINER_FOREACH());
+  return get(i);
+}
+#endif
+
+bool SingletonContainer
+::get_provides_access() const {
+  validate_readable();
+  return do_get_provides_access();
+}
+
+void SingletonContainer
+::apply_generic(const SingletonModifier *m) const {
+  apply(m);
+}
+
+void SingletonContainer
+::apply(const SingletonModifier *sm) const {
+  validate_readable();
+  do_apply(sm);
+}
+
+
 SingletonContainerAdaptor
 ::SingletonContainerAdaptor(SingletonContainer *c): P(c){}
 SingletonContainerAdaptor
@@ -34,9 +83,8 @@ SingletonContainerAdaptor
   Model *m=internal::get_model(t);
   IMP_NEW(internal::InternalListSingletonContainer, c,
           (m, name));
-  c->set_particles(t);
+  c->set(IMP::internal::get_index(t));
   P::operator=(c);
 }
-
 
 IMP_END_NAMESPACE

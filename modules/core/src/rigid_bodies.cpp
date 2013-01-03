@@ -116,7 +116,7 @@ namespace {
     AccumulateRigidBodyDerivatives(std::string name
                                    ="AccumulateRigidBodyDerivatives%1%"):
         SingletonDerivativeModifier(name){}
-    IMP_SINGLETON_DERIVATIVE_MODIFIER(AccumulateRigidBodyDerivatives);
+    IMP_INDEX_SINGLETON_DERIVATIVE_MODIFIER(AccumulateRigidBodyDerivatives);
   };
 
 
@@ -136,7 +136,7 @@ namespace {
     UpdateRigidBodyMembers(std::string name
                            = "UpdateRigidBodyMembers%1%"):
         SingletonModifier(name) {}
-    IMP_SINGLETON_MODIFIER(UpdateRigidBodyMembers);
+    IMP_INDEX_SINGLETON_MODIFIER(UpdateRigidBodyMembers);
   };
 
 
@@ -160,10 +160,11 @@ namespace {
 
 
 
-  void AccumulateRigidBodyDerivatives::apply(Particle *p,
-                                             DerivativeAccumulator &da) const {
+  void AccumulateRigidBodyDerivatives::apply_index(Model *m,
+                                                   ParticleIndex pi) const {
     IMP_OBJECT_LOG;
-    RigidBody rb(p);
+    DerivativeAccumulator da;
+    RigidBody rb(m, pi);
 #if IMP_BUILD < IMP_FAST
     algebra::Vector4D oldderiv;
     algebra::Vector3D oldcartesian= rb.get_derivatives();
@@ -198,13 +199,17 @@ namespace {
     }
     // ignoring torques on rigid members
     IMP_LOG(TERSE, "Rigid body derivative is "
-            << p->get_derivative(internal::rigid_body_data().quaternion_[0])
+            << m->get_particle(pi)
+            ->get_derivative(internal::rigid_body_data().quaternion_[0])
             << " "
-            << p->get_derivative(internal::rigid_body_data().quaternion_[1])
+            << m->get_particle(pi)
+            ->get_derivative(internal::rigid_body_data().quaternion_[1])
             << " "
-            << p->get_derivative(internal::rigid_body_data().quaternion_[2])
+            << m->get_particle(pi)
+            ->get_derivative(internal::rigid_body_data().quaternion_[2])
             << " "
-            << p->get_derivative(internal::rigid_body_data().quaternion_[3])
+            << m->get_particle(pi)
+            ->get_derivative(internal::rigid_body_data().quaternion_[3])
             << " and ");
 
     IMP_LOG(TERSE, "Translation deriv is "
@@ -268,33 +273,27 @@ namespace {
                                       internal::get_rigid_members_refiner());
 
 
-  void UpdateRigidBodyMembers::apply(Particle *p) const {
-    RigidBody rb(p);
+  void UpdateRigidBodyMembers::apply_index(Model *m,
+                                           ParticleIndex pi) const {
+    RigidBody rb(m, pi);
     rb.update_members();
   }
-  ParticlesTemp UpdateRigidBodyMembers::get_input_particles(Particle *p) const {
-    return ParticlesTemp(1, p);
-  }
-  ParticlesTemp
-  UpdateRigidBodyMembers::get_output_particles(Particle *p) const {
-    IMP_OBJECT_LOG;
-    RigidBody rb(p);
-    ParticlesTemp ret
-      = IMP::internal::get_particle(p->get_model(),
-                                    rb.get_member_particle_indexes());
-    ParticlesTemp ret2
-      = IMP::internal::get_particle(p->get_model(),
-                                    rb.get_body_member_particle_indexes());
-    ret.insert(ret.end(), ret2.begin(), ret2.end());
+  ModelObjectsTemp
+  UpdateRigidBodyMembers::do_get_inputs(Model *m,
+                                        const ParticleIndexes &pis) const {
+    ModelObjectsTemp ret;
+    ret+= IMP::get_particles(m, pis);
     return ret;
   }
-  ContainersTemp
-  UpdateRigidBodyMembers::get_input_containers(Particle *) const {
-    return ContainersTemp();
-  }
-  ContainersTemp
-  UpdateRigidBodyMembers::get_output_containers(Particle *) const {
-    return ContainersTemp();
+  ModelObjectsTemp
+  UpdateRigidBodyMembers::do_get_outputs(Model *m,
+                                        const ParticleIndexes &pis) const {
+    ModelObjectsTemp ret;
+    for (unsigned int i=0; i< pis.size(); ++i) {
+      RigidBody rb(m, pis[i]);
+      ret+=rb.get_members();
+    }
+    return ret;
   }
   void UpdateRigidBodyMembers::do_show(std::ostream &) const {
   }
@@ -340,41 +339,30 @@ inline void NormalizeRotation::apply_index(Model *m, ParticleIndex p) const {
   m->set_attribute(internal::rigid_body_data().torque_[2],
                   p, 0);
 }
-  ParticlesTemp NormalizeRotation::get_input_particles(Particle *p) const {
-    return ParticlesTemp(1, p);
+  ModelObjectsTemp NormalizeRotation::do_get_inputs(Model*m,
+                                                    const ParticleIndexes &pis)
+    const {
+    return IMP::get_particles(m, pis);
   }
-  ParticlesTemp
-  NormalizeRotation::get_output_particles(Particle *p) const {
-    return ParticlesTemp(1,p);
-  }
-  ContainersTemp
-  NormalizeRotation::get_input_containers(Particle *) const {
-    return ContainersTemp();
-  }
-  ContainersTemp
-  NormalizeRotation::get_output_containers(Particle *) const {
-    return ContainersTemp();
+  ModelObjectsTemp NormalizeRotation::do_get_outputs(Model*m,
+                                                    const ParticleIndexes &pis)
+    const {
+    return IMP::get_particles(m, pis);
   }
   void NormalizeRotation::do_show(std::ostream &) const {
   }
 
-  inline void NullSDM::apply_index(Model *, ParticleIndex,
-                                 DerivativeAccumulator &) const {
+  inline void NullSDM::apply_index(Model *, ParticleIndex) const {
   }
-  ParticlesTemp NullSDM::get_input_particles(Particle *p) const {
-    return ParticlesTemp(1,p);
+  ModelObjectsTemp NullSDM::do_get_inputs(Model*,
+                                                    const ParticleIndexes &)
+    const {
+    return ModelObjectsTemp();
   }
-  ParticlesTemp
-  NullSDM::get_output_particles(Particle *p) const {
-    return ParticlesTemp(1,p);
-  }
-  ContainersTemp
-  NullSDM::get_input_containers(Particle *) const {
-    return ContainersTemp();
-  }
-  ContainersTemp
-  NullSDM::get_output_containers(Particle *) const {
-    return ContainersTemp();
+  ModelObjectsTemp NullSDM::do_get_outputs(Model*,
+                                                    const ParticleIndexes &)
+    const {
+    return ModelObjectsTemp();
   }
   void NullSDM::do_show(std::ostream &) const {
   }
@@ -479,7 +467,7 @@ void RigidBody::teardown_constraints(Particle *p) {
     Object *o= p->get_model()->get_data(mk);
     IMP::internal::InternalListSingletonContainer* list
       = dynamic_cast<IMP::internal::InternalListSingletonContainer*>(o);
-    list->remove_particles(ParticlesTemp(1, p));
+    list->remove(IMP::internal::get_index(p));
     IMP_IF_CHECK(USAGE_AND_INTERNAL) {
       IMP_FOREACH_SINGLETON_INDEX(list, {
           IMP_CHECK_VARIABLE(_1);
@@ -520,12 +508,12 @@ RigidBody RigidBody::setup_particle(Particle *p,
     Object *o= d.get_model()->get_data(mk);
     IMP::internal::InternalListSingletonContainer* list
       = dynamic_cast<IMP::internal::InternalListSingletonContainer*>(o);
-    list->add_particle(p);
+    list->add(IMP::internal::get_index(p));
   } else {
     //IMP_LOG(TERSE, "Creating new list of rigid bodies" << std::endl);
     IMP_NEW(IMP::internal::InternalListSingletonContainer, list, (d.get_model(),
                                                          "rigid bodies list"));
-    list->set_particles(ParticlesTemp(1,p));
+    list->set(ParticleIndexes(1,p->get_index()));
     IMP_NEW(NormalizeRotation, nr, ());
     IMP_NEW(NullSDM, null, ());
     Pointer<Constraint> c1
@@ -1008,7 +996,7 @@ ParticlesTemp create_rigid_bodies(Model *m,
   }
   IMP_NEW(IMP::internal::InternalListSingletonContainer, list, (m,
                                                        "rigid body list"));
-  list->set_particles(ret);
+  list->set(IMP::internal::get_index(ret));
   if (!no_members) {
     IMP_NEW(UpdateRigidBodyMembers, urbm,());
     IMP_NEW(AccumulateRigidBodyDerivatives, arbd, ());

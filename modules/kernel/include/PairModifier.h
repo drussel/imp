@@ -17,6 +17,7 @@
 #include "base_types.h"
 #include "ParticleTuple.h"
 #include "internal/container_helpers.h"
+#include "input_output_macros.h"
 
 IMP_BEGIN_NAMESPACE
 
@@ -45,26 +46,17 @@ public:
   }
 
   /** Apply the function to a collection of ParticlePairsTemp */
-  virtual void apply_indexes(Model *m, const ParticleIndexPairs &o) const {
-    for (unsigned int i=0; i < o.size(); ++i) {
+  /** If bounds are passed, only apply to ones between the upper and
+      lower bounds.*/
+  virtual void apply_indexes(Model *m, const ParticleIndexPairs &o,
+                             unsigned int lower_bound,
+                             unsigned int upper_bound) const {
+    for (unsigned int i=lower_bound; i < upper_bound; ++i) {
       apply_index(m, o[i]);
     }
   }
-
-  /** Get the set of particles read when applied to the arguments.*/
-  virtual ParticlesTemp
-    get_input_particles(Particle* p) const =0;
-  /** Get the set of particles modifier when applied to the arguments.*/
-  virtual ParticlesTemp
-    get_output_particles(Particle *p) const =0;
-  /** Get the set of input containers when this modifier is applied to
-      the arguments. */
-  virtual ContainersTemp
-    get_input_containers(Particle *p) const =0;
-  /** Get the set of output containers when this modifier is applied to
-      the arguments. */
-  virtual ContainersTemp
-    get_output_containers(Particle *p) const =0;
+  IMP_INPUTS_DECL(PairModifier);
+  IMP_OUTPUTS_DECL(PairModifier);
 };
 
 

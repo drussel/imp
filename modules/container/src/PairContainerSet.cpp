@@ -30,20 +30,9 @@ PairContainerSet
   set_pair_containers(in);
 }
 
-
-bool
-PairContainerSet
-::get_contains_particle_pair(const ParticlePair& vt) const {
-  for (PairContainerConstIterator it= pair_containers_begin();
-       it != pair_containers_end(); ++it) {
-    if ((*it)->get_contains_particle_pair(vt)) return true;
-  }
-  return false;
-}
-
 void PairContainerSet::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_particle_pairs()
+  out << get_number_of_pair_containers()
       << " containers" << std::endl;
 }
 
@@ -58,11 +47,11 @@ ParticleIndexPairs PairContainerSet::get_indexes() const {
   return sum;
 }
 
-ParticleIndexPairs PairContainerSet::get_all_possible_indexes() const {
+ParticleIndexPairs PairContainerSet::get_range_indexes() const {
   ParticleIndexPairs sum;
   for (PairContainerConstIterator it= pair_containers_begin();
        it != pair_containers_end(); ++it) {
-    ParticleIndexPairs cur=(*it)->get_all_possible_indexes();
+    ParticleIndexPairs cur=(*it)->get_range_indexes();
     sum.insert(sum.end(), cur.begin(), cur.end());
   }
   return sum;
@@ -75,54 +64,34 @@ IMP_LIST_IMPL(PairContainerSet,
               PairContainers);
 
 
-void PairContainerSet::apply(const PairModifier *sm) const {
+void PairContainerSet::do_apply(const PairModifier *sm) const {
   for (unsigned int i=0; i< get_number_of_pair_containers(); ++i) {
     get_pair_container(i)->apply(sm);
   }
 }
 
-void PairContainerSet::apply(const PairDerivativeModifier *sm,
-                               DerivativeAccumulator &da) const {
+ParticleIndexes PairContainerSet::get_all_possible_indexes() const {
+  ParticleIndexes ret;
   for (unsigned int i=0; i< get_number_of_pair_containers(); ++i) {
-    get_pair_container(i)->apply(sm, da);
-  }
-}
-
-double PairContainerSet::evaluate(const PairScore *s,
-                                       DerivativeAccumulator *da) const {
-  return template_evaluate(s, da);
-}
-
-double PairContainerSet::evaluate_if_good(const PairScore *s,
-                                               DerivativeAccumulator *da,
-                                               double max) const {
-  return template_evaluate_if_good(s, da, max);
-}
-
-
-ParticlesTemp PairContainerSet::get_all_possible_particles() const {
-  ParticlesTemp ret;
-  for (unsigned int i=0; i< get_number_of_pair_containers(); ++i) {
-    ParticlesTemp cur= get_pair_container(i)
-        ->get_all_possible_particles();
-    ret+=cur;
+    ret+= get_pair_container(i)
+        ->get_all_possible_indexes();
   }
   return ret;
 }
 
-bool PairContainerSet::get_is_changed() const {
-  for (unsigned int i=0; i< get_number_of_pair_containers(); ++i) {
-    if (get_pair_container(i)->get_is_changed()) return true;
-  }
-  return Container::get_is_changed();
-}
-
-
-ContainersTemp PairContainerSet::get_input_containers() const {
-  return ContainersTemp(pair_containers_begin(),
-                        pair_containers_end());
-}
 void PairContainerSet::do_before_evaluate() {
+  for (unsigned int i=0; i< get_number_of_pair_containers(); ++i) {
+    if (get_pair_container(i)->get_is_changed()) {
+      set_is_changed(true);
+      return;
+    }
+  }
+  set_is_changed(false);
+}
+
+ModelObjectsTemp PairContainerSet::do_get_inputs() const {
+  return ModelObjectsTemp(pair_containers_begin(),
+                        pair_containers_end());
 }
 
 IMPCONTAINER_END_NAMESPACE

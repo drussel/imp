@@ -198,7 +198,7 @@ class TestGaussianProcessInterpolationRestraint2Points(IMP.test.TestCase):
 
     def testGetInputThings(self):
         "Test GPI restraint get_input_*() methods"
-        particles = self.gpr.get_input_particles()
+        particles = list(set(IMP.get_input_particles([self.gpr])))
         self.assertTrue(self.lam in particles)
         particles.remove(self.lam)
         self.assertTrue(self.tau in particles)
@@ -210,7 +210,7 @@ class TestGaussianProcessInterpolationRestraint2Points(IMP.test.TestCase):
         self.assertTrue(self.beta in particles)
         particles.remove(self.beta)
         self.assertEqual(particles,[])
-        self.assertEqual(self.gpr.get_input_containers(), [])
+        self.assertEqual(IMP.get_input_containers([self.gpr]), [])
 
     def testValueDensityAlpha(self):
         "Test the value of the GPI restraint density by varying alpha"
@@ -368,6 +368,14 @@ class TestGaussianProcessInterpolationRestraint2Points(IMP.test.TestCase):
 
     def testValueEnergySigma(self):
         "Test the value of the GPI restraint energy by varying sigma"
+        #dg=IMP.get_pruned_dependency_graph(self.m)
+        #dg.show_graphviz(open('pgraph.dot','w'))
+        #dg=IMP.get_dependency_graph(self.m)
+        #dgi=IMP.get_vertex_index(dg)
+        #mi=self.m.get_inputs()
+        #dg.show_graphviz(open('graph.dot','w'))
+        #print IMP.get_dependent_score_states(self.m,mi,dg,dgi)
+        #return
         skipped = 0
         for a in logspace(-1,2,num=100):
             self.sig.set_nuisance(a)
@@ -671,7 +679,7 @@ class TestGaussianProcessInterpolationRestraint2Points(IMP.test.TestCase):
             expected = self.get_derivative_tau()
             if expected != 0:
                 self.assertAlmostEqual(observed/expected
-                    ,1.0,delta=0.001)
+                    ,1.0,delta=0.0015)
             else:
                 self.assertAlmostEqual(observed,expected
                     ,delta=0.001)

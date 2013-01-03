@@ -599,22 +599,38 @@ bool Selection::operator()(Hierarchy h) const
     if (terminus_!= NONE) {
       Hierarchy cur=h;
       bool fail=false;
-      do {
-        Hierarchy p= cur.get_parent();
-        if (!p) break;
-        unsigned int i= cur.get_child_index();
-        if (terminus_==C && i+1 != p.get_number_of_children()){
+      // make sure we pick the right atom
+      if (Atom::particle_is_instance(cur)) {
+        Atom a(cur);
+        if (terminus_==C && a.get_atom_type() != AT_C
+            && get_atom(Residue(cur.get_parent()), AT_C) != Atom()) {
           fail=true;
-          break;
-        } else if (terminus_==N && i != 0) {
-          fail=true;
-          break;
         }
-        cur=p;
-        if (!Fragment::particle_is_instance(cur)
-            || !Domain::particle_is_instance(cur)
-            || !Residue::particle_is_instance(cur)) break;
-      } while (true);
+        if (terminus_==N && a.get_atom_type() != AT_N
+            && get_atom(Residue(cur.get_parent()), AT_N) != Atom()) {
+          fail=true;
+        }
+        // don't pay attention to my position
+        cur= cur.get_parent();
+      }
+      if (!fail) {
+        do {
+          Hierarchy p= cur.get_parent();
+          if (!p) break;
+          unsigned int i= cur.get_child_index();
+          if (terminus_==C && i+1 != p.get_number_of_children()){
+            fail=true;
+            break;
+          } else if (terminus_==N && i != 0) {
+            fail=true;
+            break;
+          }
+          cur=p;
+          if (!Fragment::particle_is_instance(cur)
+              && !Domain::particle_is_instance(cur)
+              && !Residue::particle_is_instance(cur)) break;
+        } while (true);
+      }
       if (fail) return false;
     }
   } catch (ValueException) {
@@ -731,7 +747,7 @@ Restraint* create_connectivity_restraint(const Selections &s,
       ps=new core::KClosePairsPairScore(hdps, tr);
       IMP_NEW(IMP::internal::InternalListSingletonContainer, lsc,
               (rps[0]->get_model(), "Connectivity particles"));
-      lsc->set_particles(rps);
+      lsc->set(IMP::internal::get_index(rps));
       IMP_NEW(core::ConnectivityRestraint, cr, (ps, lsc));
       return cr.release();
     }
@@ -784,7 +800,7 @@ Restraint* create_excluded_volume_restraint(Selections ss) {
   }
   IMP_NEW(IMP::internal::InternalListSingletonContainer, lsc,
           (ps[0]->get_model(), "Hierarchy EV particles"));
-  lsc->set_particles(ps);
+  lsc->set(IMP::internal::get_index(ps));
   IMP_NEW(core::ExcludedVolumeRestraint, evr, (lsc));
   evr->set_name("Hierarchy EV");
   return evr.release();

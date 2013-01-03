@@ -40,19 +40,15 @@ void ConsecutivePairContainer::init(){
   }
 }
 
-void ConsecutivePairContainer::do_before_evaluate() {}
+void ConsecutivePairContainer::do_before_evaluate() {
+  set_is_changed(false);
+}
 
 ParticlesTemp ConsecutivePairContainer::get_input_particles() const {
   return ParticlesTemp();
 }
 ContainersTemp ConsecutivePairContainer::get_input_containers() const {
   return ContainersTemp();
-}
-
-
-bool
-ConsecutivePairContainer::get_is_changed() const {
-  return false;
 }
 
 ParticleIndexPairs ConsecutivePairContainer::get_indexes() const {
@@ -63,7 +59,7 @@ ParticleIndexPairs ConsecutivePairContainer::get_indexes() const {
   return ret;
 }
 
-ParticleIndexPairs ConsecutivePairContainer::get_all_possible_indexes() const {
+ParticleIndexPairs ConsecutivePairContainer::get_range_indexes() const {
   return get_indexes();
 }
 
@@ -73,20 +69,13 @@ void ConsecutivePairContainer::do_show(std::ostream &out) const {
   out << "num particles: " << ps_.size() << std::endl;
 }
 
-ParticlesTemp ConsecutivePairContainer::get_all_possible_particles() const {
-  return IMP::internal::get_particle(get_model(), ps_);
+ParticleIndexes ConsecutivePairContainer::get_all_possible_indexes() const {
+  return ps_;
 }
 
-bool
-ConsecutivePairContainer
-::get_contains_particle_pair(const ParticlePair &p) const {
-  if (!p[0]->has_attribute(key_)) return false;
-  int ia= p[0]->get_value(key_);
-  if (!p[1]->has_attribute(key_)) return false;
-  int ib= p[1]->get_value(key_);
-  return std::abs(ia-ib)==1;
-}
 
+ConsecutivePairFilter::ConsecutivePairFilter(ConsecutivePairContainer *cpc):
+PairPredicate("ConsecutivePairFilter %1%"), cpc_(cpc) {}
 
 ExclusiveConsecutivePairContainer
 ::ExclusiveConsecutivePairContainer(const ParticlesTemp &ps,
@@ -110,19 +99,15 @@ void ExclusiveConsecutivePairContainer::init(){
   }
 }
 
-void ExclusiveConsecutivePairContainer::do_before_evaluate() {}
+void ExclusiveConsecutivePairContainer::do_before_evaluate() {
+  set_is_changed(false);
+}
 
 ParticlesTemp ExclusiveConsecutivePairContainer::get_input_particles() const {
   return ParticlesTemp();
 }
 ContainersTemp ExclusiveConsecutivePairContainer::get_input_containers() const {
   return ContainersTemp();
-}
-
-
-bool
-ExclusiveConsecutivePairContainer::get_is_changed() const {
-  return false;
 }
 
 ParticleIndexPairs ExclusiveConsecutivePairContainer::get_indexes() const {
@@ -134,7 +119,7 @@ ParticleIndexPairs ExclusiveConsecutivePairContainer::get_indexes() const {
 }
 
 ParticleIndexPairs ExclusiveConsecutivePairContainer
-::get_all_possible_indexes() const {
+::get_range_indexes() const {
   return get_indexes();
 }
 
@@ -144,17 +129,9 @@ void ExclusiveConsecutivePairContainer::do_show(std::ostream &out) const {
   out << "num particles: " << ps_.size() << std::endl;
 }
 
-ParticlesTemp ExclusiveConsecutivePairContainer
-::get_all_possible_particles() const {
-  return IMP::internal::get_particle(get_model(), ps_);
-}
-
-bool
-ExclusiveConsecutivePairContainer
-::get_contains_particle_pair(const ParticlePair &p) const {
-  return get_contains(get_model(),
-                      ParticleIndexPair(p[0]->get_index(),
-                                        p[1]->get_index()));
+ParticleIndexes ExclusiveConsecutivePairContainer
+::get_all_possible_indexes() const {
+  return ps_;
 }
 
 IMPCONTAINER_END_NAMESPACE

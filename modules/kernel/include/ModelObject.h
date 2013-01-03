@@ -71,7 +71,8 @@ public:
      return Tracked::get_tracker();
   }
   /** Get any Particle, Container or other ModelObjects read by
-      this during evaluation.*/
+      this during evaluation. If you read everything in a container,
+  you can just return that container. */
   ModelObjectsTemp get_inputs() const;
   /** Get any Particle, Container or other ModelObjects changed by
       this during evaluation. This is only useful for ScoreStates,

@@ -29,9 +29,12 @@ public:
   MinimumSingletonScore(const SingletonScoresTemp &scores,
                        unsigned int n=1,
                        std::string name="SingletonScore %1%");
-  IMP_SINGLETON_SCORE(MinimumSingletonScore);
+  IMP_INDEX_SINGLETON_SCORE(MinimumSingletonScore);
 
-  Restraints create_current_decomposition(Particle* vt) const;
+  IMP_IMPLEMENT(Restraints
+                do_create_current_decomposition(Model *m,
+                                                ParticleIndex vt)
+                const IMP_OVERRIDE);
 };
 
 IMP_OBJECTS(MinimumSingletonScore,MinimumSingletonScores);

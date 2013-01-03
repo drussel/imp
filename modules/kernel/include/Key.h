@@ -56,13 +56,20 @@ class Key: public base::Value
 
 
   static unsigned int find_index(std::string sc) {
-    if (get_map().find(sc) == get_map().end()) {
-      IMP_INTERNAL_CHECK(LazyAdd, "You must explicitly create the type"
-                 << " first: " << sc);
-      return IMP::internal::get_key_data(ID).add_key(sc);
-    } else {
-      return get_map().find(sc)->second;
+    IMP_USAGE_CHECK(!sc.empty(),
+                    "Can't create a key with an empty name");
+    unsigned int val;
+#pragma omp critical(imp_key)
+    {
+      if (get_map().find(sc) == get_map().end()) {
+        IMP_INTERNAL_CHECK(LazyAdd, "You must explicitly create the type"
+                           << " first: " << sc);
+        val= IMP::internal::get_key_data(ID).add_key(sc);
+      } else {
+        val= get_map().find(sc)->second;
+      }
     }
+    return val;
   }
 private:
  bool is_default() const;
@@ -74,14 +81,19 @@ public:
 
   static const std::string get_string(int i)
   {
-    if (static_cast<unsigned int>(i)
-        < get_rmap().size()) {
-      return get_rmap()[i];
-    } else {
-      IMP_THROW("Corrupted Key Table asking for key " << i
-                << " with a table of size " << get_rmap().size(),
-                base::ValueException);
+    std::string val;
+#pragma omp critical(imp_key)
+    {
+      if (static_cast<unsigned int>(i)
+          < get_rmap().size()) {
+        val= get_rmap()[i];
+      }
     }
+    if (val.empty()) {
+      IMP_FAILURE("Corrupted Key Table asking for key " << i
+                  << " with a table of size " << get_rmap().size());
+    }
+    return val;
   }
 
 #endif
@@ -102,19 +114,29 @@ public:
 #endif
 
   static unsigned int add_key(std::string sc) {
-    return IMP::internal::get_key_data(ID).add_key(sc);
+    IMP_USAGE_CHECK(!sc.empty(),
+                    "Can't create a key with an empty name");
+    unsigned int val;
+#pragma omp critical(imp_key)
+    val= IMP::internal::get_key_data(ID).add_key(sc);
+    return val;
   }
 
   //! Return true if there already is a key with that string
   static bool get_key_exists(std::string sc) {
-    return get_map().find(sc) != get_map().end();
+    bool val;
+#pragma omp critical(imp_key)
+    val= get_map().find(sc) != get_map().end();
+    return val;
   }
 
   //! Turn a key into a pretty string
   const std::string get_string() const {
     if (is_default()) return std::string("nullptr");
-    return get_string(str_);
-    //return str_;
+    std::string val;
+#pragma omp critical(imp_key)
+    val= get_string(str_);
+    return val;
   }
 
   IMP_COMPARISONS_1(Key, str_);
@@ -200,6 +222,7 @@ inline bool Key<ID, LA>::is_default() const
 template <unsigned int ID, bool LA>
 inline void Key<ID, LA>::show_all(std::ostream &out)
 {
+#pragma omp critical(imp_key)
   internal::get_key_data(ID).show(out);
 }
 
@@ -207,6 +230,7 @@ template <unsigned int ID, bool LA>
 base::Vector<std::string> Key<ID, LA>::get_all_strings()
 {
   base::Vector<std::string> str;
+#pragma omp critical(imp_key)
   for (internal::KeyData::Map::const_iterator it= get_map().begin();
        it != get_map().end(); ++it) {
     str.push_back(it->first);

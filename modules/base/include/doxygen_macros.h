@@ -9,6 +9,8 @@
 #ifndef IMPBASE_DOXYGEN_MACROS_H
 #define IMPBASE_DOXYGEN_MACROS_H
 #include "base_config.h"
+// for IMP_OVERRIDE
+#include "swig_macros.h"
 
 
 #ifdef IMP_DOXYGEN
@@ -48,13 +50,13 @@
 #define IMP_IMPLEMENT(signature) signature
 
 #define IMP_IMPLEMENT_INLINE(signature, body)   \
-  signature {                                   \
+  signature IMP_OVERRIDE {                      \
     body;                                       \
   }
 
 #ifndef SWIG
 #define IMP_IMPLEMENT_INLINE_NO_SWIG(signature, body)   \
-  signature {                                           \
+  signature IMP_OVERRIDE {                              \
     body;                                               \
   }
 #else
@@ -63,10 +65,10 @@
 #endif
 
 #define IMP_IMPLEMENTATION_TEMPLATE_1(arg0, signature, body)\
-  template <arg0> signature {body}
+  template <arg0> signature IMP_OVERRIDE {body}
 
 #define IMP_IMPLEMENTATION_TEMPLATE_2(arg0, arg1, signature, body)\
-  template <arg0, arg1> signature {body}
+  template <arg0, arg1> signature IMP_OVERRIDE {body}
 
 
 #endif

@@ -34,30 +34,35 @@ InternalDynamicListSingletonContainer
 
 void InternalDynamicListSingletonContainer::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_particles()
+  out << get_access()
       << " Singletons." << std::endl;
 }
-
-
-
+void InternalDynamicListSingletonContainer::add(ParticleIndex vt) {
+  ParticleIndexes cur;
+  swap(cur);
+  cur.push_back(vt);
+  swap(cur);
+}
 void InternalDynamicListSingletonContainer
-::remove_particles(const ParticlesTemp &c) {
+::add(const ParticleIndexes &c) {
   if (c.empty()) return;
-  get_model()->clear_caches();
-  ParticleIndexes cp= IMP::internal::get_index(c);
-  remove_from_list(cp);
-  IMP_IF_CHECK(base::USAGE) {
-    for (unsigned int i=0; i< c.size(); ++i) {
-      IMP_USAGE_CHECK(IMP::internal::is_valid(c[i]),
-                    "Passed Singleton cannot be nullptr (or None)");
-    }
-  }
+  ParticleIndexes cur;
+  swap(cur);
+  cur+=c;
+  swap(cur);
 }
 
+void InternalDynamicListSingletonContainer::set(ParticleIndexes cp) {
+  swap(cp);
+}
+void InternalDynamicListSingletonContainer::clear() {
+  ParticleIndexes t;
+  swap(t);
+}
 bool InternalDynamicListSingletonContainer::
 check_list(const ParticleIndexes& cp) const {
   ParticleIndexes app
-    = IMP::internal::get_index(scope_->get_all_possible_particles());
+    = scope_->get_all_possible_indexes();
 
   compatibility::set<ParticleIndex> all(app.begin(),
                                     app.end());
@@ -69,9 +74,9 @@ check_list(const ParticleIndexes& cp) const {
   return true;
 }
 
-ParticlesTemp
-InternalDynamicListSingletonContainer::get_all_possible_particles() const {
-  return scope_->get_all_possible_particles();
+ParticleIndexes
+InternalDynamicListSingletonContainer::get_all_possible_indexes() const {
+  return scope_->get_all_possible_indexes();
 }
 
 void InternalDynamicListSingletonContainer::do_before_evaluate() {
@@ -90,7 +95,7 @@ InternalDynamicListSingletonContainer::get_input_containers() const {
 
 
 ParticleIndexes
-InternalDynamicListSingletonContainer::get_all_possible_indexes() const {
+InternalDynamicListSingletonContainer::get_range_indexes() const {
   return get_indexes();
 }
 

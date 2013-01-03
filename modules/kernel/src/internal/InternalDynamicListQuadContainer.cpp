@@ -34,30 +34,35 @@ InternalDynamicListQuadContainer
 
 void InternalDynamicListQuadContainer::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_particle_quads()
+  out << get_access()
       << " Quads." << std::endl;
 }
-
-
-
+void InternalDynamicListQuadContainer::add(const ParticleIndexQuad& vt) {
+  ParticleIndexQuads cur;
+  swap(cur);
+  cur.push_back(vt);
+  swap(cur);
+}
 void InternalDynamicListQuadContainer
-::remove_particle_quads(const ParticleQuadsTemp &c) {
+::add(const ParticleIndexQuads &c) {
   if (c.empty()) return;
-  get_model()->clear_caches();
-  ParticleIndexQuads cp= IMP::internal::get_index(c);
-  remove_from_list(cp);
-  IMP_IF_CHECK(base::USAGE) {
-    for (unsigned int i=0; i< c.size(); ++i) {
-      IMP_USAGE_CHECK(IMP::internal::is_valid(c[i]),
-                    "Passed Quad cannot be nullptr (or None)");
-    }
-  }
+  ParticleIndexQuads cur;
+  swap(cur);
+  cur+=c;
+  swap(cur);
 }
 
+void InternalDynamicListQuadContainer::set(ParticleIndexQuads cp) {
+  swap(cp);
+}
+void InternalDynamicListQuadContainer::clear() {
+  ParticleIndexQuads t;
+  swap(t);
+}
 bool InternalDynamicListQuadContainer::
 check_list(const ParticleIndexes& cp) const {
   ParticleIndexes app
-    = IMP::internal::get_index(scope_->get_all_possible_particles());
+    = scope_->get_all_possible_indexes();
 
   compatibility::set<ParticleIndex> all(app.begin(),
                                     app.end());
@@ -69,9 +74,9 @@ check_list(const ParticleIndexes& cp) const {
   return true;
 }
 
-ParticlesTemp
-InternalDynamicListQuadContainer::get_all_possible_particles() const {
-  return scope_->get_all_possible_particles();
+ParticleIndexes
+InternalDynamicListQuadContainer::get_all_possible_indexes() const {
+  return scope_->get_all_possible_indexes();
 }
 
 void InternalDynamicListQuadContainer::do_before_evaluate() {
@@ -90,7 +95,7 @@ InternalDynamicListQuadContainer::get_input_containers() const {
 
 
 ParticleIndexQuads
-InternalDynamicListQuadContainer::get_all_possible_indexes() const {
+InternalDynamicListQuadContainer::get_range_indexes() const {
   return get_indexes();
 }
 

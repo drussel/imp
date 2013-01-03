@@ -14,11 +14,24 @@
 #include <IMP/internal/container_helpers.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/core/internal/incremental_scoring_function.h>
+#include <IMP/base/check_macros.h>
 #include <numeric>
+#include <algorithm>
+
 IMPCORE_BEGIN_NAMESPACE
 /** to handle good/max evaluate, add dummy restraints for each
     restraint set that return 0 or inf if the last scores for the
     set are bad.*/
+
+namespace {
+  // TODO: this can be made a general library function at some point
+  IMP::Model* extract_model(const ParticlesTemp &ps)
+  {
+    IMP_USAGE_CHECK(ps.size() > 0,
+                    "needs at least one particle to extract a model");
+    return ps[0]->get_model();
+  }
+}
 
 
 IncrementalScoringFunction
@@ -26,8 +39,9 @@ IncrementalScoringFunction
                              const RestraintsTemp &rs,
                              double weight, double max,
                              std::string name):
-  ScoringFunction(rs[0]->get_model(),
-                  name), weight_(weight), max_(max) {
+  ScoringFunction(extract_model(ps), name),
+    weight_(weight),
+    max_(max) {
   IMP_OBJECT_LOG;
   IMP_LOG(TERSE, "Creating IncrementalScoringFunction with particles "
           << ps << " and restraints " << rs << std::endl);
@@ -96,8 +110,8 @@ void IncrementalScoringFunction::set_moved_particles(const ParticlesTemp &p) {
   IMP_OBJECT_LOG;
   IMP_IF_CHECK(USAGE) {
     for (unsigned int i=0; i< p.size(); ++i) {
-      IMP_USAGE_CHECK(scoring_functions_.find(p[i]->get_index())
-                      != scoring_functions_.end(),
+      IMP_USAGE_CHECK(std::find(all_.begin(), all_.end(), p[i]->get_index())
+                      != all_.end(),
                       "Particle " << Showable(p[i])
                       << " was not in the list of "
                       << "particles passed to the constructor.");
@@ -154,8 +168,7 @@ ParticlesTemp IncrementalScoringFunction::get_movable_particles() const {
 void
 IncrementalScoringFunction::do_non_incremental_evaluate() {
   if (!non_incremental_) {
-    non_incremental_=new RestraintsScoringFunction(flattened_restraints_,
-                                                   "Nonincremental");
+    non_incremental_=IMP::ScoringFunctionAdaptor(flattened_restraints_);
   }
   non_incremental_->evaluate(false);
   for (unsigned int i=0; i< flattened_restraints_.size(); ++i) {
@@ -164,14 +177,9 @@ IncrementalScoringFunction::do_non_incremental_evaluate() {
   dirty_.clear();
 }
 
-ScoringFunction::ScoreIsGoodPair
-IncrementalScoringFunction::do_evaluate_if_good(bool ,
-                                    const ScoreStatesTemp &) {
-  IMP_NOT_IMPLEMENTED;
-}
-ScoringFunction::ScoreIsGoodPair
-IncrementalScoringFunction::do_evaluate(bool derivatives,
-                                         const ScoreStatesTemp &ss) {
+void
+IncrementalScoringFunction::do_add_score_and_derivatives(ScoreAccumulator sa,
+                                                 const ScoreStatesTemp &ss) {
   IMP_OBJECT_LOG;
   IMP_CHECK_VARIABLE(ss);
   IMP_USAGE_CHECK(ss.empty(), "Where did the score states come from?");
@@ -183,7 +191,7 @@ IncrementalScoringFunction::do_evaluate(bool derivatives,
           =scoring_functions_.find(dirty_.back());
       dirty_.pop_back();
       if (it != scoring_functions_.end()) {
-        it->second->evaluate(derivatives);
+        it->second->evaluate(sa.get_derivative_accumulator());
         Ints ris=it->second->get_restraint_indexes();
         for (unsigned int i=0; i< ris.size(); ++i) {
           int index=ris[i];
@@ -192,6 +200,10 @@ IncrementalScoringFunction::do_evaluate(bool derivatives,
                   << Showable(flattened_restraints_[index])
                   << " to " << score << std::endl);
           flattened_restraints_scores_[index]=score;
+          IMP_INTERNAL_CHECK_FLOAT_EQUAL(score,
+                             flattened_restraints_[index]
+                                         ->unprotected_evaluate(nullptr),
+                                         .1);
         }
       }
     }
@@ -200,20 +212,25 @@ IncrementalScoringFunction::do_evaluate(bool derivatives,
   double score=std::accumulate(flattened_restraints_scores_.begin(),
                                flattened_restraints_scores_.end(),
                                0.0)*weight_;
+  // non-incremental ignores nbl terms
+  IMP_IF_CHECK(USAGE_AND_INTERNAL) {
+    if (non_incremental_) {
+      double niscore= non_incremental_->evaluate(false);
+      IMP_CHECK_VARIABLE(niscore);
+      IMP_INTERNAL_CHECK_FLOAT_EQUAL(niscore,
+                                     score,
+                      "Incremental and non-incremental scores don't match");
+    }
+  }
   // do nbl stuff
   for (unsigned int i=0; i< nbl_.size(); ++i) {
     double cscore= nbl_[i]->get_score();
     IMP_LOG(TERSE, "NBL score is " << cscore << std::endl);
     score+=cscore;
   }
-  return std::make_pair(score, true);
+  sa.add_score(score);
 }
-ScoringFunction::ScoreIsGoodPair
-IncrementalScoringFunction::do_evaluate_if_below(bool ,
-                                                 double ,
-                                                 const ScoreStatesTemp &) {
-  IMP_NOT_IMPLEMENTED;
-}
+
 Restraints IncrementalScoringFunction::create_restraints() const {
   Restraints ret;
   for (ScoringFunctionsMap::const_iterator it= scoring_functions_.begin();

@@ -19,12 +19,19 @@ SaveOptimizerState(RMF::FileHandle fh):
 
 
 void SaveOptimizerState::do_update(unsigned int k) {
-  save_frame(fh_, k);
+  std::string name;
   if (sim_) {
     std::ostringstream oss;
     oss << sim_->get_current_time() << "fs";
-    fh_.set_frame_name(k, oss.str());
+    name=oss.str();
   }
+  save_frame(fh_, k, name);
+}
+
+
+void SaveOptimizerState::update_always(std::string name) {
+  save_frame(fh_, get_number_of_updates(), name);
+  set_number_of_updates(get_number_of_updates()+1);
 }
 
 void SaveOptimizerState
@@ -44,8 +51,5 @@ IMP_LIST_IMPL(SaveOptimizerState, Geometry, geometry,
 
 void SaveOptimizerState::set_simulator(atom::Simulator *sim) {
   sim_=sim;
-}
-void SaveOptimizerState::set_frame_name(std::string name) {
-  fh_.set_frame_name(fh_.get_number_of_frames()-1, name);
 }
 IMPRMF_END_NAMESPACE

@@ -29,9 +29,12 @@ public:
   MinimumCLASSNAMEScore(const CLASSNAMEScoresTemp &scores,
                        unsigned int n=1,
                        std::string name="CLASSNAMEScore %1%");
-  IMP_HEADERNAME_SCORE(MinimumCLASSNAMEScore);
+  IMP_INDEX_HEADERNAME_SCORE(MinimumCLASSNAMEScore);
 
-  Restraints create_current_decomposition(ARGUMENTTYPE vt) const;
+  IMP_IMPLEMENT(Restraints
+                do_create_current_decomposition(Model *m,
+                                                PASSINDEXTYPE vt)
+                const IMP_OVERRIDE);
 };
 
 IMP_OBJECTS(MinimumCLASSNAMEScore,MinimumCLASSNAMEScores);

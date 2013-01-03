@@ -16,6 +16,8 @@
 #include <IMP/core/Typed.h>
 #include <IMP/display/Colored.h>
 #include <algorithm>
+#include <RMF/utility.h>
+#include <RMF/decorators.h>
 
 IMPRMF_BEGIN_NAMESPACE
 
@@ -42,26 +44,42 @@ atom::Bonded get_bonded(Particle *p) {
   }
 }
 
+
+void create_bonds(RMF::NodeConstHandle fhc,
+                  RMF::AliasConstFactory af,
+                  const compatibility::map<RMF::NodeConstHandle,
+                                           Particle*> &map) {
+    RMF::NodeConstHandles children= fhc.get_children();
+    if (fhc.get_type()== RMF::BOND && children.size()==2) {
+      RMF::NodeConstHandle bd0, bd1;
+      if (af.get_is(children[0])) {
+        bd0= af.get(children[0]).get_aliased();
+        bd1= af.get(children[1]).get_aliased();
+      } else {
+        bd0= children[0];
+        bd1= children[1];
+      }
+      if (map.find(bd0) != map.end() && map.find(bd1) != map.end()) {
+        // ignore type and things
+        atom::create_bond(get_bonded(map.find(bd0)->second),
+                          get_bonded(map.find(bd1)->second),
+                          atom::Bond::SINGLE);
+      }
+    } else {
+      for (unsigned int i=0; i< children.size(); ++i) {
+        create_bonds(children[i], af, map);
+      }
+    }
+}
+
 void create_bonds(RMF::FileConstHandle fhc, const RMF::NodeIDs &nhs,
                   const ParticlesTemp &ps) {
   compatibility::map<RMF::NodeConstHandle, Particle*> map;
   for (unsigned int i=0; i< nhs.size(); ++i) {
     map[fhc.get_node_from_id(nhs[i])]= ps[i];
   }
-  RMF::NodePairConstHandles hs= fhc.get_node_sets<2>();
-  for (unsigned int i=0; i< hs.size(); ++i) {
-    if (hs[i].get_type()== RMF::BOND) {
-      RMF::NodeConstHandle h0= hs[i].get_node(0);
-      RMF::NodeConstHandle h1= hs[i].get_node(1);
-      if (map.find(h0) != map.end()
-          && map.find(h1) != map.end()) {
-        // ignore type and things
-        atom::create_bond(get_bonded(map.find(h0)->second),
-                          get_bonded(map.find(h1)->second),
-                          atom::Bond::SINGLE);
-      }
-    }
-  }
+  RMF::AliasConstFactory af(fhc);
+  create_bonds(fhc.get_root_node(), af, map);
 }
 
 void create_rigid_bodies(Model *m,
@@ -82,19 +100,46 @@ void create_rigid_bodies(Model *m,
   }
 }
 
+  void fix_internal_coordinates(core::RigidBody rb,
+                                algebra::ReferenceFrame3D rf,
+                                ParticleIndex pi) {
+    // Make sure the internal coordinates of the particles match
+    // This is needed to handle scripts that change them during optimation
+    // and save the result out to RMF.
+    core::RigidMember rm(rb.get_model(), pi);
+    if (core::RigidBody::particle_is_instance(rb.get_model(), pi)) {
+      core::RigidBody crb(rb.get_model(), pi);
+      algebra::ReferenceFrame3D crf= crb.get_reference_frame();
+      algebra::ReferenceFrame3D lcrf= rf.get_local_reference_frame(crf);
+      rm.set_internal_transformation(lcrf.get_transformation_to());
+    } else {
+      algebra::Vector3D crf= rm.get_coordinates();
+      algebra::Vector3D lcrf= rf.get_local_coordinates(crf);
+      if ((lcrf- rm.get_internal_coordinates()).get_squared_magnitude()
+          > .0001) {
+        // try to avoid resetting caches
+        rm.set_internal_coordinates(lcrf);
+      }
+    }
+  }
+
   void fix_rigid_body(const std::pair<core::RigidBody,
                       ParticleIndexes> &in) {
     //core::RigidMembers rms=in.second;
     core::RigidBody rb= in.first;
     rb.set_reference_frame_from_members(in.second);
+    algebra::ReferenceFrame3D rf= rb.get_reference_frame();
+    // fix rigid bodies that aren't rigid
+    for (unsigned int i=0; i< in.second.size(); ++i) {
+      fix_internal_coordinates(rb, rf, in.second[i]);
+    }
   }
 
 }
-void HierarchyLoadLink::do_load_one_particle(RMF::NodeConstHandle nh,
-                                             Particle *o,
-                                             unsigned int frame) {
-  if (rigid_factory_.get_is(nh, frame)) {
-    RMF::RigidParticleConst p=rigid_factory_.get(nh, frame);
+void HierarchyLoadLink::do_load_node(RMF::NodeConstHandle nh,
+                                     Particle *o) {
+  if (rigid_factory_.get_is(nh)) {
+    RMF::RigidParticleConst p=rigid_factory_.get(nh);
     RMF::Floats cs= p.get_coordinates();
     algebra::Vector3D v(cs.begin(),
                         cs.end());
@@ -106,24 +151,37 @@ void HierarchyLoadLink::do_load_one_particle(RMF::NodeConstHandle nh,
            v);
     algebra::ReferenceFrame3D rf(tr);
     core::RigidBody(o).set_reference_frame(rf);
-  } else if (intermediate_particle_factory_.get_is(nh, frame)) {
-    RMF::Floats cs= intermediate_particle_factory_.get(nh, frame)
+  } else if (reference_frame_factory_.get_is(nh)) {
+    RMF::ReferenceFrameConst p=reference_frame_factory_.get(nh);
+    RMF::Floats cs= p.get_coordinates();
+    algebra::Vector3D v(cs.begin(),
+                        cs.end());
+    RMF::Floats orient= p.get_orientation();
+    algebra::Transformation3D
+        tr(algebra::Rotation3D(algebra
+                               ::Vector4D(orient.begin(),
+                                          orient.end())),
+           v);
+    algebra::ReferenceFrame3D rf(tr);
+    core::RigidBody(o).set_reference_frame(rf);
+  } else if (intermediate_particle_factory_.get_is(nh)) {
+    RMF::Floats cs= intermediate_particle_factory_.get(nh)
         .get_coordinates();
     algebra::Vector3D v(cs.begin(),
                         cs.end());
     core::XYZR(o).set_coordinates(v);
   }
-  if (colored_factory_.get_is(nh, frame)) {
-    RMF::Floats c= colored_factory_.get(nh, frame).get_rgb_color();
+  if (colored_factory_.get_is(nh)) {
+    RMF::Floats c= colored_factory_.get(nh).get_rgb_color();
     display::Colored(o).set_color(display::Color(c[0], c[1], c[2]));
   }
   // needed since atom requires XYZ
-  if (atom_factory_.get_is(nh, frame)) {
+  if (atom_factory_.get_is(nh)) {
     if (!atom::Atom::particle_is_instance(o)) {
       IMP_LOG(VERBOSE, "atomic ");
       if (!atom::get_atom_type_exists(nh.get_name())) {
         atom::add_atom_type(nh.get_name(),
-                            atom::Element(atom_factory_.get(nh, frame)
+                            atom::Element(atom_factory_.get(nh)
                                           .get_element()));
       }
       atom::Atom::setup_particle(o, atom::AtomType(nh.get_name()));
@@ -132,8 +190,7 @@ void HierarchyLoadLink::do_load_one_particle(RMF::NodeConstHandle nh,
 }
 
 void HierarchyLoadLink::do_load_one( RMF::NodeConstHandle nh,
-                                     Particle *o,
-                                     unsigned int frame) {
+                                     Particle *o) {
   RMF::FileConstHandle fh= nh.get_file();
   const ConstData&d= contents_.find(o)->second;
   IMP_LOG(VERBOSE, "Loading hierarchy " << atom::Hierarchy(o)
@@ -141,14 +198,18 @@ void HierarchyLoadLink::do_load_one( RMF::NodeConstHandle nh,
           << std::endl);
   compatibility::map<core::RigidBody, ParticleIndexes> rbs;
   for (unsigned int i=0; i< d.get_nodes().size(); ++i) {
-    do_load_one_particle(fh.get_node_from_id(d.get_nodes()[i]),
-                         d.get_particles()[i], frame);
+    do_load_node(fh.get_node_from_id(d.get_nodes()[i]),
+                         d.get_particles()[i]);
     if (core::RigidMember::particle_is_instance(d.get_particles()[i])) {
       rbs[core::RigidMember(d.get_particles()[i]).get_rigid_body()].
         push_back(d.get_particles()[i]->get_index());
     }
   }
   std::for_each(rbs.begin(), rbs.end(), fix_rigid_body);
+
+  //IMP::atom::show(atom::Hierarchy(o));
+  IMP_INTERNAL_CHECK(atom::Hierarchy(o).get_is_valid(true),
+                     "Invalid hierarchy loaded");
 }
 
 bool HierarchyLoadLink::setup_particle(Particle *root,
@@ -160,7 +221,7 @@ bool HierarchyLoadLink::setup_particle(Particle *root,
   atom::Hierarchy hp=atom::Hierarchy::setup_particle(p);
   IMP_LOG(VERBOSE, "Particle " << hp << " is ");
   bool crbp=false;
-  if (rigid_factory_.get_is(nh, 0)) {
+  if (rigid_factory_.get_is(nh)) {
     IMP_LOG(VERBOSE, "rigid ");
     crbp=true;
     core::RigidBody::setup_particle(p, algebra::ReferenceFrame3D());
@@ -168,16 +229,16 @@ bool HierarchyLoadLink::setup_particle(Particle *root,
       core::RigidBody(rbp).add_member(p);
     }
   }
-  if (intermediate_particle_factory_.get_is(nh, 0)) {
+  if (intermediate_particle_factory_.get_is(nh)) {
     IMP_LOG(VERBOSE, "xyzr ");
-    double r= intermediate_particle_factory_.get(nh, 0).get_radius();
+    double r= intermediate_particle_factory_.get(nh).get_radius();
     core::XYZR::setup_particle(p).set_radius(r);
     if (rbp) {
       core::RigidBody(rbp).add_member(p);
     }
   }
-  if (particle_factory_.get_is(nh, 0)) {
-    RMF::ParticleConst m= particle_factory_.get(nh, 0);
+  if (particle_factory_.get_is(nh)) {
+    RMF::ParticleConst m= particle_factory_.get(nh);
     IMP_LOG(VERBOSE, "massive ");
     atom::Mass::setup_particle(p, m.get_mass());
   }
@@ -198,6 +259,8 @@ bool HierarchyLoadLink::setup_particle(Particle *root,
     atom::Residue::setup_particle(p,
                                   atom::ResidueType(residue.get_type()))
         .set_index(b);
+    IMP_INTERNAL_CHECK(atom::Residue::particle_is_instance(p),
+                       "Setup failed for residue");
   }
   if (domain_factory_.get_is(nh)) {
     IMP_LOG(VERBOSE, "domian ");
@@ -239,7 +302,7 @@ bool HierarchyLoadLink::setup_particle(Particle *root,
     int v= nh.get_value(rigid_body_key_);
     rigid_bodies_[v].push_back(p);
     // load coordinates for the particle so rb is set up right
-    RMF::Floats cs= intermediate_particle_factory_.get(nh, 0)
+    RMF::Floats cs= intermediate_particle_factory_.get(nh)
         .get_coordinates();
     algebra::Vector3D vv(cs.begin(),
                         cs.end());
@@ -277,6 +340,13 @@ Particle* HierarchyLoadLink::do_create(RMF::NodeConstHandle name) {
   create_bonds(name.get_file(),contents_[ret].get_nodes(),
                contents_[ret].get_particles());
   create_rigid_bodies(ret->get_model(), rigid_bodies_);
+  IMP_USAGE_CHECK(name.get_file().get_current_frame().get_id() ==
+                  RMF::FrameID(0),
+                  "Bad frame in create: "
+                  << name.get_file().get_current_frame());
+  //IMP::atom::show(atom::Hierarchy(ret));
+  IMP_INTERNAL_CHECK(atom::Hierarchy(ret).get_is_valid(true),
+                     "Invalid hierarchy created");
   return ret;
 }
 
@@ -314,28 +384,33 @@ HierarchyLoadLink::HierarchyLoadLink(RMF::FileConstHandle fh, Model *m):
     copy_factory_(fh),
     diffuser_factory_(fh),
     typed_factory_(fh),
-    domain_factory_(fh)
+    domain_factory_(fh),
+    reference_frame_factory_(fh)
 {
   RMF::Category cat= fh.get_category("IMP");
-  rigid_body_key_=fh.get_key<RMF::IndexTraits>(cat, "rigid body", false);
+  rigid_body_key_=fh.get_key<RMF::IndexTraits>(cat, "rigid body");
 }
 
 namespace {
 void copy_bonds(Particle *root,
-                RMF::FileHandle fhc) {
+                RMF::NodeHandle fhc) {
   IMP_FUNCTION_LOG;
   atom::Bonds bds= atom::get_internal_bonds(atom::Hierarchy(root));
+  if (bds.empty()) return;
+  // could do this better, but...
+  RMF::NodeHandle bonds= fhc.add_child("bonds",
+                                       RMF::ORGANIZATIONAL);
+  RMF::AliasFactory af(fhc.get_file());
   for (unsigned int i=0; i< bds.size(); ++i) {
     Particle *p0= bds[i].get_bonded(0);
     Particle *p1= bds[i].get_bonded(1);
     IMP_LOG(VERBOSE, "Adding bond for pair " << Showable(p0)
             << " and " << Showable(p1) << std::endl);
-    RMF::NodeHandle n0= get_node_from_association(fhc, p0);
-    RMF::NodeHandle n1= get_node_from_association(fhc, p1);
-    RMF::NodeHandles nphs(2);
-    nphs[0]=n0;
-    nphs[1]=n1;
-    RMF::NodePairHandle np=fhc.add_node_set<2>(nphs, RMF::BOND);
+    RMF::NodeHandle n0= get_node_from_association(fhc.get_file(), p0);
+    RMF::NodeHandle n1= get_node_from_association(fhc.get_file(), p1);
+    RMF::NodeHandle bd= bonds.add_child("bond", RMF::BOND);
+    RMF::add_child_alias(af, bd, n0);
+    RMF::add_child_alias(af, bd, n1);
   }
 }
 }
@@ -344,6 +419,14 @@ void HierarchySaveLink::setup_node(Particle *p, RMF::NodeHandle n) {
   if (core::XYZR::particle_is_instance(p)) {
     core::XYZR d(p);
     intermediate_particle_factory_.get(n).set_radius(d.get_radius());
+  }
+  if (core::RigidBody::particle_is_instance(p)
+      && atom::Hierarchy(p).get_number_of_children()==0
+      && core::XYZR::particle_is_instance(p)) {
+    // center the particle's ball
+    RMF::Floats zeros(3);
+    std::fill(zeros.begin(), zeros.end(), 0.0);
+    intermediate_particle_factory_.get(n).set_coordinates(zeros);
   }
   if (atom::Mass::particle_is_instance(p)) {
     atom::Mass d(p);
@@ -422,36 +505,47 @@ void HierarchySaveLink::do_add(Particle *p, RMF::NodeHandle cur) {
                   "Invalid hierarchy passed.");
   do_add_recursive(p,p, cur);
   P::add_link(p, cur);
-  copy_bonds(p, cur.get_file());
+  copy_bonds(p, cur);
 }
 void HierarchySaveLink::do_save_node(Particle *p,
-                                     RMF::NodeHandle n,
-                                     unsigned int frame) {
-  if (core::XYZ::particle_is_instance(p)) {
+                                     RMF::NodeHandle n) {
+  if (core::RigidBody::particle_is_instance(p)) {
+    if (atom::Hierarchy(p).get_number_of_children()==0) {
+      // evil special case for now
+      core::RigidBody bd(p);
+      RMF::ReferenceFrame p= reference_frame_factory_.get(n);
+      algebra::Vector4D q= bd.get_reference_frame().
+          get_transformation_to().get_rotation().get_quaternion();
+      p.set_orientation(RMF::Floats(q.coordinates_begin(),
+                                    q.coordinates_end()));
+      algebra::Vector3D t= bd.get_reference_frame().
+        get_transformation_to().get_translation();
+      p.set_coordinates(RMF::Floats(t.coordinates_begin(),
+                                    t.coordinates_end()));
+    } else {
+      core::RigidBody bd(p);
+      RMF::RigidParticle p= rigid_factory_.get(n);
+      algebra::Vector4D q= bd.get_reference_frame().
+          get_transformation_to().get_rotation().get_quaternion();
+      p.set_orientation(RMF::Floats(q.coordinates_begin(),
+                                    q.coordinates_end()));
+    }
+  } else if (core::XYZ::particle_is_instance(p)) {
     core::XYZ d(p);
     RMF::IntermediateParticle p
-        = intermediate_particle_factory_.get(n, frame);
+        = intermediate_particle_factory_.get(n);
     algebra::Vector3D v= d.get_coordinates();
     p.set_coordinates(RMF::Floats(v.coordinates_begin(),
                                   v.coordinates_end()));
   }
-  if (core::RigidBody::particle_is_instance(p)) {
-    core::RigidBody bd(p);
-    RMF::RigidParticle p= rigid_factory_.get(n, frame);
-    algebra::Vector4D q= bd.get_reference_frame().
-        get_transformation_to().get_rotation().get_quaternion();
-    p.set_orientation(RMF::Floats(q.coordinates_begin(),
-                                  q.coordinates_end()));
-  }
+
 }
 void HierarchySaveLink::do_save_one(Particle *o,
-                                    RMF::NodeHandle nh,
-                                    unsigned int frame) {
+                                    RMF::NodeHandle nh) {
   RMF::FileHandle fh= nh.get_file();
   const Data &d= contents_.find(o)->second;
   for (unsigned int i=0; i< d.get_nodes().size(); ++i) {
-    do_save_node(d.get_particles()[i], fh.get_node_from_id(d.get_nodes()[i]),
-                 frame);
+    do_save_node(d.get_particles()[i], fh.get_node_from_id(d.get_nodes()[i]));
   }
 }
 HierarchySaveLink::HierarchySaveLink(RMF::FileHandle fh):
@@ -466,10 +560,10 @@ HierarchySaveLink::HierarchySaveLink(RMF::FileHandle fh):
     copy_factory_(fh),
     diffuser_factory_(fh),
     typed_factory_(fh),
-    domain_factory_(fh) {
-  RMF::Category ic= RMF::get_category_always<1>(fh, "IMP");
-  rigid_body_key_= RMF::get_key_always<RMF::IndexTraits>(fh, ic, "rigid body",
-                                                         false);
+    domain_factory_(fh),
+    reference_frame_factory_(fh) {
+  RMF::Category ic= fh.get_category("IMP");
+  rigid_body_key_= fh.get_key<RMF::IndexTraits>(ic, "rigid body");
 }
 
 IMPRMF_END_NAMESPACE

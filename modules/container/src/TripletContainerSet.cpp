@@ -30,20 +30,9 @@ TripletContainerSet
   set_triplet_containers(in);
 }
 
-
-bool
-TripletContainerSet
-::get_contains_particle_triplet(const ParticleTriplet& vt) const {
-  for (TripletContainerConstIterator it= triplet_containers_begin();
-       it != triplet_containers_end(); ++it) {
-    if ((*it)->get_contains_particle_triplet(vt)) return true;
-  }
-  return false;
-}
-
 void TripletContainerSet::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_particle_triplets()
+  out << get_number_of_triplet_containers()
       << " containers" << std::endl;
 }
 
@@ -58,11 +47,11 @@ ParticleIndexTriplets TripletContainerSet::get_indexes() const {
   return sum;
 }
 
-ParticleIndexTriplets TripletContainerSet::get_all_possible_indexes() const {
+ParticleIndexTriplets TripletContainerSet::get_range_indexes() const {
   ParticleIndexTriplets sum;
   for (TripletContainerConstIterator it= triplet_containers_begin();
        it != triplet_containers_end(); ++it) {
-    ParticleIndexTriplets cur=(*it)->get_all_possible_indexes();
+    ParticleIndexTriplets cur=(*it)->get_range_indexes();
     sum.insert(sum.end(), cur.begin(), cur.end());
   }
   return sum;
@@ -75,54 +64,34 @@ IMP_LIST_IMPL(TripletContainerSet,
               TripletContainers);
 
 
-void TripletContainerSet::apply(const TripletModifier *sm) const {
+void TripletContainerSet::do_apply(const TripletModifier *sm) const {
   for (unsigned int i=0; i< get_number_of_triplet_containers(); ++i) {
     get_triplet_container(i)->apply(sm);
   }
 }
 
-void TripletContainerSet::apply(const TripletDerivativeModifier *sm,
-                               DerivativeAccumulator &da) const {
+ParticleIndexes TripletContainerSet::get_all_possible_indexes() const {
+  ParticleIndexes ret;
   for (unsigned int i=0; i< get_number_of_triplet_containers(); ++i) {
-    get_triplet_container(i)->apply(sm, da);
-  }
-}
-
-double TripletContainerSet::evaluate(const TripletScore *s,
-                                       DerivativeAccumulator *da) const {
-  return template_evaluate(s, da);
-}
-
-double TripletContainerSet::evaluate_if_good(const TripletScore *s,
-                                               DerivativeAccumulator *da,
-                                               double max) const {
-  return template_evaluate_if_good(s, da, max);
-}
-
-
-ParticlesTemp TripletContainerSet::get_all_possible_particles() const {
-  ParticlesTemp ret;
-  for (unsigned int i=0; i< get_number_of_triplet_containers(); ++i) {
-    ParticlesTemp cur= get_triplet_container(i)
-        ->get_all_possible_particles();
-    ret+=cur;
+    ret+= get_triplet_container(i)
+        ->get_all_possible_indexes();
   }
   return ret;
 }
 
-bool TripletContainerSet::get_is_changed() const {
-  for (unsigned int i=0; i< get_number_of_triplet_containers(); ++i) {
-    if (get_triplet_container(i)->get_is_changed()) return true;
-  }
-  return Container::get_is_changed();
-}
-
-
-ContainersTemp TripletContainerSet::get_input_containers() const {
-  return ContainersTemp(triplet_containers_begin(),
-                        triplet_containers_end());
-}
 void TripletContainerSet::do_before_evaluate() {
+  for (unsigned int i=0; i< get_number_of_triplet_containers(); ++i) {
+    if (get_triplet_container(i)->get_is_changed()) {
+      set_is_changed(true);
+      return;
+    }
+  }
+  set_is_changed(false);
+}
+
+ModelObjectsTemp TripletContainerSet::do_get_inputs() const {
+  return ModelObjectsTemp(triplet_containers_begin(),
+                        triplet_containers_end());
 }
 
 IMPCONTAINER_END_NAMESPACE

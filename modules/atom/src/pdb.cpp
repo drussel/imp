@@ -200,6 +200,9 @@ Particle* atom_particle(Model *m, const std::string& pdb_line)
     }
   } else { // ATOM line
     boost::trim(string_name);
+    if (string_name.empty()) {
+      string_name="UNK";
+    }
     if (!AtomType::get_key_exists(string_name)) {
       IMP_LOG(VERBOSE, "ATOM record type not found: \"" << string_name
               << "\" from " << pdb_line << std::endl);
@@ -246,6 +249,9 @@ Particle* residue_particle(Model *m, const std::string& pdb_line)
   char residue_icode = internal::atom_residue_icode(pdb_line);
   std::string rn = internal::atom_residue_name(pdb_line);
   boost::trim(rn);
+  if (rn.empty()) {
+    rn="UNK";
+  }
   ResidueType residue_name = ResidueType(rn);
 
   // residue decorator

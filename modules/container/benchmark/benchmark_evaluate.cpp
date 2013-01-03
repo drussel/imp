@@ -5,6 +5,7 @@
 #include <IMP/Particle.h>
 #include <boost/timer.hpp>
 #include <IMP/benchmark/utility.h>
+#include <IMP/internal/AccumulatorScoreModifier.h>
 #include <IMP/benchmark/benchmark_macros.h>
 #include <IMP/benchmark/command_line_macros.h>
 #include <IMP/container/PairContainerSet.h>
@@ -34,9 +35,9 @@ inline double apply_and_accumulate(It b, It e, F f) {
 
 void time_both(PairContainer *pc, PairScore *ps, std::string name) {
   std::ostringstream ossc;
-  ossc << "container " << pc->get_number_of_particle_pairs();
+  ossc << "container " << pc->get_indexes().size();
   {
-    const ParticleIndexPairs pps= get_indexes(pc->get_particle_pairs());
+    const ParticleIndexPairs pps= pc->get_indexes();
     double runtime=0, total=0;
     IMP_TIME(
              {
@@ -50,7 +51,7 @@ void time_both(PairContainer *pc, PairScore *ps, std::string name) {
   }
   {
     SoftSpherePairScore *ssps= dynamic_cast<SoftSpherePairScore*>(ps);
-    const ParticleIndexPairs pps= get_indexes(pc->get_particle_pairs());
+    const ParticleIndexPairs pps= pc->get_indexes();
     double runtime=0, total=0;
     IMP_TIME(
              {
@@ -64,7 +65,7 @@ void time_both(PairContainer *pc, PairScore *ps, std::string name) {
   }
   {
     SoftSpherePairScore *ssps= dynamic_cast<SoftSpherePairScore*>(ps);
-    const ParticleIndexPairs pps= get_indexes(pc->get_particle_pairs());
+    const ParticleIndexPairs pps= pc->get_indexes();
     double runtime=0, total=0;
     IMP_TIME(
              {
@@ -81,7 +82,7 @@ void time_both(PairContainer *pc, PairScore *ps, std::string name) {
   }
   {
     SoftSpherePairScore *ssps= dynamic_cast<SoftSpherePairScore*>(ps);
-    const ParticleIndexPairs pps= get_indexes(pc->get_particle_pairs());
+    const ParticleIndexPairs pps= pc->get_indexes();
     double runtime=0, total=0;
     IMP_TIME(
              {
@@ -96,7 +97,7 @@ void time_both(PairContainer *pc, PairScore *ps, std::string name) {
   }
   {
     SoftSpherePairScore *ssps= dynamic_cast<SoftSpherePairScore*>(ps);
-    const ParticleIndexPairs pps= get_indexes(pc->get_particle_pairs());
+    const ParticleIndexPairs pps= pc->get_indexes();
     double runtime=0, total=0;
     IMP_TIME(
              {
@@ -109,24 +110,29 @@ void time_both(PairContainer *pc, PairScore *ps, std::string name) {
     oss << "direct bind " << name;
     IMP::benchmark::report(ossc.str(), oss.str(), runtime, total);
   }
-  {
+  /*{
     double runtime=0, total=0;
+    Pointer<IMP::internal::AccumulatorScoreModifier<PairScore> >
+        am= IMP::internal::create_accumulator_score_modifier(ps);
+
     IMP_TIME(
              {
-               total+=pc->evaluate(ps, nullptr);
+               pc->apply_generic(am);
+               total=am->get_score();
              }, runtime);
     std::ostringstream oss;
     oss << name;
     IMP::benchmark::report(ossc.str(), oss.str(), runtime, total);
-  }
+    }*/
   {
    double runtime=0, total=0;
     IMP_TIME(
              {
-               for (unsigned int i=0; i< pc->get_number_of_particle_pairs();
-                    ++i) {
-                 total+= ps->evaluate(pc->get_particle_pair(i), nullptr);
-               }
+               IMP_CONTAINER_FOREACH(PairContainer, pc,
+                                     {
+                 total+= ps->evaluate_index(pc->get_model(),
+                                            _1, nullptr);
+                                     });
              }, runtime);
     std::ostringstream oss;
     oss << name << " out";

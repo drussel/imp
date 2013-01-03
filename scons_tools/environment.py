@@ -7,7 +7,6 @@ from SCons.Script import *
 import bug_fixes
 import standards
 import dependency.compilation
-import dependency.nullptr
 import module
 import dependency
 import dependency.clang
@@ -180,14 +179,14 @@ def get_base_environment(variables=None, *args, **kw):
     for mod in ('CPPPATH', 'LIBPATH', 'LIBS'):
         env['MODELLER_' + mod] = []
     dependency.compilation.configure_check(env)
-    dependency.nullptr.configure_check(env)
     if platform == 'aix':
         # Make sure compilers are in the PATH, so that Python's script for
         # building AIX extension modules can find them:
         e['ENV']['PATH'] += ':/usr/vac/bin'
     #print "cxx", env['CXXFLAGS']
-    env.Prepend(CPPPATH=[Dir('#/build/include').abspath])
-    env.Prepend(LIBPATH=[Dir('#/build/lib').abspath])
+    builddir= Dir("#/build/").abspath
+    env.Prepend(CPPPATH=[builddir+"/include"])
+    env.Prepend(LIBPATH=[builddir+"/lib"])
     env.Append(BUILDERS={'IMPRun': run.Run})
     # these should be in application, but...
     env.AddMethod(application.IMPApplication)
@@ -343,16 +342,15 @@ def get_bin_environment(envi, extra_modules=[], extra_dependencies=[]):
         env.Replace(CXXFLAGS=env['IMP_BIN_CXXFLAGS'])
     _add_flags(env, extra_modules=extra_modules,
                extra_dependencies=extra_dependencies)
+    if data.get_has_configured_dependency("tcmalloc_heapchecker")\
+        and (data.get_dependency("tcmalloc_heapchecker")["ok"]\
+        or data.get_dependency("tcmalloc_heapprofiler")["ok"]):
+        env.Append(LIBS=["tcmalloc"])
     return env
 
 def get_benchmark_environment(envi, extra_modules=[]):
     extra=[]
-    if data.get_dependency("tcmalloc")["ok"]:
-        libs=['tcmalloc']
-    else:
-        libs=[]
-    return get_bin_environment(envi, extra_modules+['benchmark'],
-                               extra_dependencies=libs)
+    return get_bin_environment(envi, extra_modules+['benchmark'])
 
 def get_test_environment(envi):
     """environment for running config tests"""

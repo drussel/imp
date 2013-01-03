@@ -16,9 +16,11 @@ env= env.IMPApplication(name="multifit_tools",
                                                     title="Determining architectures of macromolecular assemblies by aligning interaction networks to electon microscopy density maps",
                                                     journal="submitted",
                                                     year=2011)],
-                        required_modules=['multifit'],
+                        required_modules=['multifit', 'cnmultifit'],
                         required_dependencies=[],
                         python=True)
 
 if env:
     env.IMPPythonExecutable('complex_to_anchor_graph.py')
+    env.IMPPythonExecutable('cnmultifit.py')
+    env.IMPPythonExecutable('multifit.py')

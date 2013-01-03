@@ -60,7 +60,7 @@ void RestraintCache::add_restraint_set_child_internal(Restraint *r,
 }
 Subset RestraintCache::get_subset(Restraint *r,
                                   const DepMap &dependencies) const {
-  ParticlesTemp ups=r->get_input_particles();
+  ParticlesTemp ups= IMP::get_input_particles(r->get_inputs());
   std::sort(ups.begin(), ups.end());
   ups.erase(std::unique(ups.begin(), ups.end()), ups.end());
   ParticlesTemp outps;
@@ -249,7 +249,7 @@ void RestraintCache::validate() const {
    one for all the scores and one for the assignments.
 
  */
-#ifdef IMP_DOMINO_USE_IMP_RMF
+#ifdef IMP_DOMINO_USE_RMF
 namespace {
   Ints get_ids(const compatibility::map<Particle*, int> &map,
                const Subset &s) {

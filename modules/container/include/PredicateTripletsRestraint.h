@@ -102,12 +102,15 @@ public:
     error_on_unknown_=tf;
   }
 
-  ParticleTripletsTemp get_particle_triplets(int predicate_value) const {
+  IMP_IMPLEMENT(double get_last_score() const);
+
+  /** return the indexes of all particles for  a given predicate value.*/
+  ParticleIndexTriplets get_indexes(int predicate_value) const {
     return containers_.find(predicate_value)->second
-      ->get_particle_triplets();
+      ->get_indexes();
   }
 
-  IMP_RESTRAINT(PredicateTripletsRestraint);
+  IMP_RESTRAINT_ACCUMULATOR(PredicateTripletsRestraint);
 private:
   Restraints do_create_current_decomposition() const;
 };

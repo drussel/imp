@@ -20,9 +20,11 @@ DerivativesToRefined
 
 
 void DerivativesToRefined
-::apply(Particle *p,
-        DerivativeAccumulator &da) const
+::apply_index(Model *m,
+              ParticleIndex pi) const
 {
+  Particle *p= m->get_particle(pi);
+  DerivativeAccumulator da;
   ParticlesTemp ps = refiner_->get_refined(p);
 
   for (unsigned int i=0; i< ps.size(); ++i) {

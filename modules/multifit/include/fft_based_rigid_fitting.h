@@ -88,7 +88,7 @@ class IMPMULTIFITEXPORT FFTFitting : public base::Object {
  int num_fits_reported_;
  double low_cutoff_;
  int corr_mode_;
-
+ algebra::Vector3D orig_cen_;
  //paddding
  double fftw_pad_factor_;  // grid size expansion factor for FFT padding
  unsigned int fftw_zero_padding_extent_[3]; // padding extent
@@ -119,7 +119,7 @@ class IMPMULTIFITEXPORT FFTFitting : public base::Object {
  //! Detect the top fits
  FittingSolutionRecords detect_top_fits(
      const internal::RotScoresVec &rot_scores,
-     bool cluster_fits);
+     bool cluster_fits, double max_translation);
  public:
   FFTFitting() : base::Object("FFTFitting%1%") {}
   //! Fit a molecule inside its density
@@ -140,6 +140,7 @@ class IMPMULTIFITEXPORT FFTFitting : public base::Object {
                         atom::Hierarchy mol2fit,
                         double angle_sampling_interval_rad,
                         int num_fits_to_report,
+                        double max_trans,
                         bool cluster_fits=true,
                         int num_angle_per_voxel=1,
                         const std::string &angles_filename="");

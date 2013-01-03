@@ -22,7 +22,7 @@ class DummyPairContainer :
 {
   IMP::OwnerPointer<SingletonContainer> c_;
   IMP::OwnerPointer<ClosePairsFinder> cpf_;
-  IMP_LISTLIKE_PAIR_CONTAINER(DummyPairContainer);
+  IMP_LISTLIKE_PAIR_CONTAINER_2(DummyPairContainer);
   void initialize(SingletonContainer *c, double distance,
                   double slack, ClosePairsFinder *cpf);
 public:
@@ -32,7 +32,7 @@ public:
   SingletonContainer*get_singleton_container() const {return c_;}
   ClosePairsFinder *get_close_pairs_finder() const {return cpf_;}
   Restraints create_decomposition(PairScore *ps) const {
-    ParticleIndexPairs all= get_all_possible_indexes();
+    ParticleIndexPairs all= get_range_indexes();
     Restraints ret(all.size());
     for (unsigned int i=0; i< all.size(); ++i) {
       ret[i]= new PairRestraint(ps, IMP::internal::get_particle(get_model(),
@@ -42,7 +42,7 @@ public:
   }
   template <class PS>
   Restraints create_decomposition_t(PS *ps) const {
-    ParticleIndexPairs all= get_all_possible_indexes();
+    ParticleIndexPairs all= get_range_indexes();
     Restraints ret(all.size());
     for (unsigned int i=0; i< all.size(); ++i) {
       ret[i]= IMP::create_restraint(ps,
@@ -65,21 +65,13 @@ DummyPairContainer::DummyPairContainer(SingletonContainer *c,
 
 
 
-ContainersTemp DummyPairContainer
-::get_input_containers() const {
-  ContainersTemp ret= cpf_->get_input_containers(c_->get_particles());
+ModelObjectsTemp DummyPairContainer
+::do_get_inputs() const {
+  ModelObjectsTemp ret = cpf_->get_inputs(get_model(),
+                                          c_->get_indexes());
   ret.push_back(c_);
   return ret;
 }
-
-
-ParticlesTemp DummyPairContainer::get_input_particles() const {
-  ParticlesTemp ret(cpf_->get_input_particles(c_->get_particles()));
-  ParticlesTemp all;
-  ret.insert(ret.end(), all.begin(), all.end());
-  return ret;
-}
-
 
 
 
@@ -91,8 +83,8 @@ void DummyPairContainer::do_show(std::ostream &) const {
 }
 
 
-ParticleIndexPairs DummyPairContainer::get_all_possible_indexes() const {
-  ParticleIndexes pis= c_->get_all_possible_indexes();
+ParticleIndexPairs DummyPairContainer::get_range_indexes() const {
+  ParticleIndexes pis= c_->get_range_indexes();
   ParticleIndexPairs ret; ret.reserve(pis.size()*(pis.size()-1)/2);
   for (unsigned int i=0; i< pis.size(); ++i) {
     for (unsigned int j=0; j< i; ++j) {
@@ -102,10 +94,15 @@ ParticleIndexPairs DummyPairContainer::get_all_possible_indexes() const {
   return ret;
 }
 
-ParticlesTemp DummyPairContainer::get_all_possible_particles() const {
-  ParticlesTemp ret= c_->get_all_possible_particles();
-  ParticlesTemp nret =cpf_->get_input_particles(c_->get_particles());
-  ret.insert(ret.end(), nret.begin(), nret.end());
+ParticleIndexes DummyPairContainer::get_all_possible_indexes() const {
+  ParticleIndexes ret= c_->get_all_possible_indexes();
+  ModelObjectsTemp mos=cpf_->get_inputs(get_model(),
+                                        c_->get_indexes());
+  for (unsigned int i=0; i< mos.size(); ++i) {
+    ModelObject *o= mos[i];
+    Particle *p= dynamic_cast<Particle*>(o);
+    if (p) ret.push_back(p->get_index());
+  }
   return ret;
 }
 
@@ -207,7 +204,7 @@ double NBLScoring::get_score() {
 Restraint* NBLScoring::create_restraint() const {
   IMP_NEW(IMP::internal::InternalListSingletonContainer,
           lsc, (cache_.get_generator().m_, "NBLInput Container %1%"));
-  lsc->set_particles(cache_.get_generator().pis_);
+  lsc->set(cache_.get_generator().pis_);
   IMP_NEW(DummyPairContainer,
           cpc, (lsc,  default_cpf(1000)));
 

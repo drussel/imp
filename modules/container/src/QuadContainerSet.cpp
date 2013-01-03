@@ -30,20 +30,9 @@ QuadContainerSet
   set_quad_containers(in);
 }
 
-
-bool
-QuadContainerSet
-::get_contains_particle_quad(const ParticleQuad& vt) const {
-  for (QuadContainerConstIterator it= quad_containers_begin();
-       it != quad_containers_end(); ++it) {
-    if ((*it)->get_contains_particle_quad(vt)) return true;
-  }
-  return false;
-}
-
 void QuadContainerSet::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_particle_quads()
+  out << get_number_of_quad_containers()
       << " containers" << std::endl;
 }
 
@@ -58,11 +47,11 @@ ParticleIndexQuads QuadContainerSet::get_indexes() const {
   return sum;
 }
 
-ParticleIndexQuads QuadContainerSet::get_all_possible_indexes() const {
+ParticleIndexQuads QuadContainerSet::get_range_indexes() const {
   ParticleIndexQuads sum;
   for (QuadContainerConstIterator it= quad_containers_begin();
        it != quad_containers_end(); ++it) {
-    ParticleIndexQuads cur=(*it)->get_all_possible_indexes();
+    ParticleIndexQuads cur=(*it)->get_range_indexes();
     sum.insert(sum.end(), cur.begin(), cur.end());
   }
   return sum;
@@ -75,54 +64,34 @@ IMP_LIST_IMPL(QuadContainerSet,
               QuadContainers);
 
 
-void QuadContainerSet::apply(const QuadModifier *sm) const {
+void QuadContainerSet::do_apply(const QuadModifier *sm) const {
   for (unsigned int i=0; i< get_number_of_quad_containers(); ++i) {
     get_quad_container(i)->apply(sm);
   }
 }
 
-void QuadContainerSet::apply(const QuadDerivativeModifier *sm,
-                               DerivativeAccumulator &da) const {
+ParticleIndexes QuadContainerSet::get_all_possible_indexes() const {
+  ParticleIndexes ret;
   for (unsigned int i=0; i< get_number_of_quad_containers(); ++i) {
-    get_quad_container(i)->apply(sm, da);
-  }
-}
-
-double QuadContainerSet::evaluate(const QuadScore *s,
-                                       DerivativeAccumulator *da) const {
-  return template_evaluate(s, da);
-}
-
-double QuadContainerSet::evaluate_if_good(const QuadScore *s,
-                                               DerivativeAccumulator *da,
-                                               double max) const {
-  return template_evaluate_if_good(s, da, max);
-}
-
-
-ParticlesTemp QuadContainerSet::get_all_possible_particles() const {
-  ParticlesTemp ret;
-  for (unsigned int i=0; i< get_number_of_quad_containers(); ++i) {
-    ParticlesTemp cur= get_quad_container(i)
-        ->get_all_possible_particles();
-    ret+=cur;
+    ret+= get_quad_container(i)
+        ->get_all_possible_indexes();
   }
   return ret;
 }
 
-bool QuadContainerSet::get_is_changed() const {
-  for (unsigned int i=0; i< get_number_of_quad_containers(); ++i) {
-    if (get_quad_container(i)->get_is_changed()) return true;
-  }
-  return Container::get_is_changed();
-}
-
-
-ContainersTemp QuadContainerSet::get_input_containers() const {
-  return ContainersTemp(quad_containers_begin(),
-                        quad_containers_end());
-}
 void QuadContainerSet::do_before_evaluate() {
+  for (unsigned int i=0; i< get_number_of_quad_containers(); ++i) {
+    if (get_quad_container(i)->get_is_changed()) {
+      set_is_changed(true);
+      return;
+    }
+  }
+  set_is_changed(false);
+}
+
+ModelObjectsTemp QuadContainerSet::do_get_inputs() const {
+  return ModelObjectsTemp(quad_containers_begin(),
+                        quad_containers_end());
 }
 
 IMPCONTAINER_END_NAMESPACE

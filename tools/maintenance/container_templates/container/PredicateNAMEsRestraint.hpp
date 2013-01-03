@@ -100,12 +100,15 @@ public:
     error_on_unknown_=tf;
   }
 
-  PLURALVARIABLETYPE get_FUNCTIONNAMEs(int predicate_value) const {
+  IMP_IMPLEMENT(double get_last_score() const);
+
+  /** return the indexes of all particles for  a given predicate value.*/
+  PLURALINDEXTYPE get_indexes(int predicate_value) const {
     return containers_.find(predicate_value)->second
-      ->get_FUNCTIONNAMEs();
+      ->get_indexes();
   }
 
-  IMP_RESTRAINT(PredicateCLASSNAMEsRestraint);
+  IMP_RESTRAINT_ACCUMULATOR(PredicateCLASSNAMEsRestraint);
 private:
   Restraints do_create_current_decomposition() const;
 };

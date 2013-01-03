@@ -12,6 +12,7 @@
 #include "rmf_config.h"
 #include "simple_links.h"
 #include <IMP/base/object_macros.h>
+#include <IMP/base/utility_macros.h>
 #include <RMF/NodeHandle.h>
 #include <RMF/FileHandle.h>
 #include <IMP/atom/Hierarchy.h>
@@ -19,7 +20,6 @@
 #include <IMP/rmf/link_macros.h>
 #include <IMP/base/tuple_macros.h>
 #include <RMF/decorators.h>
-#include <RMF/NodeSetHandle.h>
 #include <IMP/compatibility/map.h>
 IMPRMF_BEGIN_NAMESPACE
 
@@ -39,17 +39,21 @@ class IMPRMFEXPORT HierarchyLoadLink: public SimpleLoadLink<Particle> {
   RMF::DiffuserConstFactory diffuser_factory_;
   RMF::TypedConstFactory typed_factory_;
   RMF::DomainConstFactory domain_factory_;
+  RMF::ReferenceFrameConstFactory reference_frame_factory_;
   RMF::IndexKey rigid_body_key_;
 
   compatibility::map<Particle*, ConstData> contents_;
   compatibility::map<unsigned int, ParticlesTemp> rigid_bodies_;
-  void do_load_one_particle(RMF::NodeConstHandle nh,
-                            Particle *o,
-                            unsigned int frame);
-
-  void do_load_one( RMF::NodeConstHandle nh,
-                    Particle *o,
-                    unsigned int frame);
+  /** This method is called for each particle in the hierarchy.*/
+  IMP_PROTECTED_METHOD(virtual void,
+                       do_load_node,
+                       (RMF::NodeConstHandle nh,
+                        Particle *o),,);
+  /** Overload this method to take specific action on loading a hierarchy.
+   */
+  IMP_PROTECTED_METHOD(virtual void, do_load_one,
+                       ( RMF::NodeConstHandle nh,
+                         Particle *o),,);
   bool get_is(RMF::NodeConstHandle nh) const {
     return nh.get_type()==RMF::REPRESENTATION;
   }
@@ -57,14 +61,19 @@ class IMPRMFEXPORT HierarchyLoadLink: public SimpleLoadLink<Particle> {
                       RMF::NodeConstHandle nh,
                       Particle *p,
                       Particle *rbp);
-
-  Particle* do_create_recursive(Particle *root,
+  /** Overload this to take specific action on creating
+      a member of the hierarchy.
+      \unstable */
+  IMP_PROTECTED_METHOD(virtual Particle*, do_create_recursive, (Particle *root,
                                 RMF::NodeConstHandle name,
-                                Particle *rbp=nullptr);
+                                Particle *rbp=nullptr),,);
 
   Particle* do_create(RMF::NodeConstHandle name);
-  void do_add_link_recursive(Particle *root,
-                             Particle *o, RMF::NodeConstHandle node);
+  /** Overload this to take specific action on linking
+      a member of the hierarchy.
+      \unstable */
+  IMP_PROTECTED_METHOD(virtual void, do_add_link_recursive, (Particle *root,
+                                     Particle *o, RMF::NodeConstHandle node),,);
 
   void do_add_link(Particle *o, RMF::NodeConstHandle node);
 public:
@@ -90,15 +99,17 @@ class IMPRMFEXPORT HierarchySaveLink: public SimpleSaveLink<Particle> {
   RMF::DiffuserFactory diffuser_factory_;
   RMF::TypedFactory typed_factory_;
   RMF::DomainFactory domain_factory_;
+  RMF::ReferenceFrameFactory reference_frame_factory_;
   RMF::IndexKey rigid_body_key_;
 
+  // ones in this set have their internal coordinates saved
+  compatibility::set<Particle*> internal_;
   compatibility::map<Particle*, Data> contents_;
   compatibility::map<Particle*, unsigned int> rigid_bodies_;
   void setup_node(Particle *p, RMF::NodeHandle n) ;
   void do_add(Particle *p, RMF::NodeHandle cur);
   void do_save_one(Particle *o,
-                   RMF::NodeHandle nh,
-                   unsigned int frame);
+                   RMF::NodeHandle nh);
   RMF::NodeType get_type(Particle*) const {
     return RMF::REPRESENTATION;
   }
@@ -106,8 +117,7 @@ class IMPRMFEXPORT HierarchySaveLink: public SimpleSaveLink<Particle> {
                        (Particle *root, Particle *p,
                         RMF::NodeHandle cur),,);
   IMP_PROTECTED_METHOD(virtual void, do_save_node, (Particle *p,
-                                                    RMF::NodeHandle n,
-                                                    unsigned int frame),,);
+                                                    RMF::NodeHandle n),,);
 public:
   HierarchySaveLink(RMF::FileHandle fh);
   IMP_OBJECT_INLINE(HierarchySaveLink,IMP_UNUSED(out),);

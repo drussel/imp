@@ -34,7 +34,7 @@
   \param[in] replacement_classname The class which replaces it.
 
   Further, \imp can be built without deprecated code by defining
-  \c IMP_NO_DEPRECATED or the \c deprecated=False \c scons argument.
+  using the \c deprecated=False \c scons argument.
 
   You should also use the \deprecated command in the doxygen documentation.
  */
@@ -71,10 +71,33 @@
   }
 
 
-#ifdef __GNUC__
-#define IMP_DEPRECATED_WARN __attribute__ ((deprecated))
+#if !defined(IMP_SWIG) && (defined(__GNUC__) || defined(__clang__))
+#define IMP_DEPRECATED_WARN __attribute__((deprecated))
 #else
+/** Produce compiler warnings when the function is called.*/
 #define IMP_DEPRECATED_WARN
+#endif
+
+#if defined(IMP_DOXYGEN)
+/** Suppress compiler warnings about a call to a deprecated function.*/
+#define IMP_DEPRECATED_IGNORE(call) call
+
+#elif defined(__GNUC__)
+
+// This doesn't work except in 4.7 or so and higher due to a bug in gcc
+#define IMP_DEPRECATED_IGNORE(call)                                     \
+  IMP_PRAGMA(GCC diagnostic push)                                       \
+  IMP_PRAGMA(GCC diagnostic ignored "-Wdeprecated-declarations")        \
+    call;                                                               \
+  IMP_PRAGMA(GCC diagnostic pop)
+
+#elif defined(__clang__)
+#define IMP_DEPRECATED_IGNORE(call)                                     \
+  IMP_PRAGMA(clang diagnostic push)                                     \
+  IMP_PRAGMA(clang diagnostic ignored "-Wdeprecated")                   \
+    call;                                                               \
+  IMP_PRAGMA(clang diagnostic pop)
+
 #endif
 
 #endif /* IMPBASE_DEPRECATION_MACROS_H */

@@ -102,12 +102,15 @@ public:
     error_on_unknown_=tf;
   }
 
-  ParticlesTemp get_particles(int predicate_value) const {
+  IMP_IMPLEMENT(double get_last_score() const);
+
+  /** return the indexes of all particles for  a given predicate value.*/
+  ParticleIndexes get_indexes(int predicate_value) const {
     return containers_.find(predicate_value)->second
-      ->get_particles();
+      ->get_indexes();
   }
 
-  IMP_RESTRAINT(PredicateSingletonsRestraint);
+  IMP_RESTRAINT_ACCUMULATOR(PredicateSingletonsRestraint);
 private:
   Restraints do_create_current_decomposition() const;
 };

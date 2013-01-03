@@ -331,6 +331,7 @@ def create_dockings_from_xlinks(params):
         fn_initial_docking = "%s-%s_initial_docking.pdb" % (rec,lig)
         mv.write_ligand(fn_initial_docking)
         # dock
+        dock.check_for_hexdock()
         hex_docking = dock.HexDocking()
         receptor_index = params.names.index(rec)
         fn_transforms = "hex_solutions_%s-%s.txt" % (rec, lig)
@@ -392,9 +393,9 @@ if __name__ == "__main__":
     parser.add_option("--exp",
                      dest="fn_params",
                      default=None,
-                     help="Experiment file. This is a python file containig " \
-                          "a class called Experiment containing all " \
-                          "parameters required to do the modeling.")
+                     help="Experiment file. This should be a Python file "
+                          "containing a class called Experiment containing "
+                          "all parameters required to do the modeling.")
     parser.add_option("--w",
                     type=int,
                      dest="write",
@@ -406,9 +407,9 @@ if __name__ == "__main__":
                      nargs = 2,
                      default=None,
                      help="Write the n-th largest cluster. This option has " \
-                            "two arguments. The fist one is the database file " \
+                            "two arguments. The first one is the database file " \
                             "containing the clusters. The second one is the " \
-                            "number (position) of the cluster to write. The " \
+                            "number (position) of the cluster to write. " \
                             "The index of the first cluster is 1.")
     parser.add_option("--orderby",
                       dest="orderby",
@@ -490,7 +491,7 @@ if __name__ == "__main__":
 
     if args.write:
         if not args.fn_database or not args.orderby:
-            raise ValueError("Writting solutions requires the database of " \
+            raise ValueError("Writing solutions requires the database of " \
                          "results and the name of the restraint to order by")
         if args.orderby == "False":
             args.orderby = False
@@ -501,7 +502,7 @@ if __name__ == "__main__":
 
     if args.write_cluster:
         if not args.fn_database:
-            raise ValueError("Writting clusters requires the database file")
+            raise ValueError("Writing clusters requires the database file")
         fn_db_clusters = args.write_cluster[0]
         position = int(args.write_cluster[1])
         params = utility.get_experiment_params(args.fn_params)
@@ -511,7 +512,7 @@ if __name__ == "__main__":
 
     if args.cdrms:
         if not args.fn_database or not args.orderby:
-            raise ValueError("Writting models requires the database of " \
+            raise ValueError("Writing models requires the database of " \
                             "results and the name of the restraint to order by")
         params = utility.get_experiment_params(args.fn_params)
 

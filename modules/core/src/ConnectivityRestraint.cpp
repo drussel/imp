@@ -62,7 +62,7 @@ void ConnectivityRestraint::set_particles(const ParticlesTemp &ps) {
     sc_= new IMP::internal::InternalListSingletonContainer(ps[0]->get_model(),
                                                   "connectivity list");
   }
-  get_list(sc_)->set_particles(ps);
+  get_list(sc_)->set(IMP::internal::get_index(ps));
 }
 
 void ConnectivityRestraint::add_particles(const ParticlesTemp &ps) {
@@ -70,7 +70,7 @@ void ConnectivityRestraint::add_particles(const ParticlesTemp &ps) {
     sc_= new IMP::internal::InternalListSingletonContainer(ps[0]->get_model(),
                                                   "connectivity list");
   }
-  get_list(sc_)->add_particles(ps);
+  get_list(sc_)->add(IMP::internal::get_index(ps));
 }
 
 void ConnectivityRestraint::add_particle(Particle *ps) {
@@ -78,7 +78,7 @@ void ConnectivityRestraint::add_particle(Particle *ps) {
     sc_= new IMP::internal::InternalListSingletonContainer(ps->get_model(),
                                                   "connectivity list");
   }
-  get_list(sc_)->add_particle(ps);
+  get_list(sc_)->add(IMP::internal::get_index(ps));
 }
 
 namespace {
@@ -157,8 +157,8 @@ ConnectivityRestraint::unprotected_evaluate(DerivativeAccumulator *accum) const
   if (!sc_) return 0;
   ParticleIndexPairs edges= get_edges(sc_, ps_);
   return ps_->evaluate_indexes(get_model(),
-                            edges,
-                            accum);
+                               edges,
+                               accum, 0, edges.size());
 }
 
 
@@ -183,27 +183,14 @@ ParticlePairsTemp ConnectivityRestraint::get_connected_pairs() const {
   return IMP::internal::get_particle(get_model(), edges);
 }
 
-ParticlesTemp ConnectivityRestraint::get_input_particles() const {
-  if (!sc_) return ParticlesTemp();
-  ParticlesTemp ret;
-  IMP_FOREACH_SINGLETON(sc_, {
-      ParticlesTemp cs = ps_->get_input_particles(_1);
-      ret.insert(ret.end(), cs.begin(), cs.end());
-    });
+ModelObjectsTemp ConnectivityRestraint::do_get_inputs() const {
+  if (!sc_) return ModelObjectsTemp();
+  ModelObjectsTemp ret;
+  ret+=ps_->get_inputs(get_model(),
+                       sc_->get_all_possible_indexes());
+  ret.push_back(sc_);
   return ret;
 }
-
-ContainersTemp ConnectivityRestraint::get_input_containers() const {
-  if (!sc_) return ContainersTemp();
-  ContainersTemp ret;
-  IMP_FOREACH_SINGLETON(sc_, {
-      ContainersTemp cs
-        = ps_->get_input_containers(_1);
-      ret.insert(ret.end(), cs.begin(), cs.end());
-    });
-  return ret;
-}
-
 
 void ConnectivityRestraint::do_show(std::ostream& out) const
 {

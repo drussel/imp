@@ -37,6 +37,7 @@ case ${TARGET_OSX_VER} in
 esac
 
 PREFIX=/usr/local
+TOPDIR=`pwd`
 
 # Make sure we can find the rest of our input files
 MAC_TOOL_DIR=`dirname "$0"`
@@ -102,16 +103,21 @@ for lib in *.dylib; do
   for dep in *.dylib; do
     install_name_tool -change ${LIBNAMEPATH}/$dep \
                               ${PREFIX}/lib/$dep $lib || exit 1
+    install_name_tool -change $dep ${PREFIX}/lib/$dep $lib || exit 1
   done
+
+  # Make sure path to this library is correct in all Python extensions
   for py in IMP-python/*.so; do
     install_name_tool -change ${LIBNAMEPATH}/$lib \
                               ${PREFIX}/lib/$lib $py || exit 1
+    install_name_tool -change $lib ${PREFIX}/lib/$lib $py || exit 1
   done
 
-  # Update library name paths in IMP binaries
+  # Make sure path to this library is correct in all IMP binaries
   for bin in ${bins}; do
     install_name_tool -change ${LIBNAMEPATH}/$lib \
                               ${PREFIX}/lib/$lib $bin || exit 1
+    install_name_tool -change $lib ${PREFIX}/lib/$lib $bin || exit 1
   done
 done
 
@@ -137,6 +143,8 @@ if [ "${TARGET_OSX_VER}" = "10.6" ]; then
                 /usr/local/lib/libjpeg.8.dylib \
                 /usr/local/lib/libtiff.5.dylib \
                 /usr/local/lib/libprotobuf.7.dylib \
+                /usr/local/lib/libTAU.1.dylib \
+                /usr/local/lib/libavrocpp.1.7.2.0.dylib \
                 /usr/local/lib/libCGAL.9.dylib \
                 /usr/local/lib/libgmp.10.dylib \
                 /usr/local/lib/libgmpxx.4.dylib \
@@ -205,6 +213,9 @@ if [ -s /tmp/non-standard.$$ ]; then
   cat /tmp/non-standard.$$
   echo
   rm -f /tmp/non-standard.$$
+  cd ${TOPDIR}
+  find build
+  find ${DESTDIR}
   exit 1
 else
   rm -f /tmp/non-standard.$$

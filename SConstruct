@@ -34,7 +34,7 @@ env = scons_tools.environment.get_base_environment(variables=vars,
 try:
     env['IMP_VERSION']=open(scons_tools.utility.get_source_path(env, "VERSION"), "r").read().rstrip('\r\n')
 except:
-    env['IMP_VERSION']="Unknown"
+    env['IMP_VERSION']="SVN"
 env['IMP_VARIABLES']=vars
 env['IMP_SCONS_EXTRA_VARIABLES']=[]
 env['IMP_CONFIGURATION']=[]
@@ -84,19 +84,12 @@ You can see the produced config.log for more information as to why boost failed 
 if not env.GetOption('help'):
     # various flags depending on compiler versions and things
     scons_tools.dependency.swig.configure_check(env)
-    scons_tools.dependency.endian.configure_check(env)
     scons_tools.dependency.gcc.configure_check_visibility(env)
-    scons_tools.dependency.gcc.configure_debug_vector(env)
     scons_tools.dependency.gcc.configure_check_hash(env)
     # Make these objects available to SConscript files:
 
 # placed here so that the result is universally visible since it
 # is special cased for benchmarks
-if not env.GetOption('help'):
-    scons_tools.dependency.add_external_library(env, "tcmalloc",
-                                                ["tcmalloc"],
-                                                # garbage to avoid rename issues
-                                                "vector", enabled=False)
 scripts=scons_tools.paths.get_sconscripts(env,["modules"],["tools", "doc"])
 env['IMP_PASS']="BUILD"
 for s in scripts:

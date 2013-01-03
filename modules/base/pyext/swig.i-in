@@ -8,14 +8,6 @@ namespace base {
 }
 }
 
-%inline %{
-namespace IMP {
-namespace base {
-template <class T>
-class ConvertibleVector;
-}
-}
-%}
 
 %extend IMP::base::Object {
   bool __eq__(const Object *o) const {
@@ -44,6 +36,7 @@ class ConvertibleVector;
 %include "IMP/base/object_cast.h"
 
 IMP_SWIG_RAII(IMP::base, SetLogState);
+IMP_SWIG_RAII(IMP::base, SetNumberOfThreads);
 IMP_SWIG_RAII(IMP::base, SetCheckState);
 IMP_SWIG_OBJECT(IMP::base, Object, Objects);
 IMP_SWIG_OBJECT(IMP::base, FailureHandler, FailureHandlers);
@@ -104,6 +97,7 @@ IMP_SWIG_VALUE(IMP::base::internal, _Protection, _Protections);
 %include "IMP/base/Index.h"
 %include "IMP/base/live_objects.h"
 %include "IMP/base/deprecation.h"
+%include "IMP/base/threads.h"
 
 %pythoncode %{
 import IMP

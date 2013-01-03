@@ -24,9 +24,12 @@ IMPCONTAINER_BEGIN_NAMESPACE
 /** If it is assumed that each particle is in at most one such container,
     then ExclusiveConsecutivePairContainer should be used instead,
     since it is faster when doing certain computations.
+
+    Also see ConsecutivePairFilter.
 */
 class IMPCONTAINEREXPORT ConsecutivePairContainer : public PairContainer
 {
+  friend class ConsecutivePairFilter;
   const ParticleIndexes ps_;
   IntKey key_;
   /**
@@ -35,14 +38,21 @@ class IMPCONTAINEREXPORT ConsecutivePairContainer : public PairContainer
   */
   void init();
 
+  bool get_contains(const ParticleIndexPair &p) const {
+    if (!get_model()->get_has_attribute(key_, p[0])) return false;
+    int ia= get_model()->get_attribute(key_, p[0]);
+    if (!get_model()->get_has_attribute(key_, p[1])) return false;
+    int ib= get_model()->get_attribute(key_, p[1]);
+    return std::abs(ia-ib)==1;
+  }
 public:
  //! apply to each item in container
  template <class F>
-   F for_each(F f) const {
+  void apply_generic(F* f) const {
    for (unsigned int i=1; i< ps_.size(); ++i) {
-     f(ParticleIndexPair(ps_[i-1], ps_[i]));
+     f->apply_index(get_model(),
+                    ParticleIndexPair(ps_[i-1], ps_[i]));
    }
-   return f;
  }
   //! Get the individual particles from the passed SingletonContainer
   ConsecutivePairContainer(const ParticlesTemp &ps,
@@ -52,6 +62,24 @@ public:
 };
 
 IMP_OBJECTS(ConsecutivePairContainer,ConsecutivePairContainers);
+
+
+/** Check for whether the pair is a member of a specific
+    ConsecutivePairContainer. */
+class IMPCONTAINEREXPORT ConsecutivePairFilter:
+    public PairPredicate {
+  base::OwnerPointer<ConsecutivePairContainer> cpc_;
+ public:
+  ConsecutivePairFilter(ConsecutivePairContainer *cpc);
+  IMP_INDEX_PAIR_PREDICATE(ConsecutivePairFilter,{
+      IMP_UNUSED(m);
+      return cpc_->get_contains(pi);
+    },{
+      ModelObjectsTemp ret;
+      ret+= IMP::get_particles(m, pi);
+      return ret;
+    });
+};
 
 /** This is an ConsecutivePairContainer where each particle can only be on
     one ExclusiveConsecutivePairContainer. The exclusivity makes the code
@@ -87,11 +115,11 @@ public PairContainer
  public:
  //! apply to each item in container
  template <class F>
-   F for_each(F f) const {
+     void apply_generic(F* f) const {
    for (unsigned int i=1; i< ps_.size(); ++i) {
-     f(ParticleIndexPair(ps_[i-1], ps_[i]));
+     f->apply_index(get_model(),
+                    ParticleIndexPair(ps_[i-1], ps_[i]));
   }
-   return f;
  }
 
  //! Get the individual particles from the passed SingletonContainer
@@ -111,6 +139,10 @@ class IMPCONTAINEREXPORT ExclusiveConsecutivePairFilter:
   IMP_INDEX_PAIR_PREDICATE(ExclusiveConsecutivePairFilter,{
       return ExclusiveConsecutivePairContainer
         ::get_contains(m, pi);
+    },{
+      ModelObjectsTemp ret;
+      ret+= IMP::get_particles(m, pi);
+      return ret;
     });
 };
 

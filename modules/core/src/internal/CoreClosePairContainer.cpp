@@ -62,32 +62,20 @@ void CoreClosePairContainer::set_slack(double s) {
   slack_=s;
   cpf_->set_distance(distance_+2*slack_);
   ParticleIndexPairs et;
-  update_list(et);
+  swap(et);
   first_call_=true;
 }
 
 
-ContainersTemp CoreClosePairContainer
-::get_input_containers() const {
-  ContainersTemp ret= cpf_->get_input_containers(c_->get_particles());
+ModelObjectsTemp CoreClosePairContainer::do_get_inputs() const {
+  ParticleIndexes all=c_->get_all_possible_indexes();
+  ModelObjectsTemp ret= IMP::get_particles(get_model(), all);
+  for (unsigned int i=0; i< get_number_of_pair_filters(); ++i) {
+    ret+= get_pair_filter(i)->get_inputs(get_model(), all);
+  }
+  ret+=cpf_->get_inputs(get_model(), all);
   ret.push_back(c_);
   ret.push_back(moved_);
-  return ret;
-}
-
-
-ParticlesTemp CoreClosePairContainer::get_input_particles() const {
-  ParticlesTemp inputs=c_->get_particles();
-  if (inputs.empty()) return inputs;
-  ParticlesTemp ret(cpf_->get_input_particles(inputs));
-  ParticlesTemp all;
-  for (unsigned int i=0; i< get_number_of_pair_filters(); ++i) {
-    for (unsigned int j=0; j< ret.size(); ++j) {
-      ParticlesTemp cur= get_pair_filter(i)->get_input_particles(ret[j]);
-      all.insert(all.end(), cur.begin(), cur.end());
-    }
-  }
-  ret.insert(ret.end(), all.begin(), all.end());
   return ret;
 }
 
@@ -142,7 +130,7 @@ void CoreClosePairContainer::check_list(bool check_slack) const {
                        << " vs " << ParticleIndexPairs(existings.begin(),
                                                        existings.end())
                        << std::endl);
-    ParticlesTemp all(c_->get_particles());
+    ParticlesTemp all(IMP::get_particles(get_model(), c_->get_indexes()));
     double check_distance=distance_*.9;
     if (check_slack) {
       check_distance+= 1.8*slack_;
@@ -151,6 +139,7 @@ void CoreClosePairContainer::check_list(bool check_slack) const {
     cpf_->set_pair_filters(access_pair_filters());
     ParticlePairsTemp found
       = cpf_->get_close_pairs(all);
+    IMP_LOG(TERSE, "In check found " << found << std::endl);
     for (unsigned int i=0; i< found.size(); ++i) {
       ParticleIndexPair pi(found[i][0]->get_index(),
                            found[i][1]->get_index());
@@ -193,15 +182,30 @@ void CoreClosePairContainer::do_incremental() {
   ret.insert(ret.begin(), ret1.begin(), ret1.end());
   internal::fix_order(ret);
   moved_count_+=moved.size();
-  if (moved_count_ > .2 *c_->get_number_of_particles()) {
+  {
     /*InList il= InList::create(moved);
       remove_from_list_if(il);
       InList::destroy(il);*/
-    remove_from_list_if(FarParticle(get_model(), distance_+2*slack_));
+    ParticleIndexPairs cur;
+    swap(cur);
+    cur.erase(std::remove_if(cur.begin(), cur.end(),
+                             FarParticle(get_model(), distance_+2*slack_)),
+              cur.end());
+    swap(cur);
     moved_count_=0;
   }
   IMP_LOG(TERSE, "Found " << ret.size() << " pairs." << std::endl);
-  add_to_list(ret);
+  {
+    // now insert
+    std::sort(ret.begin(), ret.end());
+    ParticleIndexPairs all;
+    swap(all);
+    unsigned int osz= all.size();
+    all.insert(all.end(), ret.begin(), ret.end());
+    std::inplace_merge(all.begin(), all.begin()+osz, all.end());
+    all.erase(std::unique(all.begin(), all.end()), all.end());
+    swap(all);
+  }
   moved_->reset_moved();
   IMP_LOG(TERSE, "Count is now "
           << get_access().size() << std::endl);
@@ -213,11 +217,12 @@ void CoreClosePairContainer::do_rebuild() {
   cpf_->set_distance(distance_+2*slack_);
   ParticleIndexPairs ret= cpf_->get_close_pairs(get_model(), c_->get_indexes());
   internal::fix_order(ret);
-  IMP_LOG(TERSE, "Found before filtering " << ret.size()
+  IMP_LOG(TERSE, "Found before filtering " << ret
           << " pairs." << std::endl);
   internal::filter_close_pairs(this, ret);
-  IMP_LOG(TERSE, "Found " << ret.size() << " pairs." << std::endl);
-  update_list(ret);
+  IMP_LOG(TERSE, "Found " << ret << " pairs." << std::endl);
+  std::sort(ret.begin(), ret.end());
+  swap(ret);
   moved_->reset();
 }
 
@@ -230,8 +235,8 @@ void CoreClosePairContainer::do_before_evaluate() {
     if (first_call_) {
       do_first_call();
       check_list(true);
-    } else if (moved_->get_number_of_particles() != 0) {
-      if (moved_->get_particles().size() < c_->get_number_of_particles()*.2) {
+    } else if (moved_->get_access().size() != 0) {
+        if (moved_->get_access().size() < 1000 ) {
         do_incremental();
         check_list(false);
       } else {
@@ -256,8 +261,8 @@ void CoreClosePairContainer::do_show(std::ostream &out) const {
 }
 
 
-ParticleIndexPairs CoreClosePairContainer::get_all_possible_indexes() const {
-  ParticleIndexes pis= c_->get_all_possible_indexes();
+ParticleIndexPairs CoreClosePairContainer::get_range_indexes() const {
+  ParticleIndexes pis= c_->get_range_indexes();
   ParticleIndexPairs ret; ret.reserve(pis.size()*(pis.size()-1)/2);
   for (unsigned int i=0; i< pis.size(); ++i) {
     for (unsigned int j=0; j< i; ++j) {
@@ -268,10 +273,8 @@ ParticleIndexPairs CoreClosePairContainer::get_all_possible_indexes() const {
   return ret;
 }
 
-ParticlesTemp CoreClosePairContainer::get_all_possible_particles() const {
-  ParticlesTemp ret= c_->get_all_possible_particles();
-  ParticlesTemp nret =cpf_->get_input_particles(c_->get_particles());
-  ret.insert(ret.end(), nret.begin(), nret.end());
+ParticleIndexes CoreClosePairContainer::get_all_possible_indexes() const {
+  ParticleIndexes ret= c_->get_all_possible_indexes();
   return ret;
 }
 

@@ -20,6 +20,7 @@
 #include <IMP/atom/Diffusion.h>
 #include <IMP/Configuration.h>
 #include <IMP/algebra/LinearFit.h>
+#include <IMP/base/thread_macros.h>
 
 #include <IMP/core/ConjugateGradients.h>
 #include <IMP/core/rigid_bodies.h>
@@ -135,7 +136,7 @@ void BrownianDynamics::setup(const ParticleIndexes& ips) {
   }
   forces_.resize(ips.size());
 }
-IMP_GCC_DISABLE_WARNING("-Wuninitialized")
+IMP_GCC_DISABLE_WARNING(-Wuninitialized)
 
 namespace {
   void check_delta(algebra::Vector3D &delta,
@@ -197,7 +198,7 @@ void BrownianDynamics
 }
 
 void BrownianDynamics
-::advance_rigid_body_0(ParticleIndex pi, unsigned int ,
+::advance_rigid_body_0(ParticleIndex pi,
                        double dtfs,
                        double ikT) {
   core::RigidBody rb(get_model(), pi);
@@ -222,21 +223,14 @@ void BrownianDynamics
   rb.set_reference_frame_lazy(algebra::ReferenceFrame3D(nt));
 }
 
-
-/**
-    dx= D/2kT*(F(x0)+F(x0+D/kTF(x0)dt +R)dt +R
- */
-double BrownianDynamics::do_step(const ParticleIndexes &ps,
-                                 double dt) {
-  double dtfs(dt);
-  double ikT= 1.0/get_kt();
-  get_scoring_function()->evaluate(true);
-  unsigned int numrb=0;
-  for (unsigned int i=0; i< ps.size(); ++i) {
+void BrownianDynamics::advance_chunk(double dtfs, double ikT,
+                                     const ParticleIndexes &ps,
+                                     unsigned int begin,
+                                     unsigned int end) {
+  for (unsigned int i=begin; i< end; ++i) {
     if (RigidBodyDiffusion::particle_is_instance(get_model(), ps[i])) {
       //std::cout << "rb" << std::endl;
-      advance_rigid_body_0(ps[i], numrb, dtfs, ikT);
-      ++numrb;
+      advance_rigid_body_0(ps[i], dtfs, ikT);
     } else {
       Particle *p= get_model()->get_particle(ps[i]);
       IMP_CHECK_VARIABLE(p);
@@ -251,6 +245,26 @@ double BrownianDynamics::do_step(const ParticleIndexes &ps,
     }
     advance_ball_0(ps[i], i, dtfs, ikT);
   }
+}
+
+/**
+    dx= D/2kT*(F(x0)+F(x0+D/kTF(x0)dt +R)dt +R
+ */
+double BrownianDynamics::do_step(const ParticleIndexes &ps,
+                                 double dt) {
+  double dtfs(dt);
+  double ikT= 1.0/get_kt();
+  get_scoring_function()->evaluate(true);
+  const unsigned int chunk_size=20;
+  for (unsigned int b=0; b< ps.size(); b+=chunk_size) {
+    IMP_TASK_SHARED((dtfs, ikT, b), (ps),
+                    advance_chunk(dtfs, ikT, ps, b,
+                                  std::min<unsigned int>(b+chunk_size,
+                                                         ps.size()));
+                    );
+  }
+#pragma omp taskwait
+#pragma omp flush
   if (srk_) {
     get_scoring_function()->evaluate(true);
     for (unsigned int i=0; i< ps.size(); ++i) {
@@ -323,7 +337,7 @@ namespace {
 };
 
 
-IMPATOMEXPORT double get_maximum_time_step_estimate(BrownianDynamics *bd){
+double get_maximum_time_step_estimate(BrownianDynamics *bd){
   IMP_NEW(Configuration, c, (bd->get_model()));
   double ots= bd->get_maximum_time_step();
   double lb=10;

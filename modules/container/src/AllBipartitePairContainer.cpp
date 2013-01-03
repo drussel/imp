@@ -26,13 +26,6 @@ AllBipartitePairContainer
   a_(a), b_(b) {
 }
 
-
-
-bool
-AllBipartitePairContainer::get_is_changed() const {
-  return a_->get_is_changed() || b_->get_is_changed();
-}
-
 ParticleIndexPairs
 AllBipartitePairContainer::get_indexes() const {
   ParticleIndexes ia= a_->get_indexes();
@@ -47,9 +40,9 @@ AllBipartitePairContainer::get_indexes() const {
 }
 
 ParticleIndexPairs
-AllBipartitePairContainer::get_all_possible_indexes() const {
-  ParticleIndexes ia= a_->get_all_possible_indexes();
-  ParticleIndexes ib= b_->get_all_possible_indexes();
+AllBipartitePairContainer::get_range_indexes() const {
+  ParticleIndexes ia= a_->get_range_indexes();
+  ParticleIndexes ib= b_->get_range_indexes();
   ParticleIndexPairs ret; ret.reserve(ia.size()*ib.size());
   for (unsigned int i=0; i< ia.size(); ++i) {
     for (unsigned int j=0; j< ib.size(); ++j) {
@@ -59,35 +52,30 @@ AllBipartitePairContainer::get_all_possible_indexes() const {
   return ret;
 }
 
-bool
-AllBipartitePairContainer
-::get_contains_particle_pair(const ParticlePair &p) const {
-  return a_->get_contains_particle(p[0])
-      && b_->get_contains_particle(p[1]);
-}
-
 void AllBipartitePairContainer::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
   out << "container " << *a_ << " and " << *b_ << std::endl;
 }
 
-
-ParticlesTemp AllBipartitePairContainer::get_all_possible_particles() const {
-  ParticlesTemp ret= a_->get_all_possible_particles();
-  ParticlesTemp b= b_->get_all_possible_particles();
-  ret.insert(ret.end(), b.begin(), b.end());
+ParticleIndexes AllBipartitePairContainer::get_all_possible_indexes() const {
+  ParticleIndexes ret= a_->get_all_possible_indexes();
+  ret+= b_->get_all_possible_indexes();
   return ret;
 }
+
 ParticlesTemp AllBipartitePairContainer::get_input_particles() const {
   return ParticlesTemp();
 }
+
 ContainersTemp AllBipartitePairContainer::get_input_containers() const {
   ContainersTemp ret;
   ret.push_back(a_);
   ret.push_back(b_);
   return ret;
 }
+
 void AllBipartitePairContainer::do_before_evaluate() {
+  set_is_changed(a_->get_is_changed() || b_->get_is_changed());
 }
 
 IMPCONTAINER_END_NAMESPACE

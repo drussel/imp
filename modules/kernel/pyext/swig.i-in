@@ -67,6 +67,7 @@ def _forward_set_value(self, name, value):
 }
 
 
+
 #if IMP_BUILD == IMP_FAST
 %pythoncode %{
 build="fast"
@@ -82,14 +83,17 @@ build="debug"
 #endif
 
 
+
 namespace IMP {
 %warnfilter(473) Refiner;
 %warnfilter(473) SingletonContainer;
 %warnfilter(473) PairContainer;
 %warnfilter(403) Constraint;
+%warnfilter(403) Container;
 %warnfilter(403) ModelObject;
 %warnfilter(473) Sampler;
 %warnfilter(473) Restraint;
+%warnfilter(403) Restraint;
 }
 // to avoid extend clash
 IMP_SWIG_BASE_OBJECT(IMP,Constraint, Constraints);
@@ -98,11 +102,9 @@ IMP_SWIG_BASE_OBJECT(IMP,Optimizer, Optimizers);
 IMP_SWIG_BASE_OBJECT(IMP,OptimizerState, OptimizerStates);
 IMP_SWIG_BASE_OBJECT(IMP,PairContainer, PairContainers);
 IMP_SWIG_BASE_OBJECT(IMP,PairModifier, PairModifiers);
-IMP_SWIG_BASE_OBJECT(IMP,PairDerivativeModifier, PairDerivativeModifiers);
 IMP_SWIG_BASE_OBJECT(IMP,PairScore, PairScores);
 IMP_SWIG_BASE_OBJECT(IMP,QuadContainer, QuadContainers);
 IMP_SWIG_BASE_OBJECT(IMP,QuadModifier, QuadModifiers);
-IMP_SWIG_BASE_OBJECT(IMP,QuadDerivativeModifier, QuadDerivativeModifiers);
 IMP_SWIG_BASE_OBJECT(IMP,QuadScore, QuadScores);
 IMP_SWIG_BASE_OBJECT(IMP,Refiner, Refiners);
 IMP_SWIG_BASE_OBJECT(IMP,Restraint, Restraints);
@@ -110,17 +112,20 @@ IMP_SWIG_BASE_OBJECT(IMP,Sampler, Samplers);
 IMP_SWIG_BASE_OBJECT(IMP,ScoreState, ScoreStates);
 IMP_SWIG_BASE_OBJECT(IMP,SingletonContainer, SingletonContainers);
 IMP_SWIG_BASE_OBJECT(IMP,SingletonModifier, SingletonModifiers);
-IMP_SWIG_BASE_OBJECT(IMP,SingletonDerivativeModifier, SingletonDerivativeModifiers);
 IMP_SWIG_BASE_OBJECT(IMP,SingletonScore, SingletonScores);
 IMP_SWIG_BASE_OBJECT(IMP,TripletContainer, TripletContainers);
 IMP_SWIG_BASE_OBJECT(IMP,TripletModifier, TripletModifiers);
-IMP_SWIG_BASE_OBJECT(IMP,TripletDerivativeModifier, TripletDerivativeModifiers);
 IMP_SWIG_BASE_OBJECT(IMP,TripletScore, TripletScores);
 IMP_SWIG_BASE_OBJECT(IMP,UnaryFunction, UnaryFunctions);
 IMP_SWIG_OBJECT(IMP,ConfigurationSet, ConfigurationSets);
 IMP_SWIG_OBJECT(IMP,Configuration, Configurations);
 IMP_SWIG_OBJECT(IMP,Model, Models);
 IMP_SWIG_OBJECT(IMP,Particle, Particles);
+
+#ifdef IMP_USE_DEPRECATED
+IMP_SWIG_BASE_OBJECT(IMP::internal,PythonRestraint, PythonRestraints);
+IMP_SWIG_BASE_OBJECT(IMP::internal,PythonScoreState, PythonScoreStates);
+#endif
 
 IMP_SWIG_NESTED_SEQUENCE_TYPEMAP(IMP::Particle, IMP::ParticlesTemp, IMP::ParticlesTemps, const&);
 IMP_SWIG_NESTED_SEQUENCE_TYPEMAP(IMP::Particle, IMP::ParticlesTemp, IMP::ParticlesTemps,);
@@ -137,20 +142,13 @@ IMP_SWIG_BASE_OBJECT(IMP, PairPredicate, PairPredicates);
 IMP_SWIG_BASE_OBJECT(IMP, TripletPredicate, TripletPredicates);
 IMP_SWIG_BASE_OBJECT(IMP, QuadPredicate, QuadPredicates);
 
-#ifdef IMP_USE_DEPRECATED
-IMP_SWIG_OBJECT(IMP, WriteParticlesOptimizerState, WriteParticlesOptimizerStates);
-IMP_SWIG_OBJECT(IMP, WriteParticlesFailureHandler, WriteParticlesFailureHandlers);
-#ifdef IMP_KERNEL_USE_NETCDFCPP
-IMP_SWIG_OBJECT(IMP, WriteParticlesBinaryOptimizerState, WriteParticlesBinaryOptimizerStates);
-IMP_SWIG_OBJECT(IMP, WriteParticlesBinaryFailureHandler, WriteParticlesBinaryFailureHandlers);
-#endif
-#endif
-
 IMP_SWIG_OBJECT(IMP, SaveToConfigurationSetOptimizerState, SaveToConfigurationSetOptimizerStates);
 IMP_SWIG_OBJECT(IMP, SaveToConfigurationSetFailureHandler, SaveToConfigurationSetFailureHandlers);
 
 // derivative accumulator is weird
 // IMP_SWIG_VALUE(IMP, DerivativeAccumulator, DerivativeAccumulators);
+IMP_SWIG_VALUE(IMP, EvaluationState, EvaluationStates);
+IMP_SWIG_VALUE(IMP, ScoreAccumulator, ScoreAccumulators);
 IMP_SWIG_VALUE_INSTANCE(IMP, ParticleIndex, base::Index, ParticleIndexes);
 IMP_SWIG_VALUE(IMP, FloatIndex, FloatIndexes);
 IMP_SWIG_VALUE_INSTANCE(IMP, FloatKey, Key, FloatKeys);
@@ -229,8 +227,10 @@ class Decorators;
 %include "IMP/base_types.h"
 %include "IMP/constants.h"
 %include "IMP/ModelObject.h"
+%include "IMP/input_output.h"
 %include "IMP/utility.h"
 %include "IMP/DerivativeAccumulator.h"
+%include "IMP/ScoreAccumulator.h"
 %include "IMP/ScoreState.h"
 %include "IMP/Constraint.h"
 %include "IMP/container_base.h"
@@ -287,7 +287,6 @@ namespace IMP {
   %template(ScopedSetFloatAttribute) ::IMP::ScopedSetAttribute<FloatKey, Float>;
 }
 
-
 %pythoncode %{
 #used_modules=[]
 #def show_used_modules():
@@ -325,3 +324,15 @@ add_to_log= IMP.base.add_to_log
 set_check_level= IMP.base.set_check_level
 get_check_level= IMP.base.get_check_level
 %}
+
+
+#ifdef IMP_USE_DEPRECATED
+%pythoncode %{
+RestraintBase=Restraint
+ScoreStateBase=ScoreState
+Restraint=PythonRestraint
+ScoreState=PythonScoreState
+%}
+#endif
+
+%include "IMP_kernel.dispatcher.i"

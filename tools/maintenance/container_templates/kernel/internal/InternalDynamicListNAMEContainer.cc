@@ -34,30 +34,35 @@ InternalDynamicListCLASSNAMEContainer
 
 void InternalDynamicListCLASSNAMEContainer::do_show(std::ostream &out) const {
   IMP_CHECK_OBJECT(this);
-  out << get_number_of_FUNCTIONNAMEs()
+  out << get_access()
       << " CLASSNAMEs." << std::endl;
 }
-
-
-
+void InternalDynamicListCLASSNAMEContainer::add(PASSINDEXTYPE vt) {
+  PLURALINDEXTYPE cur;
+  swap(cur);
+  cur.push_back(vt);
+  swap(cur);
+}
 void InternalDynamicListCLASSNAMEContainer
-::remove_FUNCTIONNAMEs(const PLURALVARIABLETYPE &c) {
+::add(const PLURALINDEXTYPE &c) {
   if (c.empty()) return;
-  get_model()->clear_caches();
-  PLURALINDEXTYPE cp= IMP::internal::get_index(c);
-  remove_from_list(cp);
-  IMP_IF_CHECK(base::USAGE) {
-    for (unsigned int i=0; i< c.size(); ++i) {
-      IMP_USAGE_CHECK(IMP::internal::is_valid(c[i]),
-                    "Passed CLASSNAME cannot be nullptr (or None)");
-    }
-  }
+  PLURALINDEXTYPE cur;
+  swap(cur);
+  cur+=c;
+  swap(cur);
 }
 
+void InternalDynamicListCLASSNAMEContainer::set(PLURALINDEXTYPE cp) {
+  swap(cp);
+}
+void InternalDynamicListCLASSNAMEContainer::clear() {
+  PLURALINDEXTYPE t;
+  swap(t);
+}
 bool InternalDynamicListCLASSNAMEContainer::
 check_list(const ParticleIndexes& cp) const {
   ParticleIndexes app
-    = IMP::internal::get_index(scope_->get_all_possible_particles());
+    = scope_->get_all_possible_indexes();
 
   compatibility::set<ParticleIndex> all(app.begin(),
                                     app.end());
@@ -69,9 +74,9 @@ check_list(const ParticleIndexes& cp) const {
   return true;
 }
 
-ParticlesTemp
-InternalDynamicListCLASSNAMEContainer::get_all_possible_particles() const {
-  return scope_->get_all_possible_particles();
+ParticleIndexes
+InternalDynamicListCLASSNAMEContainer::get_all_possible_indexes() const {
+  return scope_->get_all_possible_indexes();
 }
 
 void InternalDynamicListCLASSNAMEContainer::do_before_evaluate() {
@@ -90,7 +95,7 @@ InternalDynamicListCLASSNAMEContainer::get_input_containers() const {
 
 
 PLURALINDEXTYPE
-InternalDynamicListCLASSNAMEContainer::get_all_possible_indexes() const {
+InternalDynamicListCLASSNAMEContainer::get_range_indexes() const {
   return get_indexes();
 }
 

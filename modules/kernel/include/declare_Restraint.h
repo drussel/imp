@@ -11,9 +11,12 @@
 
 #include "kernel_config.h"
 #include "ModelObject.h"
+#include "ScoreAccumulator.h"
+#include "DerivativeAccumulator.h"
 #include "model_object_macros.h"
 #include "constants.h"
 #include <IMP/base/tracking.h>
+#include <IMP/base/deprecation_macros.h>
 
 IMP_BEGIN_NAMESPACE
 class DerivativeAccumulator;
@@ -85,7 +88,7 @@ public:
       @{
   */
   /** Return the unweighted score for the restraint.*/
-  virtual double unprotected_evaluate(DerivativeAccumulator *) const=0;
+  virtual double unprotected_evaluate(DerivativeAccumulator *da) const;
   /** The function calling this will treat any score >= get_maximum_score
       as bad and so can return early as soon as such a situation is found.*/
   virtual double unprotected_evaluate_if_good(DerivativeAccumulator *da,
@@ -102,15 +105,8 @@ public:
   }
   /** @} */
 
-  /** \name Interactions
-      Certain sorts of operations, such as evaluation of restraints in
-      isolation, benefit from being able to determine which containers
-      and particles are needed by which restraints.
-      @{
-  */
-  virtual ContainersTemp get_input_containers() const=0;
-  virtual ParticlesTemp get_input_particles() const=0;
-  /** @} */
+  void
+      add_score_and_derivatives(ScoreAccumulator sa) const;
 
   //! Decompose this restraint into constituent terms
   /** Given the set of input particles, decompose the restraint into as
@@ -177,8 +173,7 @@ public:
                                                    = NO_MAX) const;
 #endif
 #if !defined(IMP_DOXYGEN)
-  void set_last_score(double s) { last_score_=s;}
-  IMP_MODEL_OBJECT(Restraint);
+  void set_last_score(double s) const { last_score_=s;}
 #endif
 
   /** Return the (unweighted) score for this restraint last time it was
@@ -186,11 +181,18 @@ public:
       \note If some sort of special evaluation (eg Model::evaluate_if_good())
       was the last call, the score, if larger than the max, is not accurate.
    */
-  double get_last_score() const {return last_score_;}
+  virtual double get_last_score() const {return last_score_;}
   /** Return whether this restraint violated it maximum last time it was
       evaluated.
    */
-  bool get_was_good() const {return last_score_ < max_;}
+  bool get_was_good() const {return get_last_score() < max_;}
+
+#ifdef IMP_USE_DEPRECATED
+  /** \deprecated use get_inputs() instead.*/
+  IMP_DEPRECATED_WARN ParticlesTemp get_input_particles() const;
+  /** \deprecated use get_inputs() instead.*/
+  IMP_DEPRECATED_WARN ContainersTemp get_input_containers() const;
+#endif
 
   IMP_REF_COUNTED_DESTRUCTOR(Restraint);
   /** A Restraint should override this if they want to decompose themselves
@@ -200,7 +202,7 @@ public:
   */
   IMP_PROTECTED_METHOD(virtual Restraints, do_create_decomposition, (), const, {
     return Restraints(1, const_cast<Restraint*>(this));
-    })
+    });
   /** A Restraint should override this if they want to decompose themselves
       for display and other purposes. The returned restraints will be made
       in to a RestraintSet, if needed and the weight and maximum score
@@ -213,16 +215,24 @@ public:
                          (), const, {
                            return do_create_decomposition();
                          });
+
+    /** A restraint should override this instead of unprotected_evaluate()
+        if it wants to do multthreaded evaluate
+        or other fanciness.
+    */
+    IMP_PROTECTED_METHOD(virtual void, do_add_score_and_derivatives,
+                         (ScoreAccumulator sa), const,);
+
+  IMP_IMPLEMENT_INLINE(
+  void do_update_dependencies(const DependencyGraph &,
+                              const DependencyGraphVertexIndex &), {});
+  IMP_IMPLEMENT_INLINE(ModelObjectsTemp do_get_outputs() const, {
+      return ModelObjectsTemp();
+    });
  private:
-  friend class Model;
-  friend class ScoringFunction;
   double weight_;
   double max_;
-#if !defined(IMP_DOXYGEN) && !defined(SWIG)
- public:
-  // data cached by the model
-  double last_score_;
-#endif
+  mutable double last_score_;
 };
 
 IMP_END_NAMESPACE

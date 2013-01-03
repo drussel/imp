@@ -38,6 +38,7 @@ int main(int argc, char **argv)
   bool heavy_atoms_only = true;
   bool residue_level = false;
   bool score_log = false;
+  bool interval_chi = false;
   po::options_description desc("Options");
   desc.add_options()
     ("help", "Any number of input PDBs and profiles is supported. \
@@ -87,6 +88,7 @@ constant form factor (default = false)")
     ("vacuum,v", "compute profile in vacuum (default = false)")
     ("javascript,j",
      "output javascript for browser viewing of the results (default = false)")
+    ("interval_chi,i", "compute chi for intervals (default = false)")
     ;
 
   po::options_description cmdline_options;
@@ -120,8 +122,18 @@ constant form factor (default = false)")
     fit = false; excluded_volume_c1 = 1.0; }
   if(vm.count("vacuum")) { vacuum = true; }
   if(vm.count("javascript")) { javascript = true; }
+  if(vm.count("interval_chi")) { interval_chi = true; }
 
   float delta_q = max_q / profile_size;
+
+  bool reciprocal = false;
+  IMP::saxs::FormFactorTable* ft = NULL;
+  if(form_factor_table_file.length() > 0) {
+    //reciprocal space calculation, requires form factor file
+    ft = new IMP::saxs::FormFactorTable(form_factor_table_file,
+                                        0.0, max_q, delta_q);
+    reciprocal = true;
+  }
 
   // 1. read pdbs and profiles, prepare particles
   IMP::Model *model = new IMP::Model();
@@ -202,9 +214,11 @@ constant form factor (default = false)")
     }
 
     // compute profile
-    IMP::saxs::Profile *partial_profile = NULL;
-    std::cerr << "Computing profile for " << pdb_files[i] << std::endl;
-    partial_profile = new IMP::saxs::Profile(0.0, max_q, delta_q);
+    std::cerr << "Computing profile for " << pdb_files[i]
+              << " "  << particles_vec[i].size() << " atoms "<< std::endl;
+    IMP::saxs::Profile *partial_profile =
+      new IMP::saxs::Profile(0.0, max_q, delta_q);
+    if(reciprocal) partial_profile->set_ff_table(ft);
     if(excluded_volume_c1 == 1.0 && water_layer_c2 == 0.0) fit = false;
     IMP::saxs::FormFactorType ff_type = IMP::saxs::HEAVY_ATOMS;
     if(!heavy_atoms_only) ff_type = IMP::saxs::ALL_ATOMS;
@@ -219,12 +233,8 @@ constant form factor (default = false)")
     }
     average_radius /= particles_vec[i].size();
     partial_profile->set_average_radius(average_radius);
-    //partial_profile->set_average_volume(volume/particles_vec[i].size());
-    // std::cerr << "Average radius = " << average_radius
-    //            << " volume = " << volume << " average_volume = "
-    //            << volume/particles_vec[i].size() << std::endl;
 
-    if(dat_files.size() == 0 || !fit) { // regular profile, no fitting
+    if(dat_files.size() == 0 || !fit) { // regular profile, no c1/c2 fitting
       if(ab_initio) { // bead model, constant form factor
         partial_profile->
           calculate_profile_constant_form_factor(particles_vec[i]);
@@ -234,23 +244,19 @@ constant form factor (default = false)")
                                                      surface_area, ff_type);
           partial_profile->sum_partial_profiles(0.0, 0.0, *partial_profile);
         } else {
-          bool reciprocal = false;
-          if(form_factor_table_file.length() > 0) {
-            //reciprocal space calculation, provide ff table
-            IMP::saxs::FormFactorTable* ft =
-              new IMP::saxs::FormFactorTable(form_factor_table_file,
-                                             0.0, max_q, delta_q);
-            partial_profile->set_ff_table(ft);
-            reciprocal = true;
-          }
           partial_profile->calculate_profile(particles_vec[i],
                                              ff_type, reciprocal);
         }
       }
-    } else {
-      partial_profile->calculate_profile_partial(particles_vec[i],
-                                                 surface_area, ff_type);
+    } else { // c1/c2 fitting
+      if(reciprocal)
+         partial_profile->calculate_profile_reciprocal_partial(particles_vec[i],
+                                                         surface_area, ff_type);
+      else
+        partial_profile->calculate_profile_partial(particles_vec[i],
+                                                   surface_area, ff_type);
     }
+    // save the profile
     profiles.push_back(partial_profile);
     // write profile file
     std::string profile_file_name = std::string(pdb_files[i]) + ".dat";
@@ -265,7 +271,6 @@ constant form factor (default = false)")
       std::string fit_file_name2 = trim_extension(pdb_files[i]) + "_" +
         trim_extension(basename(const_cast<char *>(dat_files[j].c_str())))
         + ".dat";
-      std::cout << pdb_files[i] << " " << dat_files[j];
 
       float min_c1=0.95; float max_c1=1.05;
       if(excluded_volume_c1 > 0.0) { min_c1 = max_c1 = excluded_volume_c1; }
@@ -285,8 +290,17 @@ constant form factor (default = false)")
         fp = pf->fit_profile(*partial_profile,
                              min_c1, max_c1, MIN_C2, MAX_C2,
                              use_offset, fit_file_name2);
+        if(interval_chi) {
+          std::cout << "interval_chi " <<pdb_files[i] << " "
+                    << pf->compute_score(*partial_profile, 0.0, 0.05) << " "
+                    << pf->compute_score(*partial_profile, 0.0, 0.1) << " "
+                    << pf->compute_score(*partial_profile, 0.0, 0.15) << " "
+                    << pf->compute_score(*partial_profile, 0.0, 0.2) << " "
+                    << pf->compute_score(*partial_profile) << std::endl;
+        }
       }
-      std::cout << " Chi = " << fp.get_chi()
+      std::cout << pdb_files[i] << " " << dat_files[j]
+                << " Chi = " << fp.get_chi()
                 << " c1 = " << fp.get_c1()
                 << " c2 = " << fp.get_c2()
                 << " default chi = " << fp.get_default_chi() << std::endl;
@@ -307,10 +321,10 @@ constant form factor (default = false)")
   }
   if(javascript) {
     if(dat_files.size() > 0) {
-      Gnuplot::print_canvas_script(fps);
+      Gnuplot::print_canvas_script(fps, JmolWriter::MAX_DISPLAY_NUM_);
       JmolWriter::prepare_jmol_script(fps, particles_vec, "jmoltable");
     } else {
-      Gnuplot::print_canvas_script(pdb_files);
+      Gnuplot::print_canvas_script(pdb_files, JmolWriter::MAX_DISPLAY_NUM_);
       JmolWriter::prepare_jmol_script(pdb_files, particles_vec, "jmoltable");
     }
   }

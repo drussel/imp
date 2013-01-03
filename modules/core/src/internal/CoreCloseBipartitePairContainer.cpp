@@ -77,24 +77,18 @@ void CoreCloseBipartitePairContainer::initialize(SingletonContainer *a,
   }
 }
 
-ParticlesTemp CoreCloseBipartitePairContainer
-::get_input_particles() const {
-  ParticlesTemp ret= internal::get_input_particles(get_model(),
-                                                   sc_[0],
-                                                   access_pair_filters());
-  ParticlesTemp ret1= internal::get_input_particles(get_model(), sc_[1],
-                                                    access_pair_filters());
+ModelObjectsTemp CoreCloseBipartitePairContainer
+::do_get_inputs() const {
+  ModelObjectsTemp ret;
+  ret+= internal::get_inputs(get_model(),
+                             sc_[0],
+                             access_pair_filters());
+  ret+= internal::get_inputs(get_model(), sc_[1],
+                                      access_pair_filters());
   if (covers_[0] != base::get_invalid_index<ParticleIndexTag>()) {
     ret.push_back(get_model()->get_particle(covers_[0]));
     ret.push_back(get_model()->get_particle(covers_[1]));
   }
-  ret.insert(ret.end(), ret1.begin(), ret1.end());
-  return ret;
-}
-
-ContainersTemp CoreCloseBipartitePairContainer
-::get_input_containers() const {
-  ContainersTemp ret(sc_, sc_+2);
   return ret;
 }
 
@@ -115,7 +109,8 @@ void CoreCloseBipartitePairContainer::do_before_evaluate() {
       // all ok
     } else {
       // rebuild
-      IMP_LOG(TERSE, "Recomputing bipartite close pairs list." << std::endl);
+      IMP_LOG(TERSE, "Recomputing bipartite close pairs list."
+              << std::endl);
       internal::reset_moved(get_model(),
                             xyzrs_[0], rbs_[0], constituents_,
                             rbs_backup_[0], xyzrs_backup_[0]);
@@ -127,18 +122,22 @@ void CoreCloseBipartitePairContainer::do_before_evaluate() {
                           key_, 2*slack_+distance_, xyzrs_, rbs_,
                           constituents_, pips);
       reset_=false;
-      update_list(pips);
+      swap(pips);
     }
     were_close_=true;
   } else {
     ParticleIndexPairs none;
-    update_list(none);
+    swap(none);
   }
   IMP_IF_CHECK(base::USAGE_AND_INTERNAL) {
-    for (unsigned int i=0; i< sc_[0]->get_number_of_particles(); ++i) {
-      XYZR d0(sc_[0]->get_particle(i));
-      for (unsigned int j=0; j< sc_[1]->get_number_of_particles(); ++j) {
-        XYZR d1(sc_[1]->get_particle(j));
+    ParticlesTemp sc0p= IMP::get_particles(get_model(),
+                                           sc_[0]->get_indexes());
+    ParticlesTemp sc1p=  IMP::get_particles(get_model(),
+                                           sc_[1]->get_indexes());
+    for (unsigned int i=0; i< sc0p.size(); ++i) {
+      XYZR d0(sc0p[i]);
+      for (unsigned int j=0; j< sc1p.size(); ++j) {
+        XYZR d1(sc1p[j]);
         double dist = get_distance(d0, d1);
         if (dist < .9*distance_) {
           ParticleIndexPair pip(d0.get_particle_index(),
@@ -173,18 +172,17 @@ void CoreCloseBipartitePairContainer::do_show(std::ostream &out) const {
 }
 
 
-ParticlesTemp
-CoreCloseBipartitePairContainer::get_all_possible_particles() const {
-  ParticlesTemp ret = sc_[0]->get_particles();
-  ParticlesTemp ret1= sc_[1]->get_particles();
-  ret.insert(ret.end(), ret1.begin(), ret1.end());
+ParticleIndexes
+CoreCloseBipartitePairContainer::get_all_possible_indexes() const {
+  ParticleIndexes ret = sc_[0]->get_indexes();
+  ret+= sc_[1]->get_indexes();
   return ret;
 }
 
 ParticleIndexPairs
-CoreCloseBipartitePairContainer::get_all_possible_indexes() const {
-  ParticleIndexes pis= sc_[0]->get_all_possible_indexes();
-  ParticleIndexes pjs= sc_[1]->get_all_possible_indexes();
+CoreCloseBipartitePairContainer::get_range_indexes() const {
+  ParticleIndexes pis= sc_[0]->get_range_indexes();
+  ParticleIndexes pjs= sc_[1]->get_range_indexes();
   ParticleIndexPairs ret; ret.reserve(pis.size()*pjs.size());
   for (unsigned int i=0; i< pis.size(); ++i) {
     for (unsigned int j=0; j< pjs.size(); ++j) {

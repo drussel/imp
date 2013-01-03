@@ -54,13 +54,15 @@ class SingletonContainerTest(IMP.test.TestCase):
             p=self.create_particle(m)
             f= f+ gs.evaluate(p, None)
             c.add_particle(p)
-            r= IMP.container.SingletonsRestraint(gs, c)
-            r.set_was_used(True)
+        r= IMP.container.SingletonsRestraint(gs, c)
+        r.set_was_used(True)
         m.add_restraint(r)
+        self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
         self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
         p=self.create_particle(m)
         f= f+ gs.evaluate(p,None)
         c.add_particle(p)
+        self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
         self.assertAlmostEqual(m.evaluate(False), f, delta=.1*f)
 
 

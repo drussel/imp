@@ -3,13 +3,19 @@ import RMF
 import IMP.rmf
 pdbname= IMP.rmf.get_example_path("big.pdb")
 
+
+
 m= IMP.Model()
 h= IMP.atom.read_pdb(pdbname, m)
 IMP.atom.add_bonds(h)
 
 chains= IMP.atom.get_by_type(h, IMP.atom.CHAIN_TYPE)
 
+if IMP.build != "fast":
+    chains=[chains[0]]
+
 def recursive_approximation(res):
+    print "approximating", res
     lr=len(res)
     if lr<=1:
         return res
@@ -44,8 +50,10 @@ for c in chains:
     for mm in me:
         c.add_child(mm)
 
+print "writing"
 fn= IMP.base.create_temporary_file_name("multires", ".rmf")
 rmf= RMF.create_rmf_file(fn)
+print "adding"
 IMP.rmf.add_hierarchies(rmf, chains)
 
 print "see file", fn

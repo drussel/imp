@@ -13,20 +13,41 @@
 #include "../Key.h"
 #include "../utility.h"
 #include "../FloatIndex.h"
+#include "input_output_exception.h"
 #include <IMP/base/exception.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/log.h>
 #include <IMP/algebra/Sphere3D.h>
 
-#define IMP_CHECK_MASK(mask, particle_index, message)                   \
+
+#if IMP_BUILD < IMP_FAST
+#define IMP_CHECK_MASK(mask, particle_index, key, operation, entity)    \
   IMP_USAGE_CHECK(!mask || mask->size() >                               \
                   get_as_unsigned_int(particle_index),                  \
                   "For some reason the mask is too small.");            \
-  IMP_USAGE_CHECK(!mask || (*mask)[get_as_unsigned_int(particle_index)], \
-                  message << " at particle " << particle_index)
+  if (mask && !(*mask)[get_as_unsigned_int(particle_index)]) {          \
+    throw InputOutputException(particle_index.get_index(),        \
+                               InputOutputException::operation, \
+                               InputOutputException::entity, \
+                               key.get_string());                         \
+  }
 
+#else
+#define IMP_CHECK_MASK(mask, particle_index, key, operation, entity)
+#endif
 
-
+#ifdef _OPENMP
+#define IMP_ACCUMULATE(dest, increment)         \
+  {                                             \
+    double &val=(dest);                         \
+    double pv=(increment);                      \
+    IMP_PRAGMA(omp atomic)                      \
+      val+=pv;                                  \
+  }
+#else
+#define IMP_ACCUMULATE(dest, increment)\
+  dest+=increment
+#endif
 
 IMP_BEGIN_INTERNAL_NAMESPACE
 
@@ -79,16 +100,19 @@ public:
 
   void add_attribute(Key k, ParticleIndex particle,
                      typename Traits::PassValue value) {
-    IMP_CHECK_MASK(add_remove_mask_, particle,
-                   "Changing the attributes is not permitted now");
+    IMP_CHECK_MASK(add_remove_mask_, particle, k, ADD, ATTRIBUTE);
     do_add_attribute(k, particle, value);
   }
   void add_cache_attribute(Key k, ParticleIndex particle,
                            typename Traits::PassValue value) {
+#pragma omp critical(imp_cache)
+    {
     caches_.insert(k);
     do_add_attribute(k, particle, value);
   }
+  }
   void clear_caches(ParticleIndex particle) {
+#pragma omp critical(imp_cache)
     for (typename compatibility::set<Key>::const_iterator it=caches_.begin();
          it != caches_.end(); ++it) {
       if (data_.size() > it->get_index()
@@ -99,8 +123,7 @@ public:
     }
   }
   void remove_attribute(Key k, ParticleIndex particle) {
-    IMP_CHECK_MASK(add_remove_mask_, particle,
-                   "Changing the attributes is not permitted now");
+    IMP_CHECK_MASK(add_remove_mask_, particle, k, REMOVE, ATTRIBUTE);
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Can't remove attribute if it isn't there");
     data_[k.get_index()][particle]=Traits::get_invalid();
@@ -116,21 +139,22 @@ public:
                      typename Traits::PassValue value) {
 #if IMP_BUILD < IMP_FAST
     if (caches_.find(k)==caches_.end()) {
-      IMP_CHECK_MASK( write_mask_, particle,
-                      "Changing the attribute values is not permitted now");
+      IMP_CHECK_MASK( write_mask_, particle, k, SET, ATTRIBUTE);
     }
 #endif
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Setting invalid attribute: " << k
                     << " of particle " << particle);
+    IMP_USAGE_CHECK(value != Traits::get_invalid(),
+                    "Cannot set attribute to value of " << Traits::get_invalid()
+                    << " as it is reserved for a null value.");
     data_[k.get_index()][particle]= value;
   }
   typename Traits::PassValue get_attribute(Key k,
                                            ParticleIndex particle,
                                            bool checked=true) const {
     if (checked) {
-      IMP_CHECK_MASK(read_mask_, particle,
-                     "Reading the attribute values is not permitted now");
+      IMP_CHECK_MASK(read_mask_, particle, k, GET, ATTRIBUTE);
     }
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Requested invalid attribute: " << k
@@ -139,8 +163,7 @@ public:
   }
   typename Traits::Container::reference access_attribute(Key k,
                                                        ParticleIndex particle) {
-    IMP_CHECK_MASK(write_mask_, particle,
-                   "Writing the attribute values is not permitted now");
+    IMP_CHECK_MASK(write_mask_, particle, k, SET, ATTRIBUTE);
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Requested invalid attribute: " << k
                     << " of particle " << particle);
@@ -171,8 +194,7 @@ public:
     return ret;
   }
   void clear_attributes(ParticleIndex particle) {
-    IMP_CHECK_MASK(add_remove_mask_, particle,
-                   "Clearing the attribute values is not permitted now");
+    IMP_CHECK_MASK(add_remove_mask_, particle, Key(0), REMOVE, ATTRIBUTE);
     for (unsigned int i=0; i< data_.size(); ++i) {
       if (data_[i].size() > get_as_unsigned_int(particle)) {
         data_[i][particle]= Traits::get_invalid();
@@ -265,14 +287,12 @@ public:
 
   // make sure you know what you are doing
   algebra::Sphere3D& get_sphere(ParticleIndex particle) {
-    IMP_CHECK_MASK(read_mask_, particle,
-                   "Reading the attribute values is not permitted now");
+    IMP_CHECK_MASK(read_mask_, particle, FloatKey(0), GET, ATTRIBUTE);
     return spheres_[particle];
   }
 
   algebra::Vector3D& get_internal_coordinates(ParticleIndex particle) {
-    IMP_CHECK_MASK(read_mask_, particle,
-                   "Reading the attribute values is not permitted now");
+    IMP_CHECK_MASK(read_mask_, particle, FloatKey(5), GET, ATTRIBUTE);
     IMP_USAGE_CHECK(internal_coordinates_[particle][0]
                     !=internal::FloatAttributeTableTraits::get_invalid(),
                     "No internal coordinates");
@@ -289,34 +309,34 @@ public:
   void add_to_coordinate_derivatives(ParticleIndex particle,
                                      const algebra::Vector3D &v,
                                      const DerivativeAccumulator &da) {
-    IMP_CHECK_MASK(write_derivatives_mask_, particle,
-                   "Changing the attribute derivatives is not permitted now");
+    IMP_CHECK_MASK(write_derivatives_mask_, particle, FloatKey(0),
+                   SET, DERIVATIVE);
     IMP_USAGE_CHECK(get_has_attribute(FloatKey(0), particle),
                     "Particle does not have coordinates");
-    sphere_derivatives_[particle][0]+=da(v[0]);
-    sphere_derivatives_[particle][1]+=da(v[1]);
-    sphere_derivatives_[particle][2]+=da(v[2]);
+    IMP_ACCUMULATE(sphere_derivatives_[particle][0], da(v[0]));
+    IMP_ACCUMULATE(sphere_derivatives_[particle][1], da(v[1]));
+    IMP_ACCUMULATE(sphere_derivatives_[particle][2], da(v[2]));
   }
 
   void add_to_internal_coordinate_derivatives(ParticleIndex particle,
                                      const algebra::Vector3D &v,
                                      const DerivativeAccumulator &da) {
-    IMP_CHECK_MASK(write_derivatives_mask_, particle,
-                   "Changing the attribute derivatives is not permitted now");
+    IMP_CHECK_MASK(write_derivatives_mask_, particle, FloatKey(4),
+                   SET, DERIVATIVE);
     IMP_USAGE_CHECK(get_has_attribute(FloatKey(0), particle),
                     "Particle does not have coordinates");
-    internal_coordinate_derivatives_[particle][0]
-        +=da(v[0]);
-    internal_coordinate_derivatives_[particle][1]
-        +=da(v[1]);
-    internal_coordinate_derivatives_[particle][2]
-        +=da(v[2]);
+    IMP_ACCUMULATE(internal_coordinate_derivatives_[particle][0],
+        da(v[0]));
+    IMP_ACCUMULATE(internal_coordinate_derivatives_[particle][1],
+        da(v[1]));
+    IMP_ACCUMULATE(internal_coordinate_derivatives_[particle][2],
+        da(v[2]));
   }
 
   const algebra::Vector3D&
   get_coordinate_derivatives(ParticleIndex particle) const {
-    IMP_CHECK_MASK(read_derivatives_mask_, particle,
-                   "Reading the attribute derivatives is not permitted now");
+    IMP_CHECK_MASK(read_derivatives_mask_, particle, FloatKey(0),
+                   GET, DERIVATIVE);
     IMP_USAGE_CHECK(get_has_attribute(FloatKey(0), particle),
                     "Particle does not have coordinates");
     return sphere_derivatives_[particle].get_center();
@@ -339,18 +359,18 @@ public:
     IMP_NOT_IMPLEMENTED;
   }
   void remove_attribute(FloatKey k, ParticleIndex particle) {
-    IMP_CHECK_MASK(add_remove_mask_, particle,
-                   "Changing the attributes is not permitted now");
+    IMP_CHECK_MASK(add_remove_mask_, particle,k,
+                   REMOVE, ATTRIBUTE);
     if (k.get_index() < 4) {
-      IMP_CHECK_MASK(add_remove_mask_, particle,
-                   "Changing attributes is not permitted now");
+      IMP_CHECK_MASK(add_remove_mask_, particle, k,
+                     REMOVE, ATTRIBUTE);
       spheres_[particle][k.get_index()]
         = internal::FloatAttributeTableTraits::get_invalid();
       sphere_derivatives_[particle][k.get_index()]
         = internal::FloatAttributeTableTraits::get_invalid();
     } else if (k.get_index() < 7) {
-      IMP_CHECK_MASK(add_remove_mask_, particle,
-                   "Changing attributes is not permitted now");
+      IMP_CHECK_MASK(add_remove_mask_, particle, k,
+                     REMOVE, ATTRIBUTE);
       internal_coordinates_[particle][k.get_index()-4]
         = internal::FloatAttributeTableTraits::get_invalid();
       internal_coordinate_derivatives_[particle]
@@ -382,14 +402,14 @@ public:
                     "Can't get derivative that isn't there");
     if (k.get_index() < 4) {
       if (checked) {
-        IMP_CHECK_MASK(read_derivatives_mask_, particle,
-                       "Reading the derivatives is not permitted now");
+        IMP_CHECK_MASK(read_derivatives_mask_, particle, k,
+                       GET, DERIVATIVE);
       }
       return sphere_derivatives_[particle][k.get_index()];
     } else if (k.get_index() < 7) {
       if (checked) {
-        IMP_CHECK_MASK(read_derivatives_mask_, particle,
-                       "Reading the derivatives is not permitted now");
+        IMP_CHECK_MASK(read_derivatives_mask_, particle, k,
+                       GET, DERIVATIVE);
       }
       return internal_coordinate_derivatives_[particle]
           [k.get_index()-4];
@@ -404,25 +424,24 @@ public:
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Can't get derivative that isn't there");
     if (k.get_index() < 4) {
-      IMP_CHECK_MASK(write_derivatives_mask_, particle,
-                     "Writing the derivatives is not permitted now");
+      IMP_CHECK_MASK(write_derivatives_mask_, particle, k,
+                     SET, DERIVATIVE);
       sphere_derivatives_[particle][k.get_index()]+=da(v);;
     } else if (k.get_index() < 7) {
-      IMP_CHECK_MASK(write_derivatives_mask_, particle,
-                     "Writing the derivatives is not permitted now");
+      IMP_CHECK_MASK(write_derivatives_mask_, particle, k,
+                     SET, DERIVATIVE);
       internal_coordinate_derivatives_[particle]
           [k.get_index()-4]+=da(v);;
     } else {
       FloatKey nk(k.get_index()-7);
-      derivatives_.set_attribute(nk, particle,
-                                 derivatives_.get_attribute(nk,
-                                                            particle)+da(v));
+      IMP_ACCUMULATE(derivatives_.access_attribute(nk, particle),
+                    da(v));
     }
   }
   void add_attribute(FloatKey k, ParticleIndex particle, double v,
                      bool opt=false) {
-    IMP_CHECK_MASK(add_remove_mask_, particle,
-                     "Changing the attributes is not permitted now");
+    IMP_CHECK_MASK(add_remove_mask_, particle, k,
+                   ADD, ATTRIBUTE);
     IMP_USAGE_CHECK(!get_has_attribute(k, particle),
                     "Can't add attribute that is there");
     if (k.get_index() <4) {
@@ -480,8 +499,8 @@ public:
   }
   void set_attribute(FloatKey k, ParticleIndex particle,
                      double v) {
-    IMP_CHECK_MASK(write_mask_, particle,
-                     "Changing the attribute values is not permitted now");
+    IMP_CHECK_MASK(write_mask_, particle, k,
+                   SET, ATTRIBUTE);
     IMP_USAGE_CHECK(internal::FloatAttributeTableTraits::get_is_valid(v),
                     "Can't set attribute to invalid value");
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
@@ -489,7 +508,7 @@ public:
     if (k.get_index() <4) {
       spheres_[particle][k.get_index()]=v;
     } else if (k.get_index() <7) {
-      spheres_[particle][k.get_index()-4]=v;
+      internal_coordinates_[particle][k.get_index()-4]=v;
     } else {
       data_.set_attribute(FloatKey(k.get_index()-7), particle, v);
     }
@@ -498,23 +517,23 @@ public:
                        ParticleIndex particle,
                        bool checked=true) const {
     if (checked) {
-      IMP_CHECK_MASK(read_mask_, particle,
-                     "Reading the attribute values is not permitted now");
+      IMP_CHECK_MASK(read_mask_, particle, k,
+                     GET, ATTRIBUTE);
     }
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Can't get attribute that is not there");
     if (k.get_index()<4) {
       return spheres_[particle][k.get_index()];
     } else if (k.get_index()<7) {
-      return spheres_[particle][k.get_index()-4];
+      return internal_coordinates_[particle][k.get_index()-4];
     } else {
       return data_.get_attribute(FloatKey(k.get_index()-7), particle, checked);
     }
   }
   double& access_attribute(FloatKey k,
                        ParticleIndex particle) {
-    IMP_CHECK_MASK(write_mask_, particle,
-                   "Writing the attribute values is not permitted now");
+    IMP_CHECK_MASK(write_mask_, particle, k,
+                   SET, ATTRIBUTE);
     IMP_USAGE_CHECK(get_has_attribute(k, particle),
                     "Can't get attribute that is not there");
     if (k.get_index()<4) {
