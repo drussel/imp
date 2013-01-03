@@ -45,7 +45,6 @@ IMP_OBJECT(KinematicForest);
      make sure the internal and external coordinates are synced
      before model updating
      TODO: think about what foldtree scheme to use (star?),
-
   */
   KinematicForest(Model* m, IMP::atom::Hierarchy hierarchy);
 
@@ -137,7 +136,7 @@ IMP_OBJECT(KinematicForest);
      have changed and therefore external coordinates are not
      up to date
   */
-  void mark_internal_coordinates_changed(  ) {
+  void mark_internal_coordinates_changed() {
     is_external_coords_updated_ = false;
   }
 
@@ -146,7 +145,7 @@ IMP_OBJECT(KinematicForest);
      have changed and therefore internal (joint) coordinates are not
      up to date
   */
-  void mark_external_coordinates_changed(  ) {
+  void mark_external_coordinates_changed() {
     is_internal_coords_updated_ = false;
   }
 

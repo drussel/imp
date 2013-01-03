@@ -60,6 +60,11 @@ public:
     return get_psi_joint(r)->get_angle();
   }
 
+  DihedralAngleRevoluteJoints get_joints() { return joints_; }
+
+  KinematicForest* get_kinematic_forest() { return kf_; }
+  // TODO: not sure if we have to return Pointer or just raw pointer
+
   // TODO: add chi
 
   /* Modifier methods */
@@ -149,7 +154,7 @@ private:
   IMP::core::RigidBodies rbs_;
 
   // joints
-  std::vector<DihedralAngleRevoluteJoint*> joints_;
+  DihedralAngleRevoluteJoints joints_;
 
   IMP::base::Pointer<IMP::kinematics::KinematicForest> kf_;
 

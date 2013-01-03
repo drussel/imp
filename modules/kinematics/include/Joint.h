@@ -4,7 +4,6 @@
  *         as part of a kinematic tree
  *  \authors Dina Schneidman, Barak Raveh
  *
-
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
  */
 
@@ -30,7 +29,7 @@ class KinematicForest;
     tree.
     // TODO: make abstract
 */
-class  IMPKINEMATICSEXPORT Joint
+class IMPKINEMATICSEXPORT Joint
 : public IMP::base::Object
 {
   friend class KinematicForest;
