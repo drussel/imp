@@ -26,7 +26,9 @@ public:
 
   bool is_valid(const DOFValues& values) {
     sampler_->apply(values);
-    return (model_->evaluate(false)>0)?false:true; //_if_below(); //???
+    double score = model_->evaluate(false);
+    std::cerr << "score = " << score << std::endl;
+    return true; //(model_->evaluate(false)>0)?false:true; //_if_below(); //???
   }
 
 protected:

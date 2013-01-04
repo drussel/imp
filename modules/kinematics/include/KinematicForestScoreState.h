@@ -21,23 +21,28 @@ class IMPKINEMATICSEXPORT KinematicForestScoreState : public IMP::ScoreState {
 
   IMP_OBJECT(KinematicForestScoreState);
 
-  KinematicForestScoreState(KinematicForest *kf) : kf_(kf) {}
+  KinematicForestScoreState(KinematicForest *kf,
+                            IMP::core::RigidBodies rbs,
+                            IMP::ParticlesTemp atoms) :
+    kf_(kf), rbs_(rbs), atoms_(atoms) {}
 
+  // functions that ScoreState requires
   void do_before_evaluate() {
     std::cerr << " before kf update " << std::endl;
     kf_->update_all_external_coordinates();
     std::cerr << " after kf update " << std::endl;
   }
+
   void do_after_evaluate(DerivativeAccumulator *da) { IMP_UNUSED(da); }
-  ContainersTemp get_input_containers() const { return ContainersTemp(); }
-  ContainersTemp get_output_containers() const { return ContainersTemp(); }
-  ParticlesTemp get_input_particles() const {
-    std::cerr << "get input particles " << std::endl;
-    return ParticlesTemp(); }
-  ParticlesTemp get_output_particles() const { return ParticlesTemp(); }
+
+  ModelObjectsTemp do_get_inputs() const;
+
+  ModelObjectsTemp do_get_outputs() const;
 
  private:
   KinematicForest *kf_;
+  IMP::core::RigidBodies rbs_;
+  IMP::ParticlesTemp atoms_;
 };
 
 IMPKINEMATICS_END_NAMESPACE

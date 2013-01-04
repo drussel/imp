@@ -111,7 +111,9 @@ int main(int argc, char **argv)
   ProteinKinematics pk(mhd, true, false);
   std::cerr << "ProteinKinematics done" << std::endl;
   DihedralAngleRevoluteJoints joints = pk.get_joints();
-  IMP_NEW(KinematicForestScoreState, kfss, (pk.get_kinematic_forest()));
+  IMP_NEW(KinematicForestScoreState, kfss, (pk.get_kinematic_forest(),
+                                            pk.get_rigid_bodies(),
+                                            atoms));
   model->add_score_state(kfss);
 
   // create dofs
@@ -136,6 +138,7 @@ int main(int argc, char **argv)
   std::vector<DOFValues> dof_values = rrt.get_DOFValues();
   for(unsigned int i = 0; i<dof_values.size(); i++) {
     sampler.apply(dof_values[i]);
+    kfss->do_before_evaluate();
     std::string filename = "node" + std::string(boost::lexical_cast<std::string>(i+1)) + ".pdb";
     IMP::atom::write_pdb(mhd, filename);
   }

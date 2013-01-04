@@ -65,6 +65,9 @@ public:
   KinematicForest* get_kinematic_forest() { return kf_; }
   // TODO: not sure if we have to return Pointer or just raw pointer
 
+  IMP::core::RigidBodies get_rigid_bodies() { return rbs_; }
+
+
   // TODO: add chi
 
   /* Modifier methods */
