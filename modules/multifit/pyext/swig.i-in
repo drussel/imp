@@ -1,9 +1,6 @@
 %import "RMF.i"
 %{
-#include "RMF/FileConstHandle.h"
-#include "RMF/NodeConstHandle.h"
-#include "RMF/FileHandle.h"
-#include "RMF/NodeHandle.h"
+#include "RMF.h"
 %}
 
 IMP_SWIG_OBJECT(IMP::multifit, RadiusOfGyrationRestraint,
@@ -75,6 +72,6 @@ IMP_SWIG_OBJECT(IMP::multifit, ProteomicsEMAlignmentAtomic, ProteomicsEMAlignmen
 /* All scripts that can be called from the multifit application */
 %pythoncode %{
 _all_commands = ["param", "anchors", "fit_fft", "cluster", "add_fit_rmsd",
-                 "indexes", "auto_proteomics", "align", "models", "transforms",
+                 "indexes", "proteomics", "align", "models", "transforms",
                  "score"]
 %}
