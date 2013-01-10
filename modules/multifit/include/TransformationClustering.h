@@ -2,14 +2,14 @@
  *  \file IMP/multifit/TransformationClustering.h
  *  \brief Clustering of transformation
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_TRANSFORMATION_CLUSTERING_H
 #define IMPMULTIFIT_TRANSFORMATION_CLUSTERING_H
 
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/base_types.h>
 #include <IMP/Particle.h>
 #include <IMP/algebra/Transformation3D.h>

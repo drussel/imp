@@ -2,14 +2,14 @@
  *  \file IMP/domino/assignment_containers.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDOMINO_ASSIGNMENT_CONTAINERS_H
 #define IMPDOMINO_ASSIGNMENT_CONTAINERS_H
 
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "Assignment.h"
 #include "Order.h"
 #include "subset_scores.h"

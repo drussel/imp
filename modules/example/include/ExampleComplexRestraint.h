@@ -2,13 +2,13 @@
  *  \file IMP/example/ExampleComplexRestraint.h
  *  \brief A restraint to maintain the diameter of a set of points
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_COMPLEX_RESTRAINT_H
 #define IMPEXAMPLE_EXAMPLE_COMPLEX_RESTRAINT_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 
 #include <IMP/PairContainer.h>
 #include <IMP/SingletonContainer.h>

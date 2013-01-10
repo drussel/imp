@@ -2,14 +2,14 @@
  *  \file IMP/core/ConjugateGradients.h
  *  \brief Simple conjugate gradients optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_CONJUGATE_GRADIENTS_H
 #define IMPCORE_CONJUGATE_GRADIENTS_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/Optimizer.h>
 #include <IMP/optimizer_macros.h>

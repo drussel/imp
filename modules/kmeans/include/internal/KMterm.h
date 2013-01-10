@@ -2,7 +2,7 @@
  *  \file KMterm.h
  *  \brief Include file for kmeans algorithm
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPKMEANS_INTERNAL_KMTERM_H
@@ -28,7 +28,7 @@
 // It is provided "as is" without express or implied warranty.
 //----------------------------------------------------------------------
 
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include "KMeans.h"
 
 IMPKMEANS_BEGIN_INTERNAL_NAMESPACE

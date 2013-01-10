@@ -2,7 +2,7 @@
  *  \file CnSymmAxisDetector.h
  *  \brief Detect cn symmetry in proteins and density maps.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -15,7 +15,7 @@
 #include <IMP/core/XYZ.h>
 #include <IMP/atom/Hierarchy.h>
 #include <vector>
-#include "cnmultifit_config.h"
+#include <IMP/cnmultifit/cnmultifit_config.h>
 
 IMPCNMULTIFIT_BEGIN_NAMESPACE
 

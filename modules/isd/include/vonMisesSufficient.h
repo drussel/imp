@@ -1,13 +1,13 @@
 /**
  *  \file IMP/isd/vonMisesSufficient.h    \brief Normal distribution of Function
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_VON_MISES_SUFFICIENT_H
 #define IMPISD_VON_MISES_SUFFICIENT_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/macros.h>
 #include <IMP/Model.h>
 #include <IMP/constants.h>

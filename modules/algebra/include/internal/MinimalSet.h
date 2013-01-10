@@ -1,14 +1,14 @@
 /**
  *  \file MinimalSet.h    \brief Maintain a set of low scoring elements.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_INTERNAL_MINIMAL_SET_H
 #define IMPALGEBRA_INTERNAL_MINIMAL_SET_H
 
-#include "../algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 
 #include <utility>
 #include <algorithm>

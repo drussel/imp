@@ -2,7 +2,7 @@
  *  \file KMlocal.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:           KMlocal.h
 //      Programmer:     David Mount
@@ -30,7 +30,7 @@
 //----------------------------------------------------------------------
 //  basic includes
 //----------------------------------------------------------------------
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include <cmath>                        // math includes (exp, log)
 #include "KMeans.h"                        // kmeans includes
 #include "KMdata.h"                        // data points

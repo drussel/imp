@@ -2,7 +2,7 @@
  *  \file IMP/domino/assignment_tables.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,7 +14,7 @@
 #include "subset_filters.h"
 #include "Assignment.h"
 #include "Subset.h"
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "assignment_containers.h"
 #include "domino_macros.h"
 #include <IMP/Sampler.h>

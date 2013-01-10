@@ -2,13 +2,13 @@
  *  \file IMP/example/ExampleRefCounted.h
  *  \brief An example showing how to make a simple ref counted object
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_REF_COUNTED_H
 #define IMPEXAMPLE_EXAMPLE_REF_COUNTED_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 
 #include <IMP/RefCounted.h>
 #include <IMP/macros.h>

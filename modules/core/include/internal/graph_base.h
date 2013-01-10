@@ -1,14 +1,14 @@
 /**
  *  \file graph_base.h     \brief Internal use only.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_GRAPH_BASE_H
 #define IMPCORE_GRAPH_BASE_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/Particle.h>
 #include <IMP/Model.h>

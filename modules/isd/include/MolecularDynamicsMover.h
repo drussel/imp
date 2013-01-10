@@ -3,14 +3,14 @@
  *  \brief A modifier which perturbs XYZs or Nuisances with a constant energy
  *  MD simulation.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPISD_MOLECULAR_DYNAMICS_MOVER_H
 #define IMPISD_MOLECULAR_DYNAMICS_MOVER_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/core/Mover.h>
 #include <IMP/isd/MolecularDynamics.h>
 #include <IMP/core/mover_macros.h>

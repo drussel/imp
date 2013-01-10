@@ -2,14 +2,14 @@
  *  \file IMP/domino/particle_states.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDOMINO_PARTICLE_STATES_H
 #define IMPDOMINO_PARTICLE_STATES_H
 
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "domino_macros.h"
 #include "Subset.h"
 #include "Assignment.h"

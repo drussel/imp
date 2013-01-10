@@ -6,13 +6,13 @@
  *  in tools/maintenance/container_templates/kernel
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPKERNEL_SINGLETON_PREDICATE_H
 #define IMPKERNEL_SINGLETON_PREDICATE_H
 
-#include "kernel_config.h"
+#include <IMP/kernel_config.h>
 #include "base_types.h"
 #include "ParticleTuple.h"
 #include "DerivativeAccumulator.h"

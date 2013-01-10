@@ -2,14 +2,14 @@
  *  \file IMP/domino/DiscreteSampler.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDOMINO_DISCRETE_SAMPLER_H
 #define IMPDOMINO_DISCRETE_SAMPLER_H
 
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "assignment_tables.h"
 #include "particle_states.h"
 #include "subset_filters.h"

@@ -1,14 +1,14 @@
 /**
  *  \brief A timer class to time function calls
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPISD_INTERNAL_TIMER_H
 #define IMPISD_INTERNAL_TIMER_H
 
-#include "../isd_config.h"
+#include <IMP/isd/isd_config.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 

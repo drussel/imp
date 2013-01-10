@@ -1,7 +1,7 @@
 /**
  *  \file random_generator.h   \brief random number generator
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -9,7 +9,7 @@
 #define IMPSTATISTICS_INTERNAL_TRIVIAL_PARTITIONAL_CLUSTERING_H
 
 #include "IMP/random.h"
-#include "../statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "../PartitionalClustering.h"
 #include "../partitional_clustering_macros.h"
 #include <IMP/base/check_macros.h>

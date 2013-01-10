@@ -1,14 +1,14 @@
 /**
  *  \file FFTWGrid.h   \brief C++ smart pointer wrapper to fftw_malloc/free
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_FFTW_GRID_H
 #define IMPMULTIFIT_FFTW_GRID_H
 
-#include "../multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "fftw3.h"
 #include <boost/noncopyable.hpp>
 

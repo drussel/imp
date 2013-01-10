@@ -2,14 +2,14 @@
  *  \file IMP/base/RefCounted.h
  *  \brief A common base class for ref counted objects.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_REF_COUNTED_H
 #define IMPBASE_REF_COUNTED_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "exception.h"
 #include "utility_macros.h"
 #include <boost/static_assert.hpp>

@@ -2,14 +2,14 @@
  *  \file IMP/domino/DependencyScoreState.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDOMINO_DEPENDENCY_SCORE_STATE_H
 #define IMPDOMINO_DEPENDENCY_SCORE_STATE_H
 
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include <IMP/ScoreState.h>
 #include <IMP/score_state_macros.h>
 
@@ -49,7 +49,13 @@ public:
                     "Must set dependencies before adding to model.");
     outputc_=pt;
   }
-  IMP_SCORE_STATE_2(DependencyScoreState);
+  protected:
+  virtual void do_before_evaluate() IMP_OVERRIDE;
+  virtual void do_after_evaluate(DerivativeAccumulator *da)
+    IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_outputs() const IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(DependencyScoreState);;
 };
 
 

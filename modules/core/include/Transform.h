@@ -1,13 +1,13 @@
 /**
  *  \file IMP/core/Transform.h     \brief Transform a particle
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_TRANSFORM_H
 #define IMPCORE_TRANSFORM_H
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/algebra/Transformation3D.h>
 #include <IMP/SingletonModifier.h>
 #include <IMP/singleton_macros.h>

@@ -2,13 +2,13 @@
  *  \file IMP/isd/MultivariateFNormalSufficientSparse.h
  *  \brief Normal distribution of Function
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_MULTIVARIATE_FNORMAL_SUFFICIENT_SPARSE_H
 #define IMPISD_MULTIVARIATE_FNORMAL_SUFFICIENT_SPARSE_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 
 #ifdef IMP_ISD_USE_CHOLMOD
 

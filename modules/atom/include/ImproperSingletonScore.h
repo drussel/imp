@@ -2,13 +2,13 @@
  *  \file IMP/atom/ImproperSingletonScore.h
  *  \brief A score on the deviation of an improper angle from ideality.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_IMPROPER_SINGLETON_SCORE_H
 #define IMPATOM_IMPROPER_SINGLETON_SCORE_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "bond_decorators.h"
 #include <IMP/SingletonScore.h>
 #include <IMP/UnaryFunction.h>

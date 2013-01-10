@@ -2,14 +2,14 @@
  *  \file IMP/multifit/anchor_utilities.h
  *  \brief Common functions in anchor calculations
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_ANCHOR_UTILITIES_H
 #define IMPMULTIFIT_ANCHOR_UTILITIES_H
 
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/statistics/VQClustering.h>
 #include <IMP/statistics/DataPoints.h>

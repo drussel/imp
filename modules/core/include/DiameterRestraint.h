@@ -2,13 +2,13 @@
  *  \file IMP/core/DiameterRestraint.h
  *  \brief A restraint to maintain the diameter of a set of points
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_DIAMETER_RESTRAINT_H
 #define IMPCORE_DIAMETER_RESTRAINT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include "internal/remove_pointers.h"
 #include <IMP/PairContainer.h>

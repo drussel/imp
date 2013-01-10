@@ -2,14 +2,14 @@
  *  \file IMP/base/SetCheckState.h
  *  \brief Checkging and error reporting support.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_SET_CHECK_STATE_H
 #define IMPBASE_SET_CHECK_STATE_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "enums.h"
 #include "raii_macros.h"
 #include "value_macros.h"

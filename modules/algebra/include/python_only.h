@@ -2,14 +2,14 @@
  *  \file IMP/algebra/python_only.h
  *  \brief functionality only availble in python.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_PYTHON_ONLY_H
 #define IMPALGEBRA_PYTHON_ONLY_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 
 IMPALGEBRA_BEGIN_NAMESPACE
 

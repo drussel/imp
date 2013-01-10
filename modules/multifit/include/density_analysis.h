@@ -2,7 +2,7 @@
  *  \file IMP/multifit/density_analysis.h
  *  \brief density analysis tools, such as histogram and segmentation
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,7 +11,7 @@
 
 #include <IMP/statistics/Histogram.h>
 #include <IMP/em/DensityMap.h>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/graph/incremental_components.hpp>

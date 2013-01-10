@@ -1,13 +1,13 @@
 /**
  *  \file cgal/internal/polyhedrons.h
  *  \brief manipulation of text, and Interconversion between text and numbers
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPCGAL_INTERNAL_UNION_OF_BALLS_H
 #define IMPCGAL_INTERNAL_UNION_OF_BALLS_H
 
-#include "../cgal_config.h"
+#include <IMP/cgal/cgal_config.h>
 #include <IMP/base/types.h>
 #include <IMP/algebra/SphereD.h>
 #include <vector>

@@ -2,13 +2,13 @@
  *  \file IMP/isd/MaintainScaleOrderConstraint.h
  *  \brief Constrain scales to be ordered and positive.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_MAINTAIN_SCALE_ORDER_CONSTRAINT_H
 #define IMPISD_MAINTAIN_SCALE_ORDER_CONSTRAINT_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/Constraint.h>
 #include <IMP/score_state_macros.h>
 #include <IMP/Particle.h>

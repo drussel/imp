@@ -2,14 +2,14 @@
  *  \file KMLocalSearch.h   \brief Generic algorithm from k-means
  *                                 clustering by local search
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_INTERNAL_KM_LOCAL_SEARCH_H
 #define IMPSTATISTICS_INTERNAL_KM_LOCAL_SEARCH_H
 
-#include "../statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "KMFilterCenters.h"
 #include "KMCenters.h"
 #include "KMTerminationCondition.h"

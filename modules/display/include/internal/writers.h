@@ -2,13 +2,13 @@
  *  \file writers.h
  *  \brief Base class for writing geometry to a file
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_INTERNAL_WRITERS_H
 #define IMPDISPLAY_INTERNAL_WRITERS_H
 
-#include "../display_config.h"
+#include <IMP/display/display_config.h>
 #include <IMP/file.h>
 IMPDISPLAY_BEGIN_NAMESPACE
 class Writer;

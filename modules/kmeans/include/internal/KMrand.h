@@ -2,7 +2,7 @@
  *  \file KMrand.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:            KMrand.h
 //      Programmer:      Sunil Arya and David Mount
@@ -30,7 +30,7 @@
 //----------------------------------------------------------------------
 //  Basic includes
 //----------------------------------------------------------------------
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include <cstdlib>                  // standard C++ includes
 #include <math.h>                  // math routines
 #include "KMeans.h"                  // KMeans includes

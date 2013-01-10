@@ -1,7 +1,7 @@
 /**
  *  \file exception.cpp   \brief Check handling.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -15,20 +15,20 @@ InputOutputException::InputOutputException(int particle_index,
                                            int operation,
                                            int entity,
                                            std::string key_name):
-    ExceptionBase("InputOutputException"),
-    particle_index_(particle_index),
-    operation_(operation),
-    entity_(entity),
-    key_name_(key_name) {
+  std::runtime_error("InputOutputException"),
+  particle_index_(particle_index),
+  operation_(operation),
+  entity_(entity),
+  key_name_(key_name) {
 }
 
 InputOutputException::InputOutputException(std::string container_name,
                                            int operation):
-    ExceptionBase("InputOutputException"),
-    particle_index_(-1),
-    container_name_(container_name),
-    operation_(operation),
-    entity_(NO_ENTITY) {
+  std::runtime_error("InputOutputException"),
+  particle_index_(-1),
+  container_name_(container_name),
+  operation_(operation),
+  entity_(NO_ENTITY) {
 }
 
 InputOutputException::~InputOutputException() throw()
@@ -59,8 +59,7 @@ std::string InputOutputException::get_message(ModelObject *o) const {
     }
     break;
   };
-  oss << " Violating object: \"" << o->get_name() << "\" of type \""
-      << o->get_type_name() << "\".";
+  oss << " Violating object: \"" << o->get_name() << "\".";
   if (particle_index_>=0) {
     oss << " Attribute " << get_key_name()
     << " of particle \""

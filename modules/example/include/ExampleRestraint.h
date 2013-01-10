@@ -2,14 +2,14 @@
  *  \file IMP/example/ExampleRestraint.h
  *  \brief A restraint on a list of particle pairs.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_RESTRAINT_H
 #define IMPEXAMPLE_EXAMPLE_RESTRAINT_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/Restraint.h>
 #include <IMP/PairContainer.h>
@@ -36,10 +36,10 @@ public:
       preferably in a Singleton or PairContainer as appropriate.
    */
   ExampleRestraint(Particle *p, double k);
-
-  /** This macro declares the basic needed methods: evaluate and show
-   */
-  IMP_RESTRAINT(ExampleRestraint);
+  void do_add_score_and_derivatives(IMP::ScoreAccumulator sa)
+    const IMP_OVERRIDE;
+  IMP::ModelObjectsTemp do_get_inputs() const;
+  IMP_OBJECT_METHODS(ExampleRestraint);
 };
 
 IMPEXAMPLE_END_NAMESPACE

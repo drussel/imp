@@ -2,13 +2,13 @@
  *  \file IMP/core/RigidBodyDistancePairScore.h
  *  \brief Act on the distance between two rigid bodies
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_RIGID_BODY_DISTANCE_PAIR_SCORE_H
 #define IMPCORE_RIGID_BODY_DISTANCE_PAIR_SCORE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "ClosePairsPairScore.h"
 #include <IMP/PairContainer.h>
 #include <IMP/SingletonContainer.h>

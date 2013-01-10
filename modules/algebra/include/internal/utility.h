@@ -1,13 +1,13 @@
 /**
  *  \file algebra/internal/utility.h
  *  \brief Functions to deal with very common math operations
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPALGEBRA_INTERNAL_UTILITY_H
 #define IMPALGEBRA_INTERNAL_UTILITY_H
 
-#include "../algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "tnt_array2d.h"
 #include "../VectorD.h"
 #include <vector>

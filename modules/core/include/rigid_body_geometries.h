@@ -2,13 +2,13 @@
  *  \file IMP/core/rigid_body_geometries.h
  *  \brief functionality for defining rigid bodies
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_RIGID_BODY_GEOMETRIES_H
 #define IMPCORE_RIGID_BODY_GEOMETRIES_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "rigid_bodies.h"
 #include "internal/rigid_body_tree.h"
 #include <IMP/display/particle_geometry.h>

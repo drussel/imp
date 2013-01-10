@@ -2,14 +2,14 @@
  *  \file IMP/core/generic.h    \brief Various important functionality
  *                                       for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_GENERIC_H
 #define IMPCORE_GENERIC_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/generic.h>
 
 IMP_BEGIN_NAMESPACE

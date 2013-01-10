@@ -1,14 +1,14 @@
 /**
  *  \file IMP/display/python_only.h   \brief Build dependency graphs on models.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDISPLAY_PYTHON_ONLY_H
 #define IMPDISPLAY_PYTHON_ONLY_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 
 IMPDISPLAY_BEGIN_NAMESPACE
 

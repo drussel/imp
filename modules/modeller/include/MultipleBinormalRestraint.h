@@ -2,14 +2,14 @@
  *  \file MultipleBinormalRestraint.h
  *  \brief Modeller-style multiple binormal (phi/psi) restraint.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMODELLER_MULTIPLE_BINORMAL_RESTRAINT_H
 #define IMPMODELLER_MULTIPLE_BINORMAL_RESTRAINT_H
 
-#include "modeller_config.h"
+#include <IMP/modeller/modeller_config.h>
 
 #include <IMP/Restraint.h>
 #include <IMP/Particle.h>

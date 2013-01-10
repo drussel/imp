@@ -2,14 +2,14 @@
  *  \file IMP/benchmark/utility.h
  *  \brief Various utilities for benchmarking
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBENCHMARK_UTILITY_H
 #define IMPBENCHMARK_UTILITY_H
 
-#include "benchmark_config.h"
+#include <IMP/benchmark/benchmark_config.h>
 #include <string>
 
 IMPBENCHMARK_BEGIN_NAMESPACE

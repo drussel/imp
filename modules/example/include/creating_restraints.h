@@ -2,14 +2,14 @@
  *  \file IMP/example/creating_restraints.h
  *  \brief A simple unary function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_CREATING_RESTRAINTS_H
 #define IMPEXAMPLE_CREATING_RESTRAINTS_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/container/ClosePairContainer.h>
 #include <IMP/container/generic.h>
 #include <IMP/container/ConsecutivePairContainer.h>

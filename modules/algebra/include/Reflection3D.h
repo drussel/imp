@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/Reflection3D.h   \brief Reflect about a plane in 3D.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_REFLECTION_3D_H
 #define IMPALGEBRA_REFLECTION_3D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "Plane3D.h"
 #include "GeometricPrimitiveD.h"
 

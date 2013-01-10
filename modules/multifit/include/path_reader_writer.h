@@ -2,14 +2,14 @@
  *  \file path_reader_writer.h
  *  \brief Read and write paths.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_PATH_READER_WRITER_H
 #define IMPMULTIFIT_PATH_READER_WRITER_H
 
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/domino/DominoSampler.h>
 
 IMPMULTIFIT_BEGIN_NAMESPACE

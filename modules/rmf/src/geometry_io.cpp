@@ -2,7 +2,7 @@
  *  \file IMP/rmf/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -355,7 +355,7 @@ void set_segment(algebra::Segment3D s,
       } else  if (dynamic_cast<display::BoundingBoxGeometry*>(g)) {
         bgs.push_back(dynamic_cast<display::BoundingBoxGeometry*>(g));
       } else {
-        IMP_FAILURE("Geometry type " << g->get_type_name()
+        IMP_FAILURE("Geometry " << g->get_name()
                     << " not supported");
       }
     }

@@ -2,14 +2,14 @@
  *  \file IMP/core/MCCGSampler.h
  *  \brief A Monte Carlo/Conjugate Gradients based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_MCCG_SAMPLER_H
 #define IMPCORE_MCCG_SAMPLER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/Sampler.h>
 #include <IMP/sampler_macros.h>

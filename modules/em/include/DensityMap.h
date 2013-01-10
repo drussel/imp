@@ -2,14 +2,14 @@
  *  \file IMP/em/DensityMap.h
  *  \brief Class for handling density maps.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_DENSITY_MAP_H
 #define IMPEM_DENSITY_MAP_H
 #include <IMP/Pointer.h>
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "DensityHeader.h"
 #include "MapReaderWriter.h"
 #include <IMP/Object.h>
@@ -431,7 +431,7 @@ public:
   void calc_all_voxel2loc();
   //! copy map into this map
   void copy_map(const DensityMap *other);
-  IMP_OBJECT_INLINE(DensityMap, header_.show(out),release(););
+  IMP_OBJECT_METHODS(DensityMap)
 #if !defined(IMP_DOXYGEN) && !defined(SWIG)
   //! Convolution a kernel with a map and write results into current map
   /**

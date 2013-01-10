@@ -4,13 +4,13 @@
  *
  *  BLURB
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_HEADERNAME_PREDICATES_H
 #define IMPCORE_HEADERNAME_PREDICATES_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/CLASSNAMEPredicate.h>
 #include <boost/random.hpp>
 #include "internal/container_helpers.h"

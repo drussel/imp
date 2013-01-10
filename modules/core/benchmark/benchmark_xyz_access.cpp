@@ -1,5 +1,5 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 #include <IMP.h>
 #include <IMP/core.h>
@@ -7,7 +7,7 @@
 #include <boost/timer.hpp>
 #include <IMP/benchmark/utility.h>
 #include <IMP/benchmark/benchmark_macros.h>
-#include <IMP/benchmark/command_line_macros.h>
+#include <IMP/base/flags.h>
 
 using namespace IMP;
 using namespace IMP::core;
@@ -434,7 +434,7 @@ void do_benchmark(std::string descr, unsigned int n) {
 }
 
 int main(int argc, char **argv) {
-  IMP_BENCHMARK( );
+  IMP::base::setup_from_argv(argc, argv, 0);
   do_benchmark("small", 100);
   do_benchmark("large", 1000);
   do_benchmark("huge", 10000);

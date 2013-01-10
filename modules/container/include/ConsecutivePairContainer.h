@@ -2,13 +2,13 @@
  *  \file IMP/container/ConsecutivePairContainer.h
  *  \brief Return all pairs from a SingletonContainer
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCONTAINER_CONSECUTIVE_PAIR_CONTAINER_H
 #define IMPCONTAINER_CONSECUTIVE_PAIR_CONTAINER_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 #include <IMP/generic.h>
 #include <IMP/PairContainer.h>
 #include <IMP/PairPredicate.h>

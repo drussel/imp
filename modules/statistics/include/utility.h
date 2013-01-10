@@ -2,14 +2,14 @@
  *  \file IMP/statistics/utility.h
  *  \brief Cluster sets of points.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_UTILITY_H
 #define IMPSTATISTICS_UTILITY_H
 
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "PartitionalClustering.h"
 #include "Embedding.h"
 

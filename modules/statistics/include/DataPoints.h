@@ -2,7 +2,7 @@
  *  \file IMP/statistics/DataPoints.h
  *  \brief Handling of data for anchor points segmentation
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -21,7 +21,7 @@
 //#include <IMP/atom/Hierarchy.h>
 #include <IMP/core/XYZ.h>
 #include <boost/scoped_ptr.hpp>
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include <map>
 
 IMPSTATISTICS_BEGIN_NAMESPACE
@@ -34,6 +34,7 @@ typedef std::vector<Array1DD> Array1DD_VEC;
 
 //density grid (to remove once DensityMap is grid3d)
 //! Holds the data points to be used in the clustering procedure
+/** \unstable(DataPoints) */
 class IMPSTATISTICSEXPORT DataPoints : public IMP::base::Object {
  public:
   DataPoints(): Object("DataPoints%1%"){
@@ -46,12 +47,13 @@ class IMPSTATISTICSEXPORT DataPoints : public IMP::base::Object {
   }
   const Array1DD_VEC *get_data() const {return &data_;}
   int get_number_of_data_points()const {return data_.size();}
-  IMP_OBJECT_INLINE(DataPoints, { out << "DataPoints" << std::endl; }, {});
+  IMP_OBJECT_METHODS(DataPoints);
 protected:
   FloatKeys atts_;
   Array1DD_VEC data_;
 };
 IMP_OBJECTS(DataPoints, DataPointsList);
+/** \unstable(DataPoints) */
 class IMPSTATISTICSEXPORT XYZDataPoints : public DataPoints {
 public:
   XYZDataPoints():DataPoints(){}
@@ -62,13 +64,12 @@ public:
   //  ~XYZDataPoints(){}
   inline algebra::Vector3D get_vector(int i) const {return vecs_[i];}
 
-  IMP_OBJECT_INLINE(XYZDataPoints, { out << "XYZDataPoints" << std::endl; },
-                    {});
+  IMP_OBJECT_METHODS(XYZDataPoints);
 protected:
   algebra::Vector3Ds vecs_;
 };
 IMP_OBJECTS(XYZDataPoints, XYZDataPointsList);
-
+/** \unstable(DataPoints) */
 class IMPSTATISTICSEXPORT ParticlesDataPoints : public XYZDataPoints {
 public:
   ParticlesDataPoints() : XYZDataPoints() {

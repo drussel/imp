@@ -1,7 +1,7 @@
 /**
  *  \file GaussianProcessInterpolationRestraint.cpp
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #include <IMP/isd/GaussianProcessInterpolationRestraint.h>
@@ -103,12 +103,6 @@ double GaussianProcessInterpolationRestraint::unprotected_evaluate(
     double ene = mvn_->evaluate(); //O(M^3) if Omega has changed else O(M)
 
     return ene;
-}
-
-void GaussianProcessInterpolationRestraint::do_show(std::ostream& out) const
-{
-    out << "GaussianProcessInterpolationRestraint on "
-        << get_input_particles().size() << " particles" << std::endl;
 }
 
 double

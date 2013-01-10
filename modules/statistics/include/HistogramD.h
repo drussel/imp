@@ -1,13 +1,13 @@
 /**
  * \file IMP/statistics/HistogramD.h \brief Holds a histogram
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_HISTOGRAM_D_H
 #define IMPSTATISTICS_HISTOGRAM_D_H
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "internal/histogram.h"
 #include <IMP/algebra/GeometricPrimitiveD.h>
 #include <IMP/algebra/VectorD.h>

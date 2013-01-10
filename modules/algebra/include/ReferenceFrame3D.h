@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/ReferenceFrame3D.h   \brief Simple 3D rotation class.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_REFERENCE_FRAME_3D_H
 #define IMPALGEBRA_REFERENCE_FRAME_3D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "Transformation3D.h"
 
 IMPALGEBRA_BEGIN_NAMESPACE

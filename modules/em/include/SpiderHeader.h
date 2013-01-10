@@ -2,14 +2,14 @@
  *  \file IMP/em/SpiderHeader.h
  *  \brief Header for Spider and Xmipp formats
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPEM_SPIDER_HEADER_H
 #define IMPEM_SPIDER_HEADER_H
 
 #include <ostream>
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 
 IMPEM_BEGIN_NAMESPACE
 

@@ -1,7 +1,7 @@
 /**
  *  \file FFTWPlan.h   \brief C++ smart pointer to FFTW plans.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,7 +11,7 @@
 #include <IMP/base_types.h>
 #include <IMP/log.h>
 #include <IMP/exception.h>
-#include "../multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "fftw3.h"
 #include <boost/noncopyable.hpp>
 

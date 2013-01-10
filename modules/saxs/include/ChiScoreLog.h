@@ -1,7 +1,7 @@
 /**
  * \file IMP/saxs/ChiScoreLog.h \brief scoring with log intensity
  *
- * Copyright 2007-2010 Sali Lab. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,7 +10,7 @@
 
 #include <IMP/base/warning_macros.h>
 
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 #include "Profile.h"
 
 IMPSAXS_BEGIN_NAMESPACE

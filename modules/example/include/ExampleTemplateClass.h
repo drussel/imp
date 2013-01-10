@@ -2,14 +2,14 @@
  *  \file IMP/example/ExampleTemplateClass.h
  *  \brief Show how to manage a template class with python.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_TEMPLATE_CLASS_H
 #define IMPEXAMPLE_EXAMPLE_TEMPLATE_CLASS_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 
 #include <IMP/utility.h>
 #include <IMP/algebra/VectorD.h>

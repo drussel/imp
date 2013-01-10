@@ -2,13 +2,13 @@
  *  \file IMP/gsl/ConjugateGradients.h
  *  \brief A conjugate gradients optimizer from GSL
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPGSL_CONJUGATE_GRADIENTS_H
 #define IMPGSL_CONJUGATE_GRADIENTS_H
 
-#include "gsl_config.h"
+#include <IMP/gsl/gsl_config.h>
 
 #include "GSLOptimizer.h"
 

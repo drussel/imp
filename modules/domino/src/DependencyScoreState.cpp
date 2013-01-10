@@ -1,7 +1,7 @@
 /**
  *  \file ConjugateGradients.cpp  \brief Simple conjugate gradients optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -35,7 +35,5 @@ ModelObjectsTemp DependencyScoreState::do_get_outputs() const {
   ret+= outputc_;
   return ret;
 }
-void DependencyScoreState::do_show(std::ostream &) const {}
-
 
 IMPDOMINO_END_NAMESPACE

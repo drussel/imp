@@ -1,14 +1,14 @@
 /**
  *  \file KMRectangle.h   \brief Orthogonal (axis aligned) rectangle
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_INTERNAL_KM_RECTANGLE_H
 #define IMPSTATISTICS_INTERNAL_KM_RECTANGLE_H
 
-#include "../statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "KMData.h"
 #include <IMP/base_types.h>
 #include <cstdlib>

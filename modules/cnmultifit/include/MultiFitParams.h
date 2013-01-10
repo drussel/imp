@@ -2,7 +2,7 @@
  *  \file MultiFitParams.h
  *  \brief Parameters for MultiFit.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <string>
-#include "cnmultifit_config.h"
+#include <IMP/cnmultifit/cnmultifit_config.h>
 #include <iostream>
 
 IMPCNMULTIFIT_BEGIN_NAMESPACE

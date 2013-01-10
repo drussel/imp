@@ -2,7 +2,7 @@
  *  \file IMP/em/MapReaderWriter.h
  *  \brief An abstract class for reading a map
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,7 +10,7 @@
 #define IMPEM_MAP_READER_WRITER_H
 
 #include "../Object.h"
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "DensityHeader.h"
 #include <iostream>
 #include <fstream>
@@ -40,7 +40,7 @@ public:
   };
 #endif
 
-  IMP_OBJECT_INLINE(MapReaderWriter, {out << "MapReaderWriter";}, {});
+  IMP_OBJECT_METHODS(MapReaderWriter)
 };
 
 IMPEM_END_NAMESPACE

@@ -2,14 +2,14 @@
  *  \file IMP/isd/vonMisesKappaJeffreysRestraint.h
  *  \brief Jeffreys prior for \f$\kappa\f$ in the von Mises distribution.
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPISD_VON_MISES_KAPPA_JEFFREYS_RESTRAINT_H
 #define IMPISD_VON_MISES_KAPPA_JEFFREYS_RESTRAINT_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/SingletonScore.h>
 #include "ISDRestraint.h"
 

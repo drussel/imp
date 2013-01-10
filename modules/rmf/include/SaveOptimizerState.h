@@ -2,14 +2,14 @@
  *  \file IMP/rmf/SaveOptimizerState.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPRMF_SAVE_OPTIMIZER_STATE_H
 #define IMPRMF_SAVE_OPTIMIZER_STATE_H
 
-#include "rmf_config.h"
+#include <IMP/rmf/rmf_config.h>
 #include "atom_io.h"
 #include "restraint_io.h"
 #include "particle_io.h"

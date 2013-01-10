@@ -2,14 +2,14 @@
  *  \file IMP/atom/RemoveTranslationOptimizerState.h
  *  \brief Remove rigid translation during optimization.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_REMOVE_TRANSLATION_OPTIMIZER_STATE_H
 #define IMPATOM_REMOVE_TRANSLATION_OPTIMIZER_STATE_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/Particle.h>
 #include <IMP/base_types.h>
 #include <IMP/OptimizerState.h>

@@ -2,14 +2,14 @@
  *  \file base/Array.h
  *  \brief Classes to handle static sized arrays of things.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_ARRAY_H
 #define IMPBASE_ARRAY_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "Value.h"
 #include "comparison_macros.h"
 #include "hash_macros.h"

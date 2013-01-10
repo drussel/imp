@@ -1,14 +1,14 @@
 /**
  *  \file IMP/atom/Atom.h     \brief Simple atom decorator.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_ATOM_H
 #define IMPATOM_ATOM_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "atom_macros.h"
 #include "Residue.h"
 #include "Hierarchy.h"

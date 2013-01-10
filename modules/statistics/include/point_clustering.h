@@ -2,14 +2,14 @@
  *  \file IMP/statistics/point_clustering.h
  *  \brief Cluster sets of points.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_POINT_CLUSTERING_H
 #define IMPSTATISTICS_POINT_CLUSTERING_H
 
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "PartitionalClusteringWithCenter.h"
 #include "Embedding.h"
 

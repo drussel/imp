@@ -2,13 +2,13 @@
  *  \file IMP/kmeans/KMeans.h
  *  \brief an interface to k-means open source library (stored internally)
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPKMEANS_KMEANS_H
 #define IMPKMEANS_KMEANS_H
 
-#include "kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include "IMP/kmeans/internal/KMlocal.h"     // k-means algorithms
 #include "IMP/kmeans/internal/KMdata.h"     // k-means algorithms
 #include "IMP/kmeans/internal/KMterm.h"
@@ -103,7 +103,7 @@ KMeans : public IMP::base::Object {
 
   /************   Object virtual methods / destructor   ************/
 
-  IMP_OBJECT_INLINE(KMeans, IMP_UNUSED(out) ,);
+  IMP_OBJECT_METHODS(KMeans)
 
   /*********************** Public methods **************************/
  public:

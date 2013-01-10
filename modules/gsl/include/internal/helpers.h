@@ -2,14 +2,14 @@
  *  \file gsl/internal/helpers.h
  *  \brief Helpers for using IMP with GSL
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPGSL_INTERNAL_HELPERS_H
 #define IMPGSL_INTERNAL_HELPERS_H
 
-#include "../gsl_config.h"
+#include <IMP/gsl/gsl_config.h>
 #include "../GSLOptimizer.h"
 #include <gsl/gsl_multimin.h>
 

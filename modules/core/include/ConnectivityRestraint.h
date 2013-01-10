@@ -4,14 +4,14 @@
  *  Restrict max distance between at least one pair of particles of any
  *  two distinct types.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_CONNECTIVITY_RESTRAINT_H
 #define IMPCORE_CONNECTIVITY_RESTRAINT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "DistanceRestraint.h"
 
 #include <IMP/SingletonContainer.h>
@@ -75,7 +75,11 @@ public:
 
   Restraints do_create_current_decomposition() const;
 
-  IMP_RESTRAINT_2(ConnectivityRestraint);
+  public:
+   double unprotected_evaluate(IMP::DerivativeAccumulator *accum)
+                 const IMP_OVERRIDE;
+   IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+   IMP_OBJECT_METHODS(ConnectivityRestraint);;
 };
 
 IMPCORE_END_NAMESPACE

@@ -2,14 +2,14 @@
  *  \file IMP/example/ExampleConstraint.h
  *  \brief A restraint on a list of particle pairs.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_CONSTRAINT_H
 #define IMPEXAMPLE_EXAMPLE_CONSTRAINT_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/Constraint.h>
 #include <IMP/PairContainer.h>

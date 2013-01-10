@@ -2,13 +2,13 @@
  *  \file rigid_bodies.h
  *  \brief utilities for rigid bodies.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_INTERNAL_RIGID_BODIES_H
 #define IMPCORE_INTERNAL_RIGID_BODIES_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 #include "../XYZ.h"
 #include "../Hierarchy.h"
 #include <IMP/algebra/Sphere3D.h>

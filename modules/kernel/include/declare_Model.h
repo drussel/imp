@@ -2,7 +2,7 @@
  *  \file IMP/declare_Model.h   \brief Storage of a model, its restraints,
  *                         constraints and particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -271,7 +271,7 @@ public:
   */
   void update();
 
-  IMP_OBJECT_INLINE(Model, show_it(out), cleanup());
+  IMP_OBJECT_METHODS(Model)
 
   /** Remove a particle from the Model. The particle will then be inactive and
       cannot be used for anything and all data stored in the particle is lost.

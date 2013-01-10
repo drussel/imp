@@ -2,14 +2,14 @@
  *  \file IMP/em/CoarseCCatIntervals.h
  *  \brief Cross correlation coefficient calculator.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_COARSE_CCAT_INTERVALS_H
 #define IMPEM_COARSE_CCAT_INTERVALS_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "CoarseCC.h"
 #include <vector>
 
@@ -59,7 +59,7 @@ the same value before computing the values again
                  float scalefac, bool lderiv,
                  unsigned long eval_interval);
 
-  IMP_OBJECT_INLINE(CoarseCCatIntervals, {out << "CoarseCCatIntervals";}, {});
+  IMP_OBJECT_METHODS(CoarseCCatIntervals)
 
 protected:
   void allocate_derivatives_array(int ncd);

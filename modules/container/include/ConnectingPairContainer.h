@@ -2,13 +2,13 @@
  *  \file IMP/container/ConnectingPairContainer.h
  *  \brief A container which has pairs which ensure a set is connected
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCONTAINER_CONNECTING_PAIR_CONTAINER_H
 #define IMPCONTAINER_CONNECTING_PAIR_CONTAINER_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 #include <IMP/core/internal/MovedSingletonContainer.h>
 #include <IMP/internal/ListLikePairContainer.h>
 #include <IMP/PairContainer.h>

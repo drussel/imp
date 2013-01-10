@@ -1,14 +1,14 @@
 /**
  *  \file IMP/em/Voxel.h     \brief voxel decorator.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_VOXEL_H
 #define IMPEM_VOXEL_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include <IMP/Decorator.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/core/XYZR.h>

@@ -2,14 +2,14 @@
  *  \file IMP/core/utility.h    \brief Various important functionality
  *                                       for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_UTILITY_H
 #define IMPCORE_UTILITY_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "XYZR.h"
 #include <IMP/base_types.h>
 #include <IMP/algebra/Segment3D.h>

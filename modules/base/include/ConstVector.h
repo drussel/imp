@@ -2,14 +2,14 @@
  *  \file IMP/base/ConstVector.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_CONST_VECTOR_H
 #define IMPBASE_CONST_VECTOR_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "base_macros.h"
 #include "exception.h"
 #include "Value.h"

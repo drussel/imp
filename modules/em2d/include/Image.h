@@ -1,7 +1,7 @@
 /**
  *  \file em2d/Image.h
  *  \brief IMP images for Electron Microscopy using openCV matrices
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPEM2D_IMAGE_H
@@ -168,8 +168,8 @@ public:
   }
 
   //! Define the basic things needed by any Object
-//  IMP_OBJECT_INLINE(Image, show(out), {});
-  IMP_OBJECT_INLINE(Image, show(out), destroyed_msg());
+//  IMP_OBJECT_METHODS(Image)
+  IMP_OBJECT_METHODS(Image)
 
   void destroyed_msg() {
     IMP_LOG(TERSE, "Image destroyed " << this->name_ << std::endl);

@@ -2,14 +2,14 @@
  *  \file IMP/core/RigidBodyMover.h
  *  \brief A mover that transform a rigid body
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_RIGID_BODY_MOVER_H
 #define IMPCORE_RIGID_BODY_MOVER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "MonteCarlo.h"
 #include "Mover.h"
 #include "mover_macros.h"

@@ -2,14 +2,14 @@
  *  \file IMP/em/XplorReaderWriter.h
  *  \brief Classes to read or write density files in XPLOR format.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_XPLOR_READER_WRITER_H
 #define IMPEM_XPLOR_READER_WRITER_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "MapReaderWriter.h"
 #include "DensityHeader.h"
 #include "internal/XplorHeader.h"
@@ -31,7 +31,7 @@ protected:
   int read_map(std::ifstream &XPLORstream, float *data,
                internal::XplorHeader &header);
 #endif
-  IMP_OBJECT_INLINE(XplorReaderWriter, {out << "XplorReaderWriter";}, {});
+  IMP_OBJECT_METHODS(XplorReaderWriter)
 };
 
 IMPEM_END_NAMESPACE

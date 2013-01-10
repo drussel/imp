@@ -2,14 +2,14 @@
  *  \file IMP/base/Pointer.h
  *  \brief A nullptr-initialized pointer to an \imp Object.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_POINTER_H
 #define IMPBASE_POINTER_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "internal/PointerBase.h"
 #include "WeakPointer.h"
 

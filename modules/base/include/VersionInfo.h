@@ -1,14 +1,14 @@
 /**
  *  \file IMP/base/VersionInfo.h   \brief Version and authorship of IMP objects.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_VERSION_INFO_H
 #define IMPBASE_VERSION_INFO_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "exception.h"
 #include "comparison_macros.h"
 #include "check_macros.h"

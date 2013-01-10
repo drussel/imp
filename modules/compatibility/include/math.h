@@ -2,13 +2,13 @@
  *  \file IMP/compatibility/math.h
  *  \brief Declare an efficient stl-compatible map
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCOMPATIBILITY_COMPATIBILITY_MATH_H
 #define IMPCOMPATIBILITY_COMPATIBILITY_MATH_H
 
-#include "compatibility_config.h"
+#include <IMP/compatibility/compatibility_config.h>
 #include <boost/version.hpp>
 #include <cmath>
 #if !defined(_GLIBCXX_USE_C99_MATH)

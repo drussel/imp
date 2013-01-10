@@ -2,14 +2,14 @@
  *  \file IMP/domino/Subset.h
  *  \brief A beyesian infererence-based sampler.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDOMINO_SUBSET_H
 #define IMPDOMINO_SUBSET_H
 
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "IMP/macros.h"
 #include <IMP/container/ListSingletonContainer.h>
 #include <IMP/base/Pointer.h>

@@ -2,14 +2,14 @@
  *  \file atom/internal/bond_graph_functors.h
  *  \brief Contains decorators for a bond
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_INTERNAL_BOND_GRAPH_FUNCTORS_H
 #define IMPATOM_INTERNAL_BOND_GRAPH_FUNCTORS_H
 
-#include "../atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/container/ListSingletonContainer.h>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/properties.hpp>

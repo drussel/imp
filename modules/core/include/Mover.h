@@ -2,20 +2,19 @@
  *  \file IMP/core/Mover.h
  *  \brief The base class for movers for MC optimization.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_MOVER_H
 #define IMPCORE_MOVER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/base_types.h>
 #include <IMP/RefCounted.h>
 #include <IMP/WeakPointer.h>
 #include <IMP/ModelObject.h>
-#include <IMP/model_object_macros.h>
 #include <IMP/Optimizer.h>
 
 #include <vector>
@@ -62,7 +61,16 @@ public:
     if (c) set_was_used(true);
     opt_=c;
   }
-  IMP_MODEL_OBJECT(Mover);
+  virtual ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE {
+    return ModelObjectsTemp();
+  }
+  virtual ModelObjectsTemp do_get_outputs() const IMP_OVERRIDE {
+    return ModelObjectsTemp();
+  }
+  virtual void do_update_dependencies(const DependencyGraph &,
+                                      const DependencyGraphVertexIndex &)
+    IMP_OVERRIDE {
+  }
   IMP_REF_COUNTED_DESTRUCTOR(Mover);
 };
 

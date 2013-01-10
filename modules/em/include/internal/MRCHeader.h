@@ -2,14 +2,14 @@
  *  \file MRCHeader.h
  *  \brief Header information for an MRC file.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_INTERNAL_MRC_HEADER_H
 #define IMPEM_INTERNAL_MRC_HEADER_H
 
-#include "../em_config.h"
+#include <IMP/em/em_config.h>
 #include "../DensityHeader.h"
 
 IMPEM_BEGIN_INTERNAL_NAMESPACE

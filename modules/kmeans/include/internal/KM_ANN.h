@@ -2,7 +2,7 @@
  *  \file KM_ANN.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:           KM_ANN.h
 //      Programmer:     David Mount
@@ -35,7 +35,7 @@
 //----------------------------------------------------------------------
 //  basic includes
 //----------------------------------------------------------------------
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include <cstdlib>                      // standard libs and definitions
 #include <fstream>                      // file I/O streams
 #include <iomanip>                      // I/O manipulators (for setw)

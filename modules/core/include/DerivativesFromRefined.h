@@ -2,13 +2,13 @@
  *  \file IMP/core/DerivativesFromRefined.h
  *  \brief Accumulate the derivatives of the refined particles
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_DERIVATIVES_FROM_REFINED_H
 #define IMPCORE_DERIVATIVES_FROM_REFINED_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include "XYZ.h"
 #include <IMP/Refiner.h>

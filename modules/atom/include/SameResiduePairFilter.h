@@ -2,13 +2,13 @@
  *  \file IMP/atom/SameResiduePairFilter.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_SAME_RESIDUE_PAIR_FILTER_H
 #define IMPATOM_SAME_RESIDUE_PAIR_FILTER_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/pair_macros.h>
 

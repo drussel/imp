@@ -2,14 +2,14 @@
  *  \file IMP/atom/CHARMMAtom.h
  *  \brief A decorator for an atom that has a defined CHARMM type.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_CHARMM_ATOM_H
 #define IMPATOM_CHARMM_ATOM_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 #include "Atom.h"
 #include "Hierarchy.h"

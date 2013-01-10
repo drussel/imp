@@ -3,7 +3,7 @@
  *  \brief Get directories used by IMP.
  *  \note @AUTOGEN@
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -215,6 +215,15 @@ std::string get_example_path(std::string module, std::string file_name)
   return path;
 }
 
+
+std::string get_file_name(std::string path) {
+#if BOOST_FILESYSTEM_VERSION == 3
+  return boost::filesystem::path(path).filename().string();
+#else
+  return boost::filesystem::path(path).filename();
+#endif
+
+}
 
 
 IMPBASE_END_INTERNAL_NAMESPACE

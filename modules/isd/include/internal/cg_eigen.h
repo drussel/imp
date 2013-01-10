@@ -1,12 +1,12 @@
 /** testing of the Eigen CG. tests return true when they succeed.
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_INTERNAL_CG_EIGEN_H
 #define IMPISD_INTERNAL_CG_EIGEN_H
 
-#include "../isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/macros.h>
 #include <IMP/Model.h>
 #include <Eigen/Dense>

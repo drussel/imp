@@ -2,7 +2,7 @@
  *  \file KMLocalSearchLloyd.h
  *  \brief Lloyd's algorithm with random restarts
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,7 +10,7 @@
 #define IMPSTATISTICS_INTERNAL_KM_LOCAL_SEARCH_LLOYD_H
 
 #include "KMLocalSearch.h"
-#include "../statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "IMP/base_types.h"
 
 IMPSTATISTICS_BEGIN_INTERNAL_NAMESPACE

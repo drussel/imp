@@ -1,14 +1,14 @@
 /**
  *  \file IMP/atom/angle_decorators.h     \brief Decorators for angles
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_ANGLE_DECORATORS_H
 #define IMPATOM_ANGLE_DECORATORS_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/Decorator.h>
 

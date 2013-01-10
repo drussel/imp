@@ -2,13 +2,13 @@
  *  \file IMP/gsl/QuasiNewton.h
  *  \brief A GSL-based Quasi-Newton optimizer
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPGSL_QUASI_NEWTON_H
 #define IMPGSL_QUASI_NEWTON_H
 
-#include "gsl_config.h"
+#include <IMP/gsl/gsl_config.h>
 
 #include "GSLOptimizer.h"
 

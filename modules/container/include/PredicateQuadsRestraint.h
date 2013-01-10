@@ -6,14 +6,14 @@
  *  in tools/maintenance/container_templates/container
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCONTAINER_PREDICATE_QUADS_RESTRAINT_H
 #define IMPCONTAINER_PREDICATE_QUADS_RESTRAINT_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 
 #include <IMP/internal/InternalDynamicListQuadContainer.h>
 #include <IMP/compatibility/map.h>
@@ -110,7 +110,11 @@ public:
       ->get_indexes();
   }
 
-  IMP_RESTRAINT_ACCUMULATOR(PredicateQuadsRestraint);
+  public:
+  void do_add_score_and_derivatives(IMP::ScoreAccumulator sa)
+    const IMP_OVERRIDE;
+  IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(PredicateQuadsRestraint);;
 private:
   Restraints do_create_current_decomposition() const;
 };

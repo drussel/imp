@@ -2,7 +2,7 @@
  *  \file KMfilterCenters.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:           KMfilterCenters.h
 //      Programmer:     David Mount
@@ -27,7 +27,7 @@
 #ifndef IMPKMEANS_INTERNAL_KMFILTER_CENTERS_H
 #define IMPKMEANS_INTERNAL_KMFILTER_CENTERS_H
 
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include "KMcenters.h"                  // provides KMcenters
 
 IMPKMEANS_BEGIN_INTERNAL_NAMESPACE

@@ -1,12 +1,12 @@
 /**
  *  \file cgal_predicates.h
  *  \brief predicates implemented using CGAL
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPALGEBRA_INTERNAL_VECTOR_GENERATORS_H
 #define IMPALGEBRA_INTERNAL_VECTOR_GENERATORS_H
-#include "../algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include <IMP/base_types.h>
 #include "../VectorD.h"
 #include "../SphereD.h"

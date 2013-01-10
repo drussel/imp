@@ -1,14 +1,14 @@
 /**
  *  \file IMP/core/MoverBase.h    \brief A class to help implement movers.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_MOVER_BASE_H
 #define IMPCORE_MOVER_BASE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "Mover.h"
 
 #include <IMP/internal/container_helpers.h>

@@ -2,14 +2,14 @@
  *  \file IMP/base/check_macros.h
  *  \brief Exception definitions and assertions.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_CHECK_MACROS_H
 #define IMPBASE_CHECK_MACROS_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "exception.h"
 #include <iostream>
 #include <cmath>

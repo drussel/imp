@@ -2,14 +2,14 @@
  *  \file internal/swig_helpers.h
  *  \brief Functions for use in swig wrappers
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPBASE_INTERNAL_SWIG_HELPERS_H
 #define IMPBASE_INTERNAL_SWIG_HELPERS_H
 
 // Python.h must be included first
-#include "../base_config.h"
+#include <IMP/base/base_config.h>
 #include "../base_macros.h"
 #include "../Object.h"
 #include "../types.h"

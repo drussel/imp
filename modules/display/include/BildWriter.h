@@ -2,13 +2,13 @@
  *  \file IMP/display/BildWriter.h
  *  \brief Writer for the Chimera BILD file format.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_BILD_WRITER_H
 #define IMPDISPLAY_BILD_WRITER_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 #include "writer_macros.h"
 
 #include <IMP/PairContainer.h>

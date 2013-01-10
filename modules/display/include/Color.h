@@ -2,13 +2,13 @@
  *  \file IMP/display/Color.h
  *  \brief Represent a color
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_COLOR_H
 #define IMPDISPLAY_COLOR_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 #include <IMP/base/Value.h>
 #include <IMP/base/showable_macros.h>
 #include <IMP/base/comparison_macros.h>

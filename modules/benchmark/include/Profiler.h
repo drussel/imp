@@ -2,14 +2,14 @@
  *  \file IMP/benchmark/Profiler.h
  *  \brief Various utilities for benchmarking
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBENCHMARK_PROFILER_H
 #define IMPBENCHMARK_PROFILER_H
 
-#include "benchmark_config.h"
+#include <IMP/benchmark/benchmark_config.h>
 #include <IMP/base/raii_macros.h>
 #include <string>
 

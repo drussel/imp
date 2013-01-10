@@ -2,14 +2,14 @@
  *  \file IMP/core/DataObject.h
  *  \brief A modifier which variables within a ball.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_DATA_OBJECT_H
 #define IMPCORE_DATA_OBJECT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/Object.h>
 
 IMPCORE_BEGIN_NAMESPACE

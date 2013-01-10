@@ -4,14 +4,14 @@
  *
  *  BLURB
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCONTAINER_PREDICATE_HEADERNAMES_RESTRAINT_H
 #define IMPCONTAINER_PREDICATE_HEADERNAMES_RESTRAINT_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 
 #include <IMP/internal/InternalDynamicListCLASSNAMEContainer.h>
 #include <IMP/compatibility/map.h>
@@ -108,7 +108,11 @@ public:
       ->get_indexes();
   }
 
-  IMP_RESTRAINT_ACCUMULATOR(PredicateCLASSNAMEsRestraint);
+  public:
+  void do_add_score_and_derivatives(IMP::ScoreAccumulator sa)
+    const IMP_OVERRIDE;
+  IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(PredicateCLASSNAMEsRestraint);;
 private:
   Restraints do_create_current_decomposition() const;
 };

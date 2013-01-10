@@ -1,11 +1,12 @@
 /**
  *  \file static.cpp   \brief all static data for module.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #include "IMP/base/internal/log_stream.h"
+#include <IMP/base/internal/static.h>
 IMPBASE_BEGIN_INTERNAL_NAMESPACE
 
 struct IndentFilter: public boost::iostreams::output_filter {

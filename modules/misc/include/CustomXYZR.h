@@ -2,14 +2,14 @@
  *  \file IMP/misc/CustomXYZR.h
  *  \brief Decorator for a sphere-like particle.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMISC_CUSTOM_XYZ_R_H
 #define IMPMISC_CUSTOM_XYZ_R_H
 
-#include "misc_config.h"
+#include <IMP/misc/misc_config.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/core/XYZR.h>
 #include <IMP/algebra/Sphere3D.h>

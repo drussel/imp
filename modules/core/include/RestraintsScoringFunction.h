@@ -3,14 +3,14 @@
  *  \brief Storage of a model, its restraints,
  *                         constraints and particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_RESTRAINTS_SCORING_FUNCTION_H
 #define IMPCORE_RESTRAINTS_SCORING_FUNCTION_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/ScoringFunction.h>
 #include <IMP/internal/RestraintsScoringFunction.h>
 

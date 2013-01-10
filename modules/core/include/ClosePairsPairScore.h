@@ -2,13 +2,13 @@
  *  \file IMP/core/ClosePairsPairScore.h
  *  \brief Apply a PairScore to close pairs.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_CLOSE_PAIRS_PAIR_SCORE_H
 #define IMPCORE_CLOSE_PAIRS_PAIR_SCORE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "XYZR.h"
 #include "RigidClosePairsFinder.h"
 

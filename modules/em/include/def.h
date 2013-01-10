@@ -2,14 +2,14 @@
  *  \file IMP/em/def.h
  *  \brief Definitions for EMBED.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_DEF_H
 #define IMPEM_DEF_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 
 IMPEM_BEGIN_NAMESPACE
 

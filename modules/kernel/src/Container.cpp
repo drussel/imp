@@ -1,7 +1,7 @@
 /**
  *  \file Restraint.cpp   \brief Abstract base class for all restraints.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -15,7 +15,7 @@
 IMP_BEGIN_NAMESPACE
 
 Container::Container(Model *m, std::string name):
-  Constraint(m, name) {
+  ScoreState(m, name) {
   IMP_USAGE_CHECK(m, "Must pass model to container constructor.");
   changed_=false;
 #if IMP_BUILD < IMP_FAST

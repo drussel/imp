@@ -2,7 +2,7 @@
  * \file RotamerLibrary.h
  * \brief Object representing rotamer library.
  *
- * Copyright 2007-2012 Sali Lab. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,7 +14,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <IMP/base/Object.h>
 #include <IMP/atom/Residue.h>
-#include "rotamer_config.h"
+#include <IMP/rotamer/rotamer_config.h>
 
 IMPROTAMER_BEGIN_NAMESPACE
 
@@ -145,7 +145,7 @@ public:
   /** \param[in] lib_file_name file name */
   void read_library_file(const std::string &lib_file_name);
 
-  IMP_OBJECT_INLINE(RotamerLibrary, IMP_UNUSED(out),);
+  IMP_OBJECT_METHODS(RotamerLibrary)
 
 private:
   unsigned backbone_angle_to_index(float phi, float psi) const;

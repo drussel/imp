@@ -2,7 +2,7 @@
  *  \file proteomics_em_alignment_atomic.h
  *  \brief align proteomics graph to em density map
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -19,7 +19,7 @@
 #include "protein_anchors_mapping_reader.h"
 #include <IMP/domino/DominoSampler.h>
 #include <IMP/em/DensityMap.h>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
 
@@ -37,6 +37,7 @@ public:
   void align();
   void add_all_restraints();
   void add_states_and_filters();
+  void view_domino_merge_tree() const;
   domino::Assignments get_combinations(bool uniques=false) const;
   void set_density_map(em::DensityMap *dmap,float threshold) {
     dmap_=dmap;threshold_=threshold;

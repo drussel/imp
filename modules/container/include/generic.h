@@ -2,14 +2,14 @@
  *  \file IMP/container/generic.h    \brief Various important functionality
  *                                       for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCONTAINER_GENERIC_H
 #define IMPCONTAINER_GENERIC_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 #include <IMP/internal/ContainerRestraint.h>
 #include <IMP/internal/ContainerConstraint.h>
 #include "InContainerPairFilter.h"

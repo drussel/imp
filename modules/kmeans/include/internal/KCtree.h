@@ -2,7 +2,7 @@
  *  \file KCtree.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:            KCtree.h
 //      Programmer:      David Mount
@@ -27,7 +27,7 @@
 #ifndef IMPKMEANS_INTERNAL_KCTREE_H
 #define IMPKMEANS_INTERNAL_KCTREE_H
 
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include "KMeans.h"                        // all k-means includes
 #include "KCutil.h"                        // kc-tree utilities
 

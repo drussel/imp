@@ -2,7 +2,7 @@
  *  \file IMP/em/rigid_fitting.h
  *  \brief preforms rigid fitting between a set of particles and a density map
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPEM_RIGID_FITTING_H
@@ -17,7 +17,7 @@
 #include <IMP/Model.h>
 #include "DensityMap.h"
 #include "FitRestraint.h"
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include <IMP/OptimizerState.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/ScoreState.h>

@@ -2,7 +2,7 @@
  *  \file BondPairContainer.cpp
  *  \brief A fake container that returns true if a pair of particles are bonded
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -59,13 +59,6 @@ ParticleIndexPairs BondPairContainer::get_range_indexes() const {
   return ret;
 }
 
-
-ParticlesTemp BondPairContainer::get_input_particles() const {
-  return ParticlesTemp();
-}
-ContainersTemp BondPairContainer::get_input_containers() const {
-  return ContainersTemp(1, sc_);
-}
 void BondPairContainer::do_before_evaluate() {
   set_is_changed(sc_->get_is_changed());
 }

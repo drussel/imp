@@ -5,7 +5,7 @@
  *  Restrict max distance between at least one pair of particles of any
  *  two distinct types. It also handles multiple copies of the same particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,7 +14,7 @@
 
 #include <vector>
 #include <string>
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "DistanceRestraint.h"
 
 #include <IMP/SingletonContainer.h>

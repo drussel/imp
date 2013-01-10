@@ -1,13 +1,13 @@
 /**
  * \file IMP/saxs/FitParameters.h \brief
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSAXS_FIT_PARAMETERS_H
 #define IMPSAXS_FIT_PARAMETERS_H
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 #include <iostream>
 
 IMPSAXS_BEGIN_NAMESPACE

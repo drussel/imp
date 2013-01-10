@@ -2,13 +2,13 @@
  *  \file IMP/core/TypedPairScore.h
  *  \brief Delegate to another PairScore depending on particle types.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_TYPED_PAIR_SCORE_H
 #define IMPCORE_TYPED_PAIR_SCORE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/PairScore.h>
 #include <IMP/pair_macros.h>
 

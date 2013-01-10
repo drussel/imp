@@ -2,13 +2,13 @@
  *  \file IMP/atom/DihedralSingletonScore.h
  *  \brief A score on a dihedral angle.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_DIHEDRAL_SINGLETON_SCORE_H
 #define IMPATOM_DIHEDRAL_SINGLETON_SCORE_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/singleton_macros.h>
 

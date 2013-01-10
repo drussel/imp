@@ -2,14 +2,14 @@
  *  \file IMP/example/ExampleUnaryFunction.h
  *  \brief A simple unary function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_UNARY_FUNCTION_H
 #define IMPEXAMPLE_EXAMPLE_UNARY_FUNCTION_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/UnaryFunction.h>
 #include <IMP/utility.h>
 

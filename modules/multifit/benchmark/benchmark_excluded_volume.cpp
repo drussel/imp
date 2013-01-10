@@ -1,5 +1,5 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #include <IMP/core/ExcludedVolumeRestraint.h>
@@ -8,7 +8,7 @@
 #include <IMP/Model.h>
 #include <IMP/benchmark/utility.h>
 #include <IMP/benchmark/benchmark_macros.h>
-#include <IMP/benchmark/command_line_macros.h>
+#include <IMP/base/flags.h>
 #include <IMP/atom/pdb.h>
 #include <IMP/algebra/vector_generators.h>
 #include <IMP/core/TableRefiner.h>
@@ -212,7 +212,7 @@ void do_it() {
 }
 
 int main(int argc, char *argv[]) {
-  IMP_BENCHMARK()
+  IMP::base::setup_from_argv(argc, argv, 0);
   IMP_CATCH_AND_TERMINATE(do_it(););
   return IMP::benchmark::get_return_value();
 }

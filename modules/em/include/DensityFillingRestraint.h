@@ -2,14 +2,14 @@
  *  \file IMP/em/DensityFillingRestraint.h
  *  \brief Score how well the particles fill the density
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_DENSITY_FILLING_RESTRAINT_H
 #define IMPEM_DENSITY_FILLING_RESTRAINT_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "DensityMap.h"
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/Atom.h>

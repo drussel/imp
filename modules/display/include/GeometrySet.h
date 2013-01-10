@@ -2,13 +2,13 @@
  *  \file IMP/display/GeometrySet.h
  *  \brief Implement geometry for the basic shapes from IMP.algebra.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_GEOMETRY_SET_H
 #define IMPDISPLAY_GEOMETRY_SET_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 #include "declare_Geometry.h"
 #include "geometry_macros.h"
 

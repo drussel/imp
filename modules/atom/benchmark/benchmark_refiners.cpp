@@ -1,5 +1,5 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 #include <IMP.h>
 #include <IMP/core.h>
@@ -40,7 +40,8 @@ void do_benchmark(std::string name, Model *,
 }
 }
 
-int main(int , char **) {
+int main(int argc, char **argv) {
+  IMP::base::setup_from_argv(argc, argv, 0);
   IMP_NEW(Model, m, ());
   IMP_NEW(LeavesRefiner, lr, (atom::Hierarchy::get_traits()));
   lr->set_was_used(true);

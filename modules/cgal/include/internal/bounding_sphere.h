@@ -1,13 +1,13 @@
 /**
  *  \file bounding_sphere.h   \brief Simple 3D sphere class.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCGAL_INTERNAL_BOUNDING_SPHERE_H
 #define IMPCGAL_INTERNAL_BOUNDING_SPHERE_H
-#include "../cgal_config.h"
+#include <IMP/cgal/cgal_config.h>
 #include <IMP/algebra/SphereD.h>
 #include <vector>
 IMPCGAL_BEGIN_INTERNAL_NAMESPACE

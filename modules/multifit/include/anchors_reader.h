@@ -2,7 +2,7 @@
  *  \file IMP/multifit/anchors_reader.h
  *  \brief handles reading of anchors data
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -13,7 +13,7 @@
 #include <IMP/Model.h>
 #include <IMP/core/Hierarchy.h>
 #include <IMP/file.h>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "DataPointsAssignment.h"
 IMPMULTIFIT_BEGIN_NAMESPACE
 

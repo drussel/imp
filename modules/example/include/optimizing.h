@@ -2,14 +2,14 @@
  *  \file IMP/example/optimizing.h
  *  \brief A simple unary function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_OPTIMIZING_H
 #define IMPEXAMPLE_OPTIMIZING_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/log.h>
 #include <IMP/base_types.h>
 #include <IMP/base/enums.h>

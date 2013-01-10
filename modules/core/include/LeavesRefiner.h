@@ -2,13 +2,13 @@
  *  \file IMP/core/LeavesRefiner.h
  *  \brief Return the hierarchy children of a particle.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_LEAVES_REFINER_H
 #define IMPCORE_LEAVES_REFINER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "Hierarchy.h"
 
 #include <IMP/Refiner.h>

@@ -2,14 +2,14 @@
  *  \file IMP/core/blame.h    \brief Various important functionality
  *                                       for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_BLAME_H
 #define IMPCORE_BLAME_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/display/declare_Geometry.h>
 #include <IMP/constants.h>
 #include <IMP/base_types.h>

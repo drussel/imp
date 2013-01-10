@@ -2,13 +2,13 @@
  *  \file IMP/core/DistanceToSingletonScore.h
  *  \brief A Score on the distance to a fixed point.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_DISTANCE_TO_SINGLETON_SCORE_H
 #define IMPCORE_DISTANCE_TO_SINGLETON_SCORE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "XYZ.h"
 #include "internal/evaluate_distance_pair_score.h"
 #include <IMP/generic.h>

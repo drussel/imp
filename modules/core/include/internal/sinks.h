@@ -2,13 +2,13 @@
  *  \file rigid_pair_score.h
  *  \brief utilities for rigid pair scores.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_INTERNAL_SINKS_H
 #define IMPCORE_INTERNAL_SINKS_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 #include "IMP/Particle.h"
 #include "IMP/PairPredicate.h"
 #include "rigid_body_tree.h"

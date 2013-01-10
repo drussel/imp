@@ -2,7 +2,7 @@
  *  \file KCutil.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:            KCutil.h
 //      Programmer:      David Mount
@@ -27,7 +27,7 @@
 #ifndef IMPKMEANS_INTERNAL_KCUTIL_H
 #define IMPKMEANS_INTERNAL_KCUTIL_H
 
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include "KCtree.h"                  // kc-tree declarations
 
 IMPKMEANS_BEGIN_INTERNAL_NAMESPACE

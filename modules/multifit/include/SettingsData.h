@@ -2,13 +2,13 @@
  *  \file IMP/multifit/SettingsData.h
  *  \brief stored multifit settings data
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_SETTINGS_DATA_H
 #define IMPMULTIFIT_SETTINGS_DATA_H
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/base_types.h>
 #include <IMP/container_macros.h>
 #include <IMP/Pointer.h>

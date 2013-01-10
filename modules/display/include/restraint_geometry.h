@@ -2,13 +2,13 @@
  *  \file IMP/display/restraint_geometry.h
  *  \brief Represent an XYZR restraint with a sphere
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_RESTRAINT_GEOMETRY_H
 #define IMPDISPLAY_RESTRAINT_GEOMETRY_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 #include "geometry_macros.h"
 #include "Colored.h"
 #include "declare_Geometry.h"

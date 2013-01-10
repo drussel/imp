@@ -2,14 +2,14 @@
  *  \file hierarchy_helpers.h
  *  \brief Helpers for the Hierarchy.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_INTERNAL_HIERARCHY_HELPERS_H
 #define IMPCORE_INTERNAL_HIERARCHY_HELPERS_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/base_types.h>
 #include <IMP/Particle.h>

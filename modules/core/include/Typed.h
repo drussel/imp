@@ -1,14 +1,14 @@
 /**
  *  \file IMP/core/Typed.h     \brief A particle with a user-defined type.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_TYPED_H
 #define IMPCORE_TYPED_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "../macros.h"
 
 #include <IMP/Decorator.h>

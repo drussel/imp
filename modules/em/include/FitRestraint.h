@@ -2,14 +2,14 @@
  *  \file IMP/em/FitRestraint.h
  *  \brief Calculate score based on fit to EM map.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_FIT_RESTRAINT_H
 #define IMPEM_FIT_RESTRAINT_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "DensityMap.h"
 #include "CoarseCC.h"
 #include "SampledDensityMap.h"

@@ -1,13 +1,13 @@
 /**
  *  \file IMP/isd/FNormal.h    \brief Normal distribution of Function
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_FNORMAL_H
 #define IMPISD_FNORMAL_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/macros.h>
 #include <IMP/Model.h>
 #include <IMP/constants.h>

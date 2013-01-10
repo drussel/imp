@@ -2,14 +2,14 @@
  *  \file IMP/em/SampledDensityMap.h
  *  \brief Sampled density map.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_SAMPLED_DENSITY_MAP_H
 #define IMPEM_SAMPLED_DENSITY_MAP_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "exp.h"
 #include "DensityMap.h"
 #include "DensityHeader.h"

@@ -2,7 +2,7 @@
  *  \file sampling_space_utils.h
  *  \brief setting up tools
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,8 +11,8 @@
 
 #include <IMP/multifit/DataContainer.h>
 #include <IMP/domino1/TransformationCartesianProductSampler.h>
-#include "multifit_config.h"
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/domino1/TransformationCartesianProductSampler.h>
 
 IMPMULTIFIT_BEGIN_NAMESPACE

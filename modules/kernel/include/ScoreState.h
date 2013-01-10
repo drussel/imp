@@ -1,7 +1,7 @@
 /**
  *  \file IMP/ScoreState.h   \brief Shared score state.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,7 +14,6 @@
 #include "utility.h"
 #include "ModelObject.h"
 #include "base_types.h"
-#include "model_object_macros.h"
 #include <IMP/base/check_macros.h>
 #include <IMP/base/deprecation_macros.h>
 #include <IMP/base/ref_counted_macros.h>
@@ -53,8 +52,6 @@ IMP_BEGIN_NAMESPACE
     functions. As a result, the ScoreStates are applied in opposite order
     after evaluate. If you have a ScoreState for which this is not true,
     consider splitting it into two parts.
-
-    \implementationwithoutexample{ScoreState, IMP_SCORE_STATE}
  */
 class IMPEXPORT ScoreState : public ModelObject
 {
@@ -100,9 +97,9 @@ public:
   /** \deprecated use get_outputs() instead.*/
   IMP_DEPRECATED_WARN ContainersTemp get_output_containers() const;
 #endif
-  IMP_IMPLEMENT_INLINE(
-  void do_update_dependencies(const DependencyGraph &,
-                              const DependencyGraphVertexIndex &), {});
+  virtual void do_update_dependencies(const DependencyGraph &,
+                                      const DependencyGraphVertexIndex &)
+    IMP_OVERRIDE {}
  private:
 
 #if !defined(IMP_DOXYGEN) && !defined(SWIG)

@@ -2,14 +2,14 @@
  *  \file IMP/base/deprecation.h
  *  \brief Control display of deprecation information.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_DEPRECATION_H
 #define IMPBASE_DEPRECATION_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "internal/deprecation.h"
 
 IMPBASE_BEGIN_NAMESPACE

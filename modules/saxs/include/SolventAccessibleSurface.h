@@ -1,14 +1,14 @@
 /**
  * \file IMP/saxs/SolventAccessibleSurface.h \brief
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSAXS_SOLVENT_ACCESSIBLE_SURFACE_H
 #define IMPSAXS_SOLVENT_ACCESSIBLE_SURFACE_H
 
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 #include <IMP/core/XYZR.h>
 
 IMPSAXS_BEGIN_NAMESPACE

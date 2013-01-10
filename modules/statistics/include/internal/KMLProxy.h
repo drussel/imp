@@ -1,14 +1,14 @@
 /**
  *  \file KMLProxy.h   \brief proxy to k-means
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_INTERNAL_KML_PROXY_H
 #define IMPSTATISTICS_INTERNAL_KML_PROXY_H
 
-#include "../statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "KMTerminationCondition.h"
 #include "KMData.h"
 #include "KMFilterCenters.h"

@@ -2,13 +2,13 @@
  *  \file IMP/core/CoverRefined.h
  *  \brief Cover a bond with a sphere.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_COVER_REFINED_H
 #define IMPCORE_COVER_REFINED_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include "XYZR.h"
 #include <IMP/Refiner.h>

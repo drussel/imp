@@ -2,14 +2,14 @@
  *  \file directories.h
  *  \brief Get directories used by IMP.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_INTERNAL_DIRECTORIES_H
 #define IMPBASE_INTERNAL_DIRECTORIES_H
 
-#include "../base_config.h"
+#include <IMP/base/base_config.h>
 #include <string>
 
 IMPBASE_BEGIN_INTERNAL_NAMESPACE
@@ -35,6 +35,8 @@ IMPBASEEXPORT std::string get_example_path(std::string module_name,
     requires boost file system.
  */
 IMPBASEEXPORT void set_backup_data_path(std::string path) ;
+
+IMPBASEEXPORT std::string get_file_name(std::string path);
 
 IMPBASE_END_INTERNAL_NAMESPACE
 

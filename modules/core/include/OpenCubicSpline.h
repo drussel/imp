@@ -1,13 +1,13 @@
 /**
  *  \file IMP/core/OpenCubicSpline.h    \brief Open cubic spline function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_OPEN_CUBIC_SPLINE_H
 #define IMPCORE_OPEN_CUBIC_SPLINE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/UnaryFunction.h>
 #include <IMP/unary_function_macros.h>
 #include "internal/evaluate_distance_pair_score.h"

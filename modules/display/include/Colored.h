@@ -2,13 +2,13 @@
  *  \file IMP/display/Colored.h
  *  \brief A decorator for a particle with a color
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_COLORED_H
 #define IMPDISPLAY_COLORED_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 
 #include "Color.h"
 #include <IMP/Decorator.h>

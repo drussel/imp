@@ -2,13 +2,13 @@
  *  \file IMP/isd/GaussianProcessInterpolationRestraint.h
  *  \brief Restraint and ScoreState for GaussianProcessInterpolation
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_GAUSSIAN_PROCESS_INTERPOLATION_RESTRAINT_H
 #define IMPISD_GAUSSIAN_PROCESS_INTERPOLATION_RESTRAINT_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/macros.h>
 #include <boost/scoped_ptr.hpp>
 #include <IMP/isd/ISDRestraint.h>
@@ -82,7 +82,11 @@ class IMPISDEXPORT GaussianProcessInterpolationRestraint : public ISDRestraint
         //call this one from python
         FloatsList get_hessian(bool unused) const;
 
-        IMP_RESTRAINT_2(GaussianProcessInterpolationRestraint);
+        public:
+   double unprotected_evaluate(IMP::DerivativeAccumulator *accum)
+                 const IMP_OVERRIDE;
+   IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+   IMP_OBJECT_METHODS(GaussianProcessInterpolationRestraint);;
 
         //needed to register the score state
         void set_model(Model *m);

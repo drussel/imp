@@ -2,14 +2,14 @@
  *  \file charmm_helpers.h
  *  \brief Helpers for the CHARMM forcefield support.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_INTERNAL_CHARMM_HELPERS_H
 #define IMPATOM_INTERNAL_CHARMM_HELPERS_H
 
-#include "../atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 #include <IMP/base_types.h>
 #include <IMP/Particle.h>

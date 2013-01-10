@@ -2,13 +2,13 @@
  *  \file IMP/gsl/GSLOptimizer.h
  *  \brief A base class for GSL-based optimizers
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPGSL_GSL_OPTIMIZER_H
 #define IMPGSL_GSL_OPTIMIZER_H
 
-#include "gsl_config.h"
+#include <IMP/gsl/gsl_config.h>
 
 #include <IMP/Optimizer.h>
 #include <IMP/optimizer_macros.h>

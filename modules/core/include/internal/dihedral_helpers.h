@@ -2,13 +2,13 @@
  *  \file dihedral_helpers.h
  *  \brief Helper functions to calculate dihedral angles
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_DIHEDRAL_HELPERS_H
 #define IMPCORE_DIHEDRAL_HELPERS_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/algebra/Vector3D.h>
 #include <cmath>
 

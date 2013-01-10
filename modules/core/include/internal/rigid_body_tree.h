@@ -2,13 +2,13 @@
  *  \file rigid_pair_score.h
  *  \brief utilities for rigid pair scores.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_INTERNAL_RIGID_BODY_TREE_H
 #define IMPCORE_INTERNAL_RIGID_BODY_TREE_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 #include "../XYZ.h"
 #include "../rigid_bodies.h"
 #include <IMP/algebra/Sphere3D.h>

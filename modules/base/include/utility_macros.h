@@ -2,13 +2,13 @@
  *  \file IMP/base/utility_macros.h
  *  \brief Various general useful macros for IMP.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_UTILITY_MACROS_H
 #define IMPBASE_UTILITY_MACROS_H
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 
 //! Use a copy_from method to create a copy constructor and operator=
 /** This macro is there to aid with classes which require a custom

@@ -2,14 +2,14 @@
  *  \file IMP/atom/Diffusion.h
  *  \brief A decorator for a diffusing particle.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_DIFFUSION_H
 #define IMPATOM_DIFFUSION_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 #include <IMP/core/XYZR.h>
 #include <IMP/algebra/Vector3D.h>

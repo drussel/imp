@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/Plane3D.h   \brief Simple 3D plane class.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_PLANE_3D_H
 #define IMPALGEBRA_PLANE_3D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "Vector3D.h"
 #include "BoundingBoxD.h"
 #include "GeometricPrimitiveD.h"

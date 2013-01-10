@@ -2,14 +2,14 @@
  *  \file IMP/atom/python_only.h
  *  \brief functionality only availble in python.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_PYTHON_ONLY_H
 #define IMPATOM_PYTHON_ONLY_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 IMPATOM_BEGIN_NAMESPACE
 

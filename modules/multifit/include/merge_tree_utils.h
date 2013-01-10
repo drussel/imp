@@ -1,7 +1,7 @@
 /**
  *  \file merge_tree_utils.h
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPMULTIFIT_MERGE_TREE_UTILS_H
@@ -11,7 +11,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/graph/graph_utility.hpp>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/compatibility/map.h>
 #include <boost/graph/kruskal_min_spanning_tree.hpp>

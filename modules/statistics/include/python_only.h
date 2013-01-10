@@ -1,13 +1,13 @@
 /**
  * \file IMP/statistics/python_only.h \brief Python-only functionality
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_PYTHON_ONLY_H
 #define IMPSTATISTICS_PYTHON_ONLY_H
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 IMPSTATISTICS_BEGIN_NAMESPACE
 
 

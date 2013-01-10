@@ -1,14 +1,14 @@
 /**
  *  \file IMP/core/XYZ.h     \brief Simple xyz decorator.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_XY_Z_H
 #define IMPCORE_XY_Z_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "../macros.h"
 #include "internal/dihedral_helpers.h"
 #include "internal/angle_helpers.h"

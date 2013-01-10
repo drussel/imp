@@ -2,13 +2,13 @@
  *  \file ExcludedPair.h
  *  \brief A pair of Particles, used for exclusions.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_INTERNAL_EXCLUDED_PAIR_H
 #define IMPATOM_INTERNAL_EXCLUDED_PAIR_H
 
-#include "../atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/Particle.h>
 
 IMPATOM_BEGIN_INTERNAL_NAMESPACE

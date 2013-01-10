@@ -2,14 +2,14 @@
  *  \file IMP/em/SurfaceShellDensityMap.h
  *  \brief Represent a molecule as shells of distance from the surface
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_SURFACE_SHELL_DENSITY_MAP_H
 #define IMPEM_SURFACE_SHELL_DENSITY_MAP_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "exp.h"
 #include "SampledDensityMap.h"
 #include "DensityHeader.h"

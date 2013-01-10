@@ -2,13 +2,13 @@
  *  \file IMP/misc/StateAdaptor.h
  *  \brief XXXXXXXXXXXXXX
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPMISC_STATE_ADAPTOR_H
 #define IMPMISC_STATE_ADAPTOR_H
 
-#include "misc_config.h"
+#include <IMP/misc/misc_config.h>
 
 #include <IMP/OptimizerState.h>
 #include <IMP/ScoreState.h>

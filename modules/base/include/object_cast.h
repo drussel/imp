@@ -2,14 +2,14 @@
  *  \file IMP/base/object_cast.h
  *  \brief A shared base class to help in debugging and things.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_OBJECT_CAST_H
 #define IMPBASE_OBJECT_CAST_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "check_macros.h"
 
 

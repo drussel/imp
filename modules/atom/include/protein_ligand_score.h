@@ -2,14 +2,14 @@
  *  \file IMP/atom/protein_ligand_score.h
  *  \brief Functions to read mol2s
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_PROTEIN_LIGAND_SCORE_H
 #define IMPATOM_PROTEIN_LIGAND_SCORE_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Hierarchy.h"
 #include <IMP/core/StatisticalPairScore.h>
 #include <IMP/Model.h>

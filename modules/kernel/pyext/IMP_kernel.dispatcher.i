@@ -39,7 +39,7 @@ class CommandDispatcher(object):
             print self.short_help + " Use '%s help' for help." % self._progname
         else:
             command = sys.argv[1]
-            if command == 'help':
+            if command == 'help' or command == '--help':
                 if len(sys.argv) == 3:
                     self.show_command_help(sys.argv[2])
                 else:
@@ -66,7 +66,7 @@ class CommandDispatcher(object):
         return self.import_module().get_module_version()
 
     def show_version(self):
-        print self._get_version()
+        print self._progname + ' ' + self._get_version()
 
     def show_help(self):
         ver = self._get_version()

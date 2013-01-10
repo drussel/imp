@@ -1,14 +1,14 @@
 /**
  * \file IMP/saxs/ChiScore.h \brief Basic chi score implementation
  *
- * Copyright 2007-2010 Sali Lab. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSAXS_CHI_SCORE_H
 #define IMPSAXS_CHI_SCORE_H
 
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 #include "Profile.h"
 
 IMPSAXS_BEGIN_NAMESPACE

@@ -1,14 +1,14 @@
 /**
  *  \file IMP/core/MonteCarlo.h    \brief Simple Monte Carlo optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_MONTE_CARLO_H
 #define IMPCORE_MONTE_CARLO_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "Mover.h"
 #include "monte_carlo_macros.h"
 #include "IncrementalScoringFunction.h"

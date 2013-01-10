@@ -5,14 +5,14 @@
  * RadialDistributionFunction required for calculation of SAXS profile
  * DeltaDistributionFunction requires for chi-square derivatives
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSAXS_DISTRIBUTION_H
 #define IMPSAXS_DISTRIBUTION_H
 
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 #include "Profile.h"
 #include <IMP/Particle.h>
 

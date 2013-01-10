@@ -2,13 +2,13 @@
  *  \file IMP/score_functor/UnaryFunctionEvaluate.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPSCORE_FUNCTOR_UNARY_FUNCTION_EVALUATE_H
 #define IMPSCORE_FUNCTOR_UNARY_FUNCTION_EVALUATE_H
 
-#include "score_functor_config.h"
+#include <IMP/score_functor/score_functor_config.h>
 #include "Score.h"
 #include <IMP/UnaryFunction.h>
 #include <IMP/base/value_macros.h>

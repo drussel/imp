@@ -2,14 +2,14 @@
  *  \file IMP/em/CoarseConvolution.h
  *  \brief Convolutes two grids
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_COARSE_CONVOLUTION_H
 #define IMPEM_COARSE_CONVOLUTION_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "exp.h"
 #include "DensityMap.h"
 #include "SampledDensityMap.h"

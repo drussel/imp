@@ -2,14 +2,14 @@
  *  \file IMP/isd/AmbiguousRestraint.h
  *  \brief An implementation of the d-norm to make an ambiguous restraint.
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPISD_AMBIGUOUS_RESTRAINT_H
 #define IMPISD_AMBIGUOUS_RESTRAINT_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/isd/ISDRestraint.h>
 
 IMPISD_BEGIN_NAMESPACE

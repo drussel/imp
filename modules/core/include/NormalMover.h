@@ -2,14 +2,14 @@
  *  \file IMP/core/NormalMover.h
  *  \brief A modifier which perturbs a point with a normal distribution.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_NORMAL_MOVER_H
 #define IMPCORE_NORMAL_MOVER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "MoverBase.h"
 
 IMPCORE_BEGIN_NAMESPACE

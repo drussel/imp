@@ -2,14 +2,14 @@
  *  \file IMP/em/masking.h
  *  \brief masking tools
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_MASKING_H
 #define IMPEM_MASKING_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include <IMP/base_types.h>
 #include "DensityHeader.h"
 #include "KernelParameters.h"

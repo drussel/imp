@@ -2,14 +2,14 @@
  *  \file IMP/atom/Charged.h
  *  \brief A decorator for a point particle that has an electrostatic charge.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_CHARGED_H
 #define IMPATOM_CHARGED_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 #include <IMP/core/XYZ.h>
 #include <IMP/algebra/Vector3D.h>

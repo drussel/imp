@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/GeometricPrimitiveD.h    \brief Basic types used by IMP.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_GEOMETRIC_PRIMITIVE_D_H
 #define IMPALGEBRA_GEOMETRIC_PRIMITIVE_D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include <IMP/base/Vector.h>
 #include <IMP/base/utility_macros.h>
 

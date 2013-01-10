@@ -3,13 +3,13 @@
  *  \brief A singleton modifier which wraps an attribute into a
  *  given range.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_NUISANCE_RANGE_MODIFIER_H
 #define IMPISD_NUISANCE_RANGE_MODIFIER_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/SingletonModifier.h>
 #include <IMP/isd/Nuisance.h>
 #include <IMP/singleton_macros.h>

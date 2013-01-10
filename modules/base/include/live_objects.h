@@ -2,14 +2,14 @@
  *  \file IMP/base/live_objects.h
  *  \brief A shared base class to help in debugging and things.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_LIVE_OBJECTS_H
 #define IMPBASE_LIVE_OBJECTS_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "Object.h"
 #include "types.h"
 

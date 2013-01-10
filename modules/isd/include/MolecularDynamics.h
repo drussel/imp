@@ -2,14 +2,14 @@
  *  \file IMP/isd/MolecularDynamics.h
  *  \brief Simple molecular dynamics optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPISD_MOLECULAR_DYNAMICS_H
 #define IMPISD_MOLECULAR_DYNAMICS_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/Particle.h>
 #include <IMP/Optimizer.h>
 #include <IMP/atom/MolecularDynamics.h>

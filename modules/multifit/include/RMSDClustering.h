@@ -2,14 +2,14 @@
  *  \file IMP/multifit/RMSDClustering.h
  *  \brief Cluster transformations by rmsd
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_RMSD_CLUSTERING_H
 #define IMPMULTIFIT_RMSD_CLUSTERING_H
 
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "GeometricHash.h"
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/algebra/Transformation3D.h>

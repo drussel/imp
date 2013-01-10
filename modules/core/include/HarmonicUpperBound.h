@@ -1,13 +1,13 @@
 /**
  *  \file IMP/core/HarmonicUpperBound.h    \brief Harmonic upper bound function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_HARMONIC_UPPER_BOUND_H
 #define IMPCORE_HARMONIC_UPPER_BOUND_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "Harmonic.h"
 
 IMPCORE_BEGIN_NAMESPACE

@@ -2,14 +2,14 @@
  *  \file IMP/statistics/RecursivePartitionalClusteringMetric.h
  *  \brief Cluster sets of points.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_RECURSIVE_PARTITIONAL_CLUSTERING_METRIC_H
 #define IMPSTATISTICS_RECURSIVE_PARTITIONAL_CLUSTERING_METRIC_H
 
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "metric_macros.h"
 #include "Metric.h"
 #include "PartitionalClustering.h"

@@ -2,14 +2,14 @@
  *  \file IMP/em/MRCReaderWriter.h
  *  \brief Classes to read or write MRC files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_MRC_READER_WRITER_H
 #define IMPEM_MRC_READER_WRITER_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "MapReaderWriter.h"
 #include "internal/MRCHeader.h"
 #include <string>
@@ -92,7 +92,7 @@ private:
   //! that the order of indexes is z,y,x
   float *grid;
 
-  IMP_OBJECT_INLINE(MRCReaderWriter, {out << "MRCReaderWriter";}, {});
+  IMP_OBJECT_METHODS(MRCReaderWriter)
 };
 
 IMPEM_END_NAMESPACE

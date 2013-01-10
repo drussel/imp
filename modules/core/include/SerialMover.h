@@ -2,14 +2,14 @@
  *  \file IMP/core/SerialMover.h
  *  \brief  A mover that apply other movers one at a time
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_SERIAL_MOVER_H
 #define IMPCORE_SERIAL_MOVER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "MonteCarlo.h"
 #include "Mover.h"
 #include "mover_macros.h"

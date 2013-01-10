@@ -2,13 +2,13 @@
  *  \file IMP/misc/LogPairScore.h
  *  \brief Track the particles pairs passed to the pair score.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPMISC_LOG_PAIR_SCORE_H
 #define IMPMISC_LOG_PAIR_SCORE_H
 
-#include "misc_config.h"
+#include <IMP/misc/misc_config.h>
 #include <IMP/PairScore.h>
 #include <IMP/generic.h>
 #include <IMP/compatibility/map.h>

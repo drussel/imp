@@ -4,13 +4,13 @@
  *
  *  BLURB
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCONTAINER_MINIMUM_HEADERNAME_RESTRAINT_H
 #define IMPCONTAINER_MINIMUM_HEADERNAME_RESTRAINT_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 #include <IMP/Restraint.h>
 #include <IMP/CLASSNAMEScore.h>
 #include <IMP/CLASSNAMEContainer.h>
@@ -39,7 +39,11 @@ public:
                                  std::string name
                                  ="MinimumCLASSNAMERestraint %1%");
 
-  IMP_RESTRAINT_2(MinimumCLASSNAMERestraint);
+  public:
+   double unprotected_evaluate(IMP::DerivativeAccumulator *accum)
+                 const IMP_OVERRIDE;
+   IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+   IMP_OBJECT_METHODS(MinimumCLASSNAMERestraint);;
 
   //! Set the number of lowest scores to use.
   void set_n(unsigned int n) { n_=n;}

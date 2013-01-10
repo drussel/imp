@@ -2,13 +2,13 @@
  * \file internal/mol2.h
  * \brief a class with static functions for parsing mol2 files
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_INTERNAL_MOL_2_H
 #define IMPATOM_INTERNAL_MOL_2_H
 
-#include "../atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "../Atom.h"
 #include <IMP/compatibility/map.h>
 #include <IMP/Particle.h>

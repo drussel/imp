@@ -2,14 +2,14 @@
  *  \file IMP/rmf/associations.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPRMF_ASSOCIATIONS_H
 #define IMPRMF_ASSOCIATIONS_H
 
-#include "rmf_config.h"
+#include <IMP/rmf/rmf_config.h>
 #include "links.h"
 #include <IMP/base/Object.h>
 #include <IMP/base/Pointer.h>

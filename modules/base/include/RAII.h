@@ -1,14 +1,14 @@
 /**
  *  \file IMP/base/RAII.h    \brief Basic types used by IMP.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_RAI_I_H
 #define IMPBASE_RAI_I_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "NonCopyable.h"
 #include "utility_macros.h"
 

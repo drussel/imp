@@ -1,14 +1,14 @@
 /**
  * \file IMP/atom/element.h \brief Define the elements used in \imp.
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_ELEMENT_H
 #define IMPATOM_ELEMENT_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/base_types.h>
 
 #include <IMP/log.h>

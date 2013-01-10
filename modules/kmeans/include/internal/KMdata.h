@@ -2,7 +2,7 @@
  *  \file KMdata.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 //----------------------------------------------------------------------
 //      File:           KMData.h
 //      Programmer:     David Mount
@@ -27,7 +27,7 @@
 #ifndef IMPKMEANS_INTERNAL_KMDATA_H
 #define IMPKMEANS_INTERNAL_KMDATA_H
 
-#include "../kmeans_config.h"
+#include <IMP/kmeans/kmeans_config.h>
 #include "KMeans.h"                  // kmeans includes
 #include "KCtree.h"                  // kc-tree includes
 #include "IMP/RefCounted.h"

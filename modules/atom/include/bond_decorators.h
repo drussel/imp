@@ -1,14 +1,14 @@
 /**
  *  \file IMP/atom/bond_decorators.h     \brief Contains decorators for a bond
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_BOND_DECORATORS_H
 #define IMPATOM_BOND_DECORATORS_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/core/internal/graph_base.h>
 #include "internal/bond_helpers.h"
 #include <IMP/display/particle_geometry.h>

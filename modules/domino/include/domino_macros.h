@@ -2,7 +2,7 @@
  *  \file IMP/domino/domino_macros.h    \brief Various important macros
  *                           for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -202,6 +202,6 @@ IMP_OBJECT(Name)
 
 #define IMP_ASSIGNMENT_CONTAINER_INLINE(Name, show, dest)               \
   IMP_ASSIGNMENT_CONTAINER_BASE(Name);                                  \
-  IMP_OBJECT_INLINE(Name, show, dest)
+  IMP_OBJECT_METHODS(Name)
 
 #endif  /* IMPDOMINO_MACROS_H */

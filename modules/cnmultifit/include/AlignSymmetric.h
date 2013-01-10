@@ -2,14 +2,14 @@
  *  \file AlignSymmetric.h
  *  \brief Fast alignment of a cyclic model to its density.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCNMULTIFIT_ALIGN_SYMMETRIC_H
 #define IMPCNMULTIFIT_ALIGN_SYMMETRIC_H
 
-#include "cnmultifit_config.h"
+#include <IMP/cnmultifit/cnmultifit_config.h>
 #include <IMP/em/DensityMap.h>
 #include "CnSymmAxisDetector.h"
 #include <boost/scoped_ptr.hpp>

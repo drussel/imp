@@ -2,14 +2,14 @@
  *  \file IMP/atom/Simulator.h
  *  \brief Simple molecular dynamics optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_SIMULATOR_H
 #define IMPATOM_SIMULATOR_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 #include <IMP/Particle.h>
 #include <IMP/Optimizer.h>

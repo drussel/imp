@@ -2,14 +2,14 @@
  *  \file IMP/em/CoarseCC.h
  *  \brief Perform coarse fitting between two density objects.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_COARSE_CC_H
 #define IMPEM_COARSE_CC_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "exp.h"
 #include "DensityMap.h"
 #include "SampledDensityMap.h"
@@ -116,7 +116,7 @@ static float local_cross_correlation_coefficient(const DensityMap *em_map,
                                               DensityMap *model_map,
                                                  float voxel_data_threshold);
 
-IMP_OBJECT_INLINE(CoarseCC, {out << "CoarseCC";}, {});
+IMP_OBJECT_METHODS(CoarseCC)
 };
 
 

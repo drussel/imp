@@ -1,14 +1,14 @@
 /**
  *  \file IMP/atom/Copy.h     \brief A particle with a user-defined type.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_COPY_H
 #define IMPATOM_COPY_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "../macros.h"
 
 #include "Molecule.h"

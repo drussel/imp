@@ -2,13 +2,13 @@
  *  \file IMP/compatibility/vector.h
  *  \brief Declare a bounds checked vector
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCOMPATIBILITY_VECTOR_H
 #define IMPCOMPATIBILITY_VECTOR_H
 
-#include "compatibility_config.h"
+#include <IMP/compatibility/compatibility_config.h>
 
 #if IMP_USE_DEBUG_VECTOR
 #include <debug/vector>

@@ -2,7 +2,7 @@
  *  \file IMP/declare_Restraint.h
  *  \brief Abstract base class for all restraints.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -13,7 +13,6 @@
 #include "ModelObject.h"
 #include "ScoreAccumulator.h"
 #include "DerivativeAccumulator.h"
-#include "model_object_macros.h"
 #include "constants.h"
 #include <IMP/base/tracking.h>
 #include <IMP/base/deprecation_macros.h>
@@ -46,7 +45,7 @@ class DerivativeAccumulator;
 
     \headerfile Restraint.h "IMP/Restraint.h"
 
-    \implementation{Restraint, IMP_RESTRAINT, IMP::example::ExampleRestraint}
+    See IMP::example::ExampleRestraint for an example.
  */
 class IMPEXPORT Restraint : public ModelObject
 {
@@ -75,6 +74,7 @@ public:
   //! See Model::evaluate_with_maximum()
   double evaluate_if_below(bool calc_derivatives, double max) const;
 
+#ifndef IMP_DOXYGEN
   /** \name Evaluation implementation
       These methods are called in order to perform the actual restraint
       scoring. The restraints should assume that all appropriate ScoreState
@@ -104,6 +104,7 @@ public:
     return unprotected_evaluate(da);
   }
   /** @} */
+#endif
 
   void
       add_score_and_derivatives(ScoreAccumulator sa) const;
@@ -216,19 +217,18 @@ public:
                            return do_create_decomposition();
                          });
 
-    /** A restraint should override this instead of unprotected_evaluate()
-        if it wants to do multthreaded evaluate
-        or other fanciness.
+    /** A restraint should override this to compute the score and derivatives.
     */
     IMP_PROTECTED_METHOD(virtual void, do_add_score_and_derivatives,
                          (ScoreAccumulator sa), const,);
 
-  IMP_IMPLEMENT_INLINE(
+    /** There is no interesting dependency tracking. */
   void do_update_dependencies(const DependencyGraph &,
-                              const DependencyGraphVertexIndex &), {});
-  IMP_IMPLEMENT_INLINE(ModelObjectsTemp do_get_outputs() const, {
-      return ModelObjectsTemp();
-    });
+                              const DependencyGraphVertexIndex &){}
+  /** No outputs. */
+  ModelObjectsTemp do_get_outputs() const {
+    return ModelObjectsTemp();
+  }
  private:
   double weight_;
   double max_;

@@ -2,13 +2,13 @@
  *  \file IMP/atom/Chain.h
  *  \brief Store the chain ID
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_CHAIN_H
 #define IMPATOM_CHAIN_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Hierarchy.h"
 #include <IMP/macros.h>
 #include <IMP/Decorator.h>

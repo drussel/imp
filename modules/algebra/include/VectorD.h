@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/VectorD.h   \brief Simple D vector class.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_VECTOR_D_H
 #define IMPALGEBRA_VECTOR_D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "GeometricPrimitiveD.h"
 #include <IMP/base/types.h>
 #include <IMP/base/base_macros.h>

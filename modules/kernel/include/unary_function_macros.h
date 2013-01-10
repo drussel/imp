@@ -2,7 +2,7 @@
  *  \file IMP/unary_function_macros.h
  *  \brief Various general useful macros for IMP.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -48,7 +48,7 @@
   IMP_IMPLEMENT_INLINE(virtual double evaluate(double feature) const,{  \
     return (value_expression);                                          \
     });                                                                 \
-  IMP_OBJECT_INLINE(Name, out << show_expression, {})
+  IMP_OBJECT_METHODS(Name)
 
 
 

@@ -2,13 +2,13 @@
  *  \file IMP/core/model_statistics.h
  *  \brief Log the restraint scores and things.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_MODEL_STATISTICS_H
 #define IMPCORE_MODEL_STATISTICS_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "PeriodicOptimizerState.h"
 #include "periodic_optimizer_state_macros.h"
 #include <IMP/Model.h>

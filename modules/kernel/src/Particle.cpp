@@ -1,7 +1,7 @@
 /**
  *  \file Particle.cpp   \brief Classes to handle individual model particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -142,16 +142,6 @@ void Particle::do_show(std::ostream& out) const
 
 void Particle::clear_caches() {
   get_model()->clear_particle_caches(id_);
-}
-
-ModelObjectsTemp Particle::do_get_inputs() const {
-  return ModelObjectsTemp();
-}
-ModelObjectsTemp Particle::do_get_outputs() const {
-  return ModelObjectsTemp();
-}
-void Particle::do_update_dependencies(const DependencyGraph &,
-                                       const DependencyGraphVertexIndex &) {
 }
 
 

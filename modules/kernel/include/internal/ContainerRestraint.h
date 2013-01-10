@@ -2,7 +2,7 @@
  *  \file core/generic.h    \brief Various important functionality
  *                                       for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -32,7 +32,11 @@ public:
                      Container *pc,
                      std::string name="GroupnamesRestraint %1%");
 
-  IMP_RESTRAINT_ACCUMULATOR(ContainerRestraint);
+  public:
+  void do_add_score_and_derivatives(IMP::ScoreAccumulator sa)
+    const IMP_OVERRIDE;
+  IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(ContainerRestraint);;
 
   //! Get the container used to store Particles
   typename Container::ContainedTypes
@@ -124,14 +128,6 @@ ContainerRestraint<Score, C>::do_create_current_decomposition() const {
                                                      acc_->get_score_object(),
                                                      pc_.get(),
                                                      get_name());
-}
-
-
-template <class Score, class C>
-void ContainerRestraint<Score, C>::do_show(std::ostream& out) const
-{
-  out << "score " << *acc_->get_score_object() << std::endl;
-  out << "container " << *pc_ << std::endl;
 }
 
 

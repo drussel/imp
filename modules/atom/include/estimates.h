@@ -2,13 +2,13 @@
     *  \file IMP/atom/estimates.h
     *  \brief Estimates of various physical quantities.
     *
-    *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+    *  Copyright 2007-2013 IMP Inventors. All rights reserved.
     */
 
 #ifndef IMPATOM_ESTIMATES_H
 #define IMPATOM_ESTIMATES_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Residue.h"
 #include <IMP/base_types.h>
 

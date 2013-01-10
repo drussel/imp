@@ -2,13 +2,13 @@
  *  \file IMP/algebra/Rotation2D.h
  *  \brief Classes and operations related with rotations
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPALGEBRA_ROTATION_2D_H
 #define IMPALGEBRA_ROTATION_2D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "utility.h"
 #include "Vector2D.h"
 #include "GeometricPrimitiveD.h"

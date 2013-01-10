@@ -1,14 +1,14 @@
 /**
  *  \file multi_array_helpers.h    \brief helpers for multi_array.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_INTERNAL_MULTI_ARRAY_HELPERS_H
 #define IMPALGEBRA_INTERNAL_MULTI_ARRAY_HELPERS_H
 
-#include "../algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "boost/array.hpp"
 #include "boost/multi_array.hpp"
 

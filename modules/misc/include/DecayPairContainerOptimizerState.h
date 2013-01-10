@@ -2,13 +2,13 @@
  *  \file IMP/misc/DecayPairContainerOptimizerState.h
  *  \brief Track the particles pairs passed to the pair score.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPMISC_DECAY_PAIR_CONTAINER_OPTIMIZER_STATE_H
 #define IMPMISC_DECAY_PAIR_CONTAINER_OPTIMIZER_STATE_H
 
-#include "misc_config.h"
+#include <IMP/misc/misc_config.h>
 #include <IMP/OptimizerState.h>
 #include <IMP/PairContainer.h>
 #include <IMP/PairContainer.h>

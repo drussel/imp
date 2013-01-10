@@ -3,13 +3,13 @@
  *  \brief A score on the distance between a pair of particles
  *  after transforming one.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_TRANSFORMED_DISTANCE_PAIR_SCORE_H
 #define IMPCORE_TRANSFORMED_DISTANCE_PAIR_SCORE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/generic.h>
 #include <IMP/PairScore.h>
 #include <IMP/UnaryFunction.h>

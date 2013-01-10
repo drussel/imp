@@ -2,14 +2,14 @@
  *  \file IMP/statistics/metrics.h
  *  \brief Cluster sets of points.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_METRICS_H
 #define IMPSTATISTICS_METRICS_H
 
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include "Metric.h"
 #include "Embedding.h"
 #include "metric_macros.h"

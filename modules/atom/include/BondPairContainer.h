@@ -2,13 +2,13 @@
  *  \file IMP/atom/BondPairContainer.h
  *  \brief A fake container for bonds
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_BOND_PAIR_CONTAINER_H
 #define IMPATOM_BOND_PAIR_CONTAINER_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "bond_decorators.h"
 #include <IMP/generic.h>
 #include <IMP/PairContainer.h>
@@ -31,8 +31,6 @@ class IMPATOMEXPORT BondPairContainer :
   public PairContainer
 {
   IMP::OwnerPointer<SingletonContainer> sc_;
-  IMP_CONTAINER_DEPENDENCIES(BondPairContainer, ret.push_back(back_->sc_););
-
 public:
  template <class F>
     void apply_generic(F* f) const {
@@ -47,7 +45,15 @@ public:
   //! The container containing the bonds
   BondPairContainer(SingletonContainer *sc);
 
-  IMP_PAIR_CONTAINER(BondPairContainer);
+  virtual ParticleIndexPairs get_indexes() const IMP_OVERRIDE;
+  virtual ParticleIndexPairs get_range_indexes() const IMP_OVERRIDE;
+  virtual void do_before_evaluate() IMP_OVERRIDE;
+  virtual ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE {
+    ModelObjects ret;
+    ret.push_back(sc_);
+    return ret;
+  }
+  IMP_IMPLEMENT_PAIR_CONTAINER(BondPairContainer);
 };
 
 IMP_OBJECTS(BondPairContainer,BondPairContainers);

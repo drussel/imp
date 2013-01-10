@@ -330,7 +330,7 @@ def add_external_cmake_library(env, name, lib, header, body="", extra_libs=[],
     arguments.append("-DCMAKE_LIBRARY_PATH="+env["libpath"])
   if env.get("includepath", "") != "":
     arguments.append("-DCMAKE_INCLUDE_PATH="+env["includepath"])
-  if env.get("cxxflags", "") != "":
+  if env.get("cxxflags", "") != "" and '-DCMAKE_CXX_FLAGS' not in env['cmake']:
     arguments.append("-DCMAKE_CXX_FLAGS=\""+env["cxxflags"]+"\"")
   if env.get("linkflags", "") != "":
     arguments.append("-DCMAKE_SHARED_LINKER_FLAGS=\""+env["linkflags"]+"\"")
@@ -342,7 +342,6 @@ def add_external_cmake_library(env, name, lib, header, body="", extra_libs=[],
                        versioncpp=versioncpp, versionheader=versionheader,
                        enabled=enabled, alternate_lib=alternate_lib,
                        build=cleanup_cmd+"""cd %(workdir)s
-                       ls -l %(builddir)s/lib
 """ + cmake + """
     make -j %d
     """%(int(GetOption('num_jobs')))+install_cmd)

@@ -1,14 +1,14 @@
 /**
  *  \file IMP/base/InputAdaptor.h    \brief Basic types used by IMP.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_INPUT_ADAPTOR_H
 #define IMPBASE_INPUT_ADAPTOR_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "utility_macros.h"
 
 IMPBASE_BEGIN_NAMESPACE

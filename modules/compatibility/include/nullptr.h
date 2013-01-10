@@ -2,13 +2,13 @@
  *  \file IMP/compatibility/nullptr.h
  *  \brief Provide a nullptr keyword analog.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCOMPATIBILITY_NULLPTR_H
 #define IMPCOMPATIBILITY_NULLPTR_H
 
-#include "compatibility_config.h"
+#include <IMP/compatibility/compatibility_config.h>
 
 namespace IMP {
 #ifdef IMP_DOXYGEN

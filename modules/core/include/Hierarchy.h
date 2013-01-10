@@ -2,14 +2,14 @@
  *  \file IMP/core/Hierarchy.h     \brief Decorator for helping deal with
  *                                        a hierarchy.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_HIERARCHY_H
 #define IMPCORE_HIERARCHY_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "internal/hierarchy_helpers.h"
 
 #include <IMP/SingletonModifier.h>

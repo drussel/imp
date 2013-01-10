@@ -2,7 +2,7 @@
  *  \file restraints_utils.h
  *  \brief restraints setup utilities
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,7 +14,7 @@
 #include <IMP/core/Hierarchy.h>
 #include <IMP/Object.h>
 #include <IMP/file.h>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "FittingSolutionRecord.h"
 IMPMULTIFIT_BEGIN_NAMESPACE
 //! Generates filenames for precalculated restraint scores

@@ -2,14 +2,14 @@
  * \file IMP/atom/force_fields.h
  * \brief Define functions to add bonds and radii to atoms.
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_FORCE_FIELDS_H
 #define IMPATOM_FORCE_FIELDS_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Hierarchy.h"
 #include "ForceFieldParameters.h"
 #include "CHARMMParameters.h"

@@ -2,7 +2,7 @@
  *  \file IMP/atom/atom_macros.h    \brief Various important macros
  *                           for implementing decorators.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -35,7 +35,7 @@
   bool get_is_selected(const std::string &pdb_line) const {      \
     selected;                                                    \
   }                                                              \
-  IMP_OBJECT_INLINE(Name, show,)
+  IMP_OBJECT_METHODS(Name)
 
 
 //! Define the basic things you need for a mol2 selector
@@ -49,7 +49,7 @@
   bool get_is_selected(const std::string &mol2_line) const {     \
   selected;                                                      \
   }                                                              \
-  IMP_OBJECT_INLINE(Name, show,)
+  IMP_OBJECT_METHODS(Name)
 
 
 /** Add the methods needed for a Simulator

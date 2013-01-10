@@ -6,14 +6,14 @@
  *  in tools/maintenance/container_templates/core
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_SINGLETON_RESTRAINT_H
 #define IMPCORE_SINGLETON_RESTRAINT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/internal/TupleRestraint.h>
 #include <IMP/SingletonScore.h>

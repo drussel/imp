@@ -5,7 +5,7 @@
  *  in tools/maintenance/container_templates/container
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -41,11 +41,11 @@ ModelObjectsTemp DistributeSingletonsScoreState
 
 
 
-void DistributeSingletonsScoreState::do_update_attributes() {
+void DistributeSingletonsScoreState::do_before_evaluate() {
   update_lists_if_necessary();
 }
 void DistributeSingletonsScoreState
-::do_update_derivatives(DerivativeAccumulator *) {
+::do_after_evaluate(DerivativeAccumulator *) {
 }
 
 void DistributeSingletonsScoreState

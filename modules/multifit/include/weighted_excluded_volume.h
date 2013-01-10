@@ -3,7 +3,7 @@
  *  \brief handles low resolution weighted excluded
  *         volume calculation.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -15,7 +15,7 @@
 #include <IMP/core/Hierarchy.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Mass.h>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 IMPMULTIFIT_BEGIN_NAMESPACE
 
 

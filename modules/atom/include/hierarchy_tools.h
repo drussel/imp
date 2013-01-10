@@ -2,13 +2,13 @@
  *  \file IMP/atom/hierarchy_tools.h
  *  \brief A set of useful functionality on IMP::atom::Hierarchy decorators
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_HIERARCHY_TOOLS_H
 #define IMPATOM_HIERARCHY_TOOLS_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/algebra/algebra_config.h>
 #include "Hierarchy.h"
 #include "Residue.h"

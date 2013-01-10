@@ -2,7 +2,7 @@
  *  \file CollisionCrossSection.h
  *  \brief
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -58,7 +58,7 @@ public:
   void show(std::ostream &out) const {
     out << "Collision Cross section." << std::endl;
   }
-  IMP_OBJECT_INLINE( CollisionCrossSection, show(out), {} );
+  IMP_OBJECT_METHODS( CollisionCrossSection)
 
 protected:
 

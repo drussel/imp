@@ -1,14 +1,14 @@
 /**
  *  \file symmetric_multifit.h  \brief Build cyclic symmetric complexes.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCNMULTIFIT_SYMMETRIC_MULTIFIT_H
 #define IMPCNMULTIFIT_SYMMETRIC_MULTIFIT_H
 
-#include "cnmultifit_config.h"
+#include <IMP/cnmultifit/cnmultifit_config.h>
 #include <string>
 
 IMPCNMULTIFIT_BEGIN_NAMESPACE

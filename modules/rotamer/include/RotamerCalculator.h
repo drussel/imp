@@ -2,7 +2,7 @@
  * \file RotamerCalculator.h
  * \brief Object performing rotations by Chi angles.
  *
- * Copyright 2007-2012 Sali Lab. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -79,7 +79,7 @@ public:
   */
   ResidueRotamer get_rotamer(const IMP::atom::Residue &rd, double thr) const;
 
-  IMP_OBJECT_INLINE(RotamerCalculator, IMP_UNUSED(out),);
+  IMP_OBJECT_METHODS(RotamerCalculator)
 
 private:
   struct ResidueData

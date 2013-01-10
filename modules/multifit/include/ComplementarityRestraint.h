@@ -2,14 +2,14 @@
  *  \file IMP/multifit/ComplementarityRestraint.h
  *  \brief Calculate weighted excluded volume between rigid bodies
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_COMPLEMENTARITY_RESTRAINT_H
 #define IMPMULTIFIT_COMPLEMENTARITY_RESTRAINT_H
 
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/core/DataObject.h>
 #include <IMP/algebra/standard_grids.h>

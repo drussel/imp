@@ -1,14 +1,14 @@
 /**
  *  \file IMP/base/tracking.h    \brief IO support.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_TRACKING_H
 #define IMPBASE_TRACKING_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "Object.h"
 #include <IMP/compatibility/set.h>
 #include <IMP/compatibility/vector.h>

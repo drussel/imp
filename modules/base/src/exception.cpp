@@ -1,19 +1,23 @@
 /**
  *  \file exception.cpp   \brief Check handling.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #include "IMP/base/exception.h"
 #include "IMP/base/log.h"
 #include "IMP/base/internal/static.h"
+#include "IMP/base/check_macros.h"
+#include <IMP/base/FailureHandler.h>
 #include <cstring>
 #include <boost/lambda/lambda.hpp>
 
 
 IMPBASE_BEGIN_NAMESPACE
-
+namespace internal {
+  extern FailureHandlers handlers;
+}
 
 CheckLevel get_maximum_check_level() {
 #if IMP_BUILD == IMP_FAST
@@ -59,28 +63,12 @@ void remove_failure_handler(FailureHandler *fh) {
                                      internal::handlers.end(), fh));
 }
 
-ExceptionBase::~ExceptionBase() throw()
-{
-  destroy();
-}
-
-ExceptionBase::ExceptionBase(const char *message) {
-  str_= new (std::nothrow) refstring();
-  if (str_ != nullptr) {
-    str_->ct_=1;
-    std::strncpy(str_->message_, message, 4095);
-    str_->message_[4095]='\0';
-  }
-}
-
-
-
 Exception::~Exception() throw()
 {
 }
 
 Exception::Exception(const char *message):
-  ExceptionBase(message) {
+  std::runtime_error(message) {
 }
 
 InternalException::~InternalException() throw()

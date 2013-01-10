@@ -2,13 +2,13 @@
  *  \file IMP/core/predicates.h
  *  \brief Score particles based on a bounding box
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_PREDICATES_H
 #define IMPCORE_PREDICATES_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/SingletonPredicate.h>
 #include <IMP/singleton_macros.h>
 #include "XYZ.h"

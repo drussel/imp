@@ -2,13 +2,13 @@
  *  \file IMP/example/ExamplePairScore.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_PAIR_SCORE_H
 #define IMPEXAMPLE_EXAMPLE_PAIR_SCORE_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/PairScore.h>
 #include <IMP/UnaryFunction.h>

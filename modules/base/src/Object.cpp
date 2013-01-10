@@ -2,7 +2,7 @@
  *  \file Object.cpp
  *  \brief A shared base class to help in debugging and things.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -83,8 +83,7 @@ void Object::set_log_level(LogLevel l) {
 
 
 void Object::show(std::ostream &out) const {
-  out << get_name()
-      << "(" << get_type_name() << ")\n";
+  out << get_name() << "\n";
   do_show(out);
 }
 

@@ -2,14 +2,14 @@
  *  \file IMP/em/EMReaderWriter.h
  *  \brief Classes to read or write density files in EM format.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_EM_READER_WRITER_H
 #define IMPEM_EM_READER_WRITER_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "MapReaderWriter.h"
 #include "DensityHeader.h"
 #include "internal/EMHeader.h"
@@ -64,7 +64,7 @@ protected:
   */
   void write_header(std::ostream& s, const internal::EMHeader &header);
 
-  IMP_OBJECT_INLINE(EMReaderWriter, {out << "EMReaderWriter";}, {});
+  IMP_OBJECT_METHODS(EMReaderWriter)
 };
 
 IMPEM_END_NAMESPACE

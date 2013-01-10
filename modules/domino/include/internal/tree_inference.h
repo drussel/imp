@@ -2,14 +2,14 @@
  *  \file RestraintGraph.h
  *  \brief creates a MRF from a set of particles and restraints
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPDOMINO_INTERNAL_TREE_INFERENCE_H
 #define IMPDOMINO_INTERNAL_TREE_INFERENCE_H
 
-#include "../domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "../utility.h"
 #include "../subset_filters.h"
 #include "inference_utility.h"

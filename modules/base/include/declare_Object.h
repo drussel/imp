@@ -2,14 +2,14 @@
  *  \file IMP/base/declare_Object.h
  *  \brief A shared base class to help in debugging and things.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_DECLARE_OBJECT_H
 #define IMPBASE_DECLARE_OBJECT_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "RefCounted.h"
 #include "ref_counted_macros.h"
 #include "enums.h"
@@ -65,7 +65,8 @@ class IMPBASEEXPORT Object: public RefCounted
   IMP_PROTECTED_CONSTRUCTOR(Object, (std::string name), );
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(Object);
 public:
-
+  // needed for python to make sure all wrapper objects are equivalent
+  IMP_HASHABLE_INLINE(Object, return boost::hash_value(this););
 
   //! Set the logging level used in this object
   /** Each object can be assigned a different log level in order to,
@@ -104,11 +105,6 @@ public:
 #endif
   }
 #endif // IMP_DOXYGEN
-
-  //! Return a string identifying the type of the object
-  virtual std::string get_type_name() const=0;
-
-  IMP_HASHABLE_INLINE(Object, return boost::hash_value(this););
 
 #ifndef IMP_DOXYGEN
   void _debugger_show() const {
@@ -157,8 +153,8 @@ public:
   IMP_SHOWABLE(Object);
 
 #ifndef IMP_DOXYGEN
-  // swig needs to know to wrap this function
-  virtual void do_show(std::ostream &out) const =0;
+  // not used any more
+  virtual void do_show(std::ostream &) const {};
 
   void _on_destruction();
 #endif

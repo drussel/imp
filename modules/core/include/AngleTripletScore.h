@@ -2,13 +2,13 @@
  *  \file IMP/core/AngleTripletScore.h
  *  \brief A Score on the angle between three particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_ANGLE_TRIPLET_SCORE_H
 #define IMPCORE_ANGLE_TRIPLET_SCORE_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/generic.h>
 #include <IMP/TripletScore.h>
 #include <IMP/UnaryFunction.h>

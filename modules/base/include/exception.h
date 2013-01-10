@@ -2,17 +2,18 @@
  *  \file IMP/base/exception.h
  *  \brief Exception definitions and assertions.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_EXCEPTION_H
 #define IMPBASE_EXCEPTION_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "random.h"
 #include "enums.h"
 #include <IMP/compatibility/nullptr.h>
+#include "internal/static.h"
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -21,8 +22,13 @@
 #include <iostream>
 #include <new>
 #include <sstream>
+#include <stdexcept>
 
 IMPBASE_BEGIN_NAMESPACE
+
+#ifndef IMP_DOXYGEN
+typedef std::runtime_error ExceptionBase;
+#endif
 
 #ifndef SWIG
 /**
@@ -44,57 +50,12 @@ IMPBASE_BEGIN_NAMESPACE
     @{
  */
 
-
-#if !defined(SWIG) && !defined(IMP_DOXYGEN)
-/** This base class is for all \imp exceptions, including
-    UsageException and InternalException. You can catch
-    IMP::Exception without worrying about catching those
-    exceptions.
-*/
-class IMPBASEEXPORT ExceptionBase
-{
-  struct refstring {
-    char message_[4096];
-    int ct_;
-  };
-  refstring *str_;
- public:
-  const char *what() const throw() {
-    return str_? str_->message_: nullptr;
-  }
-  ExceptionBase(const char *message);
-  /* \note By making the destructor virtual and providing an implementation in
-      each derived class, we force a strong definition of the exception object
-      in the kernel DSO. This allows exceptions to be passed between DSOs.
-  */
-  virtual ~ExceptionBase() throw();
-
-  ExceptionBase(const ExceptionBase &o) {copy(o);}
-  ExceptionBase &operator=(const ExceptionBase &o) {
-    destroy();
-    copy(o);
-    return *this;
-  }
- private:
-  void destroy() {
-    if (str_ != nullptr) {
-      --str_->ct_;
-      if (str_->ct_==0) delete str_;
-    }
-  }
-  void copy(const ExceptionBase &o) {
-    str_=o.str_;
-    if (str_!= nullptr) ++str_->ct_;
-  }
-};
-#endif
-
 //! The general base class for \imp exceptions
 /** Exceptions should be used to report all errors that occur within \imp.
 */
 class IMPBASEEXPORT Exception
 #if !defined(SWIG) && !defined(IMP_DOXYGEN)
-  : public ExceptionBase
+  : public std::runtime_error
 #endif
 {
  public:
@@ -113,9 +74,6 @@ class IMPBASEEXPORT Exception
 IMPBASEEXPORT CheckLevel get_maximum_check_level();
 
 #if !defined(SWIG) && !defined(IMP_DOXYGEN)
-namespace internal {
-  IMPBASEEXPORT extern CheckLevel check_mode;
-}
 IMPBASEEXPORT std::string get_context_message();
 #endif
 
@@ -125,7 +83,7 @@ IMPBASEEXPORT std::string get_context_message();
     USAGE_AND_INTERNAL for debug builds.
 */
 inline void set_check_level(CheckLevel tf) {
-  internal::check_mode= tf;
+  FLAGS_check_level= tf;
 }
 
 //! Get the current audit mode
@@ -133,7 +91,7 @@ inline void set_check_level(CheckLevel tf) {
  */
 inline CheckLevel get_check_level() {
 #if IMP_BUILD < IMP_FAST
-  return internal::check_mode;
+  return CheckLevel(FLAGS_check_level);
 #else
   return NONE;
 #endif
@@ -167,10 +125,10 @@ IMPBASEEXPORT void handle_error(const char *msg);
  */
 struct IMPBASEEXPORT InternalException
 #if !defined(SWIG) && !defined(IMP_DOXYGEN)
-  : public ExceptionBase
+  : public std::runtime_error
 #endif
 {
-  InternalException(const char *msg="Fatal error"): ExceptionBase(msg){}
+  InternalException(const char *msg="Fatal error"): std::runtime_error(msg){}
   ~InternalException() throw();
 };
 
@@ -186,11 +144,11 @@ struct IMPBASEEXPORT InternalException
  */
 class IMPBASEEXPORT UsageException
 #if !defined(SWIG) && !defined(IMP_DOXYGEN)
-  : public ExceptionBase
+  : public std::runtime_error
 #endif
 {
  public:
-  UsageException(const char *t): ExceptionBase(t){}
+  UsageException(const char *t): std::runtime_error(t){}
   ~UsageException() throw();
 };
 

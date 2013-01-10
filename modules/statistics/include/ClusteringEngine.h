@@ -2,7 +2,7 @@
  *  \file IMP/statistics/ClusteringEngine.h
  *  \brief Virtual anchor points clustering engine
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,7 +10,7 @@
 #define IMPSTATISTICS_CLUSTERING_ENGINE_H
 
 #include "DataPoints.h"
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 IMPSTATISTICS_BEGIN_NAMESPACE
 
 class ClusteringEngine {

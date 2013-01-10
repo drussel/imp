@@ -1,7 +1,7 @@
 /**
  *  \file fft_fitting_utils.h   \brief masking function for fft fitting
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,7 +10,7 @@
 
 #include <IMP/log.h>
 #include <IMP/exception.h>
-#include "../multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/em/DensityMap.h>
 #include <IMP/atom/Hierarchy.h>
 

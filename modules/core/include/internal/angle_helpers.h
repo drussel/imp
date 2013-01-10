@@ -2,13 +2,13 @@
  *  \file anglel_helpers.h
  *  \brief Helper functions to calculate and handle angles
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_ANGLE_HELPERS_H
 #define IMPCORE_ANGLE_HELPERS_H
 
-#include "../core_config.h"
+#include <IMP/core/core_config.h>
 #include "../XYZ.h"
 #include <IMP/constants.h>
 #include <IMP/algebra/Vector3D.h>

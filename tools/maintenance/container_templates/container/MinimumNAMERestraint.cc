@@ -4,7 +4,7 @@
  *
  *  BLURB
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -101,13 +101,6 @@ Restraints MinimumCLASSNAMERestraint
   }
   return ret;
 }
-
-
-void MinimumCLASSNAMERestraint::do_show(std::ostream &out) const {
-  out << "container " << *c_ << std::endl;
-  out << "score " << *f_ << std::endl;
-}
-
 
 ModelObjectsTemp MinimumCLASSNAMERestraint::do_get_inputs() const
 {

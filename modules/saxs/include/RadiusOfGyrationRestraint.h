@@ -2,14 +2,14 @@
  *  \file IMP/saxs/RadiusOfGyrationRestraint.h
  *  \brief Calculate score based on fit to SAXS profile.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSAXS_RADIUS_OF_GYRATION_RESTRAINT_H
 #define IMPSAXS_RADIUS_OF_GYRATION_RESTRAINT_H
 
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 
 #include <IMP/saxs/Profile.h>
 

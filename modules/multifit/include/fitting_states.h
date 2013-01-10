@@ -2,14 +2,14 @@
  *  \file multifit/fitting_states.h
  *  \brief Fitting states
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPMULTIFIT_FITTING_STATES_H
 #define IMPMULTIFIT_FITTING_STATES_H
 
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/domino/particle_states.h>
 
 IMPMULTIFIT_BEGIN_NAMESPACE

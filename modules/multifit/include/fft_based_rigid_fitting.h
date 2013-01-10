@@ -2,7 +2,7 @@
  *  \file IMP/multifit/fft_based_rigid_fitting.h
  *  \brief FFT based fitting
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,7 +10,7 @@
 #define IMPMULTIFIT_FFT_BASED_RIGID_FITTING_H
 
 #include "fftw3.h"
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/base_types.h>
 #include <IMP/multifit/internal/FFTWGrid.h>

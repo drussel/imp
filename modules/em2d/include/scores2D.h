@@ -1,7 +1,7 @@
 /*!
  *  \file scores2D.h
  *  \brief Scoring functions for 2D
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPEM2D_SCORES_2D_H
@@ -69,7 +69,7 @@ public:
     set_variance_image_private(var);
   }
 
-  IMP_OBJECT_INLINE(ScoreFunction, IMP_UNUSED(out), {});
+  IMP_OBJECT_METHODS(ScoreFunction)
 
 protected:
   // Number of particle images used to get the class average

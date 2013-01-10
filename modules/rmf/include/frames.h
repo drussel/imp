@@ -2,14 +2,14 @@
  *  \file IMP/rmf/frames.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPRMF_FRAMES_H
 #define IMPRMF_FRAMES_H
 
-#include "rmf_config.h"
+#include <IMP/rmf/rmf_config.h>
 #include <RMF/FileHandle.h>
 
 IMPRMF_BEGIN_NAMESPACE

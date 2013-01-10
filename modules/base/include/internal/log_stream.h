@@ -2,13 +2,13 @@
  *  \file internal/utility.h
  *  \brief Various useful utilities
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPBASE_INTERNAL_LOG_STREAM_H
 #define IMPBASE_INTERNAL_LOG_STREAM_H
 
-#include "../base_config.h"
+#include <IMP/base/base_config.h>
 #include "../file.h"
 #include "static.h"
 #include <istream>

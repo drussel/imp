@@ -1,7 +1,7 @@
 /**
  *  \file MonteCarlo.cpp  \brief Simple Monte Carlo optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -20,19 +20,6 @@
 IMPCORE_BEGIN_NAMESPACE
 
 Mover::Mover(Model *m, std::string name):ModelObject(m, name) {}
-
-
-
-ModelObjectsTemp Mover::do_get_inputs() const {
-  return ModelObjectsTemp();
-}
-ModelObjectsTemp Mover::do_get_outputs() const {
-  return get_output_particles();
-}
-void Mover::do_update_dependencies(const DependencyGraph &,
-                                       const DependencyGraphVertexIndex &) {
-}
-
 
 IMP_LIST_IMPL(MonteCarlo, Mover, mover, Mover*, Movers);
 

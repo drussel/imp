@@ -2,13 +2,13 @@
  *  \file display/internal/utility.h
  *  \brief Base class for writing geometry to a file
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_INTERNAL_UTILITY_H
 #define IMPDISPLAY_INTERNAL_UTILITY_H
 
-#include "../display_config.h"
+#include <IMP/display/display_config.h>
 #include <IMP/algebra/Vector3D.h>
 
 IMPDISPLAY_BEGIN_NAMESPACE

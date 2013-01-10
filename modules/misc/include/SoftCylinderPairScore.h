@@ -2,13 +2,13 @@
  *  \file IMP/misc/SoftCylinderPairScore.h
  *  \brief A Score on the distance between a pair of particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPMISC_SOFT_CYLINDER_PAIR_SCORE_H
 #define IMPMISC_SOFT_CYLINDER_PAIR_SCORE_H
 
-#include "misc_config.h"
+#include <IMP/misc/misc_config.h>
 #include <IMP/PairScore.h>
 #include <IMP/UnaryFunction.h>
 #include <IMP/Pointer.h>

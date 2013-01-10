@@ -2,14 +2,14 @@
  *  \file IMP/statistics/PartitionalClustering.h
  *  \brief Compute a distance metric between two points
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_PARTITIONAL_CLUSTERING_H
 #define IMPSTATISTICS_PARTITIONAL_CLUSTERING_H
 
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include <IMP/macros.h>
 #include <IMP/base_types.h>
 #include <IMP/Object.h>

@@ -2,14 +2,14 @@
  *  \file IMP/core/MinimumRestraint.h
  *  \brief Score based on the k minimum restraints.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_MINIMUM_RESTRAINT_H
 #define IMPCORE_MINIMUM_RESTRAINT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/Restraint.h>
 #include <IMP/Model.h>
 #include <IMP/macros.h>
@@ -39,7 +39,11 @@ public:
     }
   }
 
-  IMP_RESTRAINT_2(MinimumRestraint);
+  public:
+   double unprotected_evaluate(IMP::DerivativeAccumulator *accum)
+                 const IMP_OVERRIDE;
+   IMP::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+   IMP_OBJECT_METHODS(MinimumRestraint);;
 
   IMP_LIST_ACTION(public, Restraint, Restraints,
                   restraint, restraints, Restraint*, Restraints,

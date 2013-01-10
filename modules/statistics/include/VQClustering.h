@@ -2,7 +2,7 @@
  *  \file IMP/statistics/VQClustering.h
  *  \brief Vector quantization clustering. Based on Wriggers et at, JMB 1998
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,7 +12,7 @@
 #include <IMP/base_types.h>
 #include "DataPoints.h"
 #include "ClusteringEngine.h"
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 IMPSTATISTICS_BEGIN_NAMESPACE
 
 

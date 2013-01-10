@@ -3,14 +3,14 @@
  *  \brief A lognormal restraint that uses the ISPA model to model HBond-derived
  *  distance fit.
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPISD_MARGINAL_HBOND_RESTRAINT_H
 #define IMPISD_MARGINAL_HBOND_RESTRAINT_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/isd/ISDRestraint.h>
 #include <IMP/PairContainer.h>
 

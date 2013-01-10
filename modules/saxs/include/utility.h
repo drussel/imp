@@ -1,13 +1,13 @@
 /**
  *  \file IMP/saxs/utility.h
  *  \brief Functions to deal with very common saxs operations
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPSAXS_UTILITY_H
 #define IMPSAXS_UTILITY_H
 
-#include "saxs_config.h"
+#include <IMP/saxs/saxs_config.h>
 #include "FormFactorTable.h"
 #include <IMP/exception.h>
 #include <IMP/core/XYZ.h>

@@ -2,13 +2,13 @@
  *  \file IMP/base/WeakPointer.h
  *  \brief A nullptr-initialized pointer to an Object.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_WEAK_POINTER_H
 #define IMPBASE_WEAK_POINTER_H
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "internal/PointerBase.h"
 
 

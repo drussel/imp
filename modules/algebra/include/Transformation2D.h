@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/Transformation2D.h
  *  \brief 2D transformations.
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
 **/
 
 #ifndef IMPALGEBRA_TRANSFORMATION_2D_H
 #define IMPALGEBRA_TRANSFORMATION_2D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 
 #include "Vector2D.h"
 #include "Rotation2D.h"

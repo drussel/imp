@@ -2,7 +2,7 @@
  *  \file symmetry_utils.h
  *  \brief Symmetry utilities.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -15,7 +15,7 @@
 #include <IMP/em/rigid_fitting.h>
 #include <IMP/core/LeavesRefiner.h>
 #include <IMP/multifit/fitting_solutions_reader_writer.h>
-#include "cnmultifit_config.h"
+#include <IMP/cnmultifit/cnmultifit_config.h>
 #include "AlignSymmetric.h"
 
 IMPCNMULTIFIT_BEGIN_NAMESPACE

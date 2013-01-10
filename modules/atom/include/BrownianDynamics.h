@@ -2,14 +2,14 @@
  *  \file IMP/atom/BrownianDynamics.h
  *  \brief Simple molecular dynamics optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_BROWNIAN_DYNAMICS_H
 #define IMPATOM_BROWNIAN_DYNAMICS_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Diffusion.h"
 #include "Simulator.h"
 #include "atom_macros.h"

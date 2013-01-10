@@ -1,5 +1,5 @@
 /**
- *   Copyright 2007-2012 IMP Inventors. All rights reserved
+ *   Copyright 2007-2013 IMP Inventors. All rights reserved
  */
 #include <IMP/Model.h>
 #include <IMP/Particle.h>
@@ -46,7 +46,7 @@ int main(int, char*[]) {
     r->evaluate(false);
     // there had better be an exception
     return 1;
-  } catch (const IMP::base::ExceptionBase &e) {
+  } catch (const IMP::internal::InputOutputException &e) {
     std::cerr << e.what() << std::endl;
   }
 #endif

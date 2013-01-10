@@ -2,7 +2,7 @@
  *  \file IMP/container_macros.h
  *  \brief Macros to define containers of objects
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -352,8 +352,7 @@ IMP_REQUIRE_SEMICOLON_CLASS(list##lcname)
   }                                                                     \
   void do_before_evaluate() {}                                          \
   void do_after_evaluate(DerivativeAccumulator *) {}                    \
-  IMP_OBJECT_INLINE(DependenciesScoreState, {if (0) out<<1;}, {});      \
-  };                                                                    \
+  IMP_OBJECT_METHODS(DependenciesScoreState)                                  \
   friend class DependenciesScoreState;                                  \
   ScopedScoreState deps_
 

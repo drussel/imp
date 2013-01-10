@@ -1,14 +1,14 @@
 /**
  *  \file IMP/example/ExampleDecorator.h     \brief Add a name to a particle.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_EXAMPLE_DECORATOR_H
 #define IMPEXAMPLE_EXAMPLE_DECORATOR_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 
 #include <IMP/Particle.h>
 #include <IMP/Model.h>

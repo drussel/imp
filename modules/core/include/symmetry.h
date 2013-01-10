@@ -1,13 +1,13 @@
 /**
  *  \file IMP/core/symmetry.h     \brief Implement various types of symmetry
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_SYMMETRY_H
 #define IMPCORE_SYMMETRY_H
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/algebra/Transformation3D.h>
 #include <IMP/algebra/Reflection3D.h>
 #include "XYZ.h"

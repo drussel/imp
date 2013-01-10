@@ -1,13 +1,13 @@
 /**
  *  \file output_helpers.h
  *  \brief manipulation of text, and Interconversion between text and numbers
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
 
 #ifndef IMPALGEBRA_INTERNAL_OUTPUT_HELPERS_H
 #define IMPALGEBRA_INTERNAL_OUTPUT_HELPERS_H
 
-#include "../algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "IMP/base_types.h"
 
 #include <vector>

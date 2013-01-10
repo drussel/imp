@@ -1,7 +1,7 @@
 /**
  *  \file MinimumRestraint.cpp \brief Distance restraint between two particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -62,15 +62,5 @@ ModelObjectsTemp MinimumRestraint::do_get_inputs() const
   }
   return ret;
 }
-
-void MinimumRestraint::do_show(std::ostream& out) const
-{
-  out << "min k: " << k_ << std::endl;
-  for (RestraintConstIterator it= restraints_begin();
-       it != restraints_end(); ++it) {
-    (*it)->show(out);
-  }
-}
-
 
 IMPCORE_END_NAMESPACE

@@ -2,7 +2,7 @@
  *  \file density_utils.h
  *  \brief Density utilities.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,7 +11,7 @@
 
 #include <IMP/statistics/Histogram.h>
 #include <IMP/em/DensityMap.h>
-#include "cnmultifit_config.h"
+#include <IMP/cnmultifit/cnmultifit_config.h>
 
 IMPCNMULTIFIT_BEGIN_NAMESPACE
 

@@ -2,14 +2,14 @@
  * \file IMP/atom/CHARMMStereochemistryRestraint.h
  * \brief Class to maintain CHARMM stereochemistry.
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_CHARMM_STEREOCHEMISTRY_RESTRAINT_H
 #define IMPATOM_CHARMM_STEREOCHEMISTRY_RESTRAINT_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include <IMP/Pointer.h>
 #include <IMP/Restraint.h>
 #include "StereochemistryPairFilter.h"

@@ -2,7 +2,7 @@
  *  \file Model.cpp \brief Storage of a model, its restraints,
  *                         constraints and particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -82,15 +82,6 @@ ScoringFunction::do_update_dependencies(const DependencyGraph &dg,
   // but we must make sure they are ordered
   ss_= get_update_order(get_required_score_states(dg, index));
 }
-
-ModelObjectsTemp ScoringFunction::do_get_outputs() const {
-  return ModelObjectsTemp();
-}
-
-ModelObjectsTemp ScoringFunction::do_get_inputs() const {
-  return ModelObjectsTemp();
-}
-
 
 ScoreStatesTemp
 ScoringFunction::get_required_score_states(const DependencyGraph &dg,

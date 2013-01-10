@@ -6,7 +6,7 @@
  *  in tools/maintenance/container_templates/container
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -103,13 +103,6 @@ Restraints MinimumSingletonRestraint
   }
   return ret;
 }
-
-
-void MinimumSingletonRestraint::do_show(std::ostream &out) const {
-  out << "container " << *c_ << std::endl;
-  out << "score " << *f_ << std::endl;
-}
-
 
 ModelObjectsTemp MinimumSingletonRestraint::do_get_inputs() const
 {

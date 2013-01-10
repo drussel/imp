@@ -2,13 +2,13 @@
  *  \file IMP/base/Vector.h
  *  \brief A common base class for ref counted objects.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_CONVERTIBLE_VECTOR_H
 #define IMPBASE_CONVERTIBLE_VECTOR_H
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 // do not include anything more from base
 #include "Showable.h"
 #include "Value.h"

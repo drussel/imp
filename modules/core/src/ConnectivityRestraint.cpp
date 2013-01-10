@@ -4,7 +4,7 @@
  *  Restrict max distance between at least one pair of particles of any
  *  two distinct types.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -190,15 +190,6 @@ ModelObjectsTemp ConnectivityRestraint::do_get_inputs() const {
                        sc_->get_all_possible_indexes());
   ret.push_back(sc_);
   return ret;
-}
-
-void ConnectivityRestraint::do_show(std::ostream& out) const
-{
-  if (!sc_) {
-    out << "container is nullptr" << std::endl;
-  } else {
-    out << "container is " << *sc_ << std::endl;
-  }
 }
 
 IMPCORE_END_NAMESPACE

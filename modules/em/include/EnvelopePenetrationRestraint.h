@@ -2,14 +2,14 @@
  *  \file IMP/em/EnvelopePenetrationRestraint.h
  *  \brief Score how well a protein is inside its density
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_ENVELOPE_PENETRATION_RESTRAINT_H
 #define IMPEM_ENVELOPE_PENETRATION_RESTRAINT_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "DensityMap.h"
 #include <IMP/atom/Hierarchy.h>
 #include <IMP/atom/Atom.h>

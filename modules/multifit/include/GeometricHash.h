@@ -1,7 +1,7 @@
 /**
  *  \file IMP/multifit/GeometricHash.h   \brief Geometric Hashing class.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -13,7 +13,7 @@
 #include <ostream>
 #include <cmath>
 #include <boost/array.hpp>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "IMP/algebra/VectorD.h"
 
 IMPMULTIFIT_BEGIN_NAMESPACE

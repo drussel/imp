@@ -1,13 +1,13 @@
 /**
  *  \file IMP/core/Linear.h    \brief A linear function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_LINEAR_H
 #define IMPCORE_LINEAR_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include <IMP/UnaryFunction.h>
 #include <IMP/unary_function_macros.h>
 

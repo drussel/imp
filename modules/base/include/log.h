@@ -2,17 +2,17 @@
  *  \file IMP/base/log.h
  *  \brief Logging and error reporting support.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_LOG_H
 #define IMPBASE_LOG_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "enums.h"
 #include "WarningContext.h"
-#include "internal/log.h"
+#include "internal/static.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -71,7 +71,7 @@ IMPBASEEXPORT void reset_log_timer();
  */
 inline LogLevel get_log_level()
 {
-  return internal::log_level;
+  return LogLevel(FLAGS_log_level);
 }
 
 #if !defined(IMP_DOXYGEN) && !defined(SWIG)

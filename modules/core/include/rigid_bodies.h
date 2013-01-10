@@ -2,13 +2,13 @@
  *  \file IMP/core/rigid_bodies.h
  *  \brief functionality for defining rigid bodies
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCORE_RIGID_BODIES_H
 #define IMPCORE_RIGID_BODIES_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "internal/rigid_bodies.h"
 
 #include "XYZ.h"

@@ -6,13 +6,13 @@
  *  in tools/maintenance/container_templates/kernel/internal
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPKERNEL_INTERNAL_INTERNAL_DYNAMIC_LIST_QUAD_CONTAINER_H
 #define IMPKERNEL_INTERNAL_INTERNAL_DYNAMIC_LIST_QUAD_CONTAINER_H
 
-#include "../kernel_config.h"
+#include <IMP/kernel_config.h>
 #include "container_helpers.h"
 #include "ListLikeQuadContainer.h"
 #include <IMP/base/Pointer.h>

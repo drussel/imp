@@ -2,14 +2,14 @@
  *  \file IMP/atom/mol2.h
  *  \brief Functions to read mol2s
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_MOL_2_H
 #define IMPATOM_MOL_2_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Hierarchy.h"
 #include "atom_macros.h"
 #include "internal/mol2.h"

@@ -2,13 +2,13 @@
  *  \file IMP/isd/GaussianProcessInterpolation.h
  *  \brief Normal distribution of Function
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_GAUSSIAN_PROCESS_INTERPOLATION_H
 #define IMPISD_GAUSSIAN_PROCESS_INTERPOLATION_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 #include <IMP/macros.h>
 #include <boost/scoped_ptr.hpp>
 #include <IMP/isd/univariate_functions.h>

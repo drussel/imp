@@ -1,14 +1,14 @@
 /**
  *  \file IMP/core/SteepestDescent.h   \brief Simple steepest descent optimizer.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_STEEPEST_DESCENT_H
 #define IMPCORE_STEEPEST_DESCENT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 
 #include <IMP/Optimizer.h>
 #include <IMP/optimizer_macros.h>

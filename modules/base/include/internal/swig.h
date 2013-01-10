@@ -2,13 +2,13 @@
  *  \file internal/swig.h
  *  \brief Functions for use in swig wrappers
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPBASE_INTERNAL_SWIG_H
 #define IMPBASE_INTERNAL_SWIG_H
 
-#include "../base_config.h"
+#include <IMP/base/base_config.h>
 #include "graph_utility.h"
 #include "../VersionInfo.h"
 #include "../utility_macros.h"

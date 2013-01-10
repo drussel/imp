@@ -2,14 +2,14 @@
  *  \file IMP/base/threads.h
  *  \brief Control for using multiple threads in IMP
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_THREADS_H
 #define IMPBASE_THREADS_H
 #include "raii_macros.h"
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 
 IMPBASE_BEGIN_NAMESPACE
 

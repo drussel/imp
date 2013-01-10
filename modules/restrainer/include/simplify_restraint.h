@@ -2,13 +2,13 @@
  *  \file IMP/restrainer/simplify_restraint.h
  *  \brief Restrainer functions for restraints
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPRESTRAINER_SIMPLIFY_RESTRAINT_H
 #define IMPRESTRAINER_SIMPLIFY_RESTRAINT_H
 
-#include "restrainer_config.h"
+#include <IMP/restrainer/restrainer_config.h>
 #include <IMP/SingletonContainer.h>
 #include <IMP/atom.h>
 #include <IMP/core.h>

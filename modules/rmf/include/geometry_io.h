@@ -2,14 +2,14 @@
  *  \file IMP/rmf/geometry_io.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPRMF_GEOMETRY_IO_H
 #define IMPRMF_GEOMETRY_IO_H
 
-#include "rmf_config.h"
+#include <IMP/rmf/rmf_config.h>
 #include <IMP/display/declare_Geometry.h>
 #include <RMF/NodeHandle.h>
 #include <RMF/FileHandle.h>

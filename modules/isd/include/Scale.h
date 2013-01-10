@@ -2,13 +2,13 @@
  *  \file IMP/isd/Scale.h
  *  \brief A decorator for scale parameters particles
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPISD_SCALE_H
 #define IMPISD_SCALE_H
 
-#include "isd_config.h"
+#include <IMP/isd/isd_config.h>
 
 #include <IMP/PairContainer.h>
 #include <IMP/SingletonContainer.h>

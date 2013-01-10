@@ -2,14 +2,14 @@
  *  \file IMP/em/DensityHeader.h
  *  \brief Metadata for a density file.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_DENSITY_HEADER_H
 #define IMPEM_DENSITY_HEADER_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include "def.h"
 #include <IMP/exception.h>
 #include <iostream>

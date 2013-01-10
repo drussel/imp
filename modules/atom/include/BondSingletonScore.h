@@ -2,17 +2,17 @@
  *  \file IMP/atom/BondSingletonScore.h
  *  \brief A Score on the distance between a the two particles in a bond.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_BOND_SINGLETON_SCORE_H
 #define IMPATOM_BOND_SINGLETON_SCORE_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "bond_decorators.h"
 #include <IMP/SingletonScore.h>
 #include <IMP/UnaryFunction.h>
-#include <IMP/Pointer.h>
+#include <IMP/base/Pointer.h>
 
 IMPATOM_BEGIN_NAMESPACE
 
@@ -26,7 +26,7 @@ IMPATOM_BEGIN_NAMESPACE
  */
 class IMPATOMEXPORT BondSingletonScore : public SingletonScore
 {
-  IMP::OwnerPointer<UnaryFunction> f_;
+  IMP::base::OwnerPointer<UnaryFunction> f_;
 public:
   //! Use f to penalize deviations in length
   BondSingletonScore(UnaryFunction *f);

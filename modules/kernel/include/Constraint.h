@@ -1,7 +1,7 @@
 /**
  *  \file IMP/Constraint.h   \brief A base class for constraints.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -54,6 +54,15 @@ public:
   Constraint(std::string name="Constraint %1%");
 #endif
   Constraint(Model *m, std::string name="Constraint %1%");
+  virtual void do_update_attributes()=0;
+  virtual void do_update_derivatives(DerivativeAccumulator *da)=0;
+
+  virtual void do_before_evaluate() IMP_OVERRIDE {
+    do_update_attributes();
+  }
+  virtual void do_after_evaluate(DerivativeAccumulator*da) IMP_OVERRIDE {
+    if (da) do_update_derivatives(da);
+  }
   IMP_REF_COUNTED_DESTRUCTOR(Constraint);
 };
 

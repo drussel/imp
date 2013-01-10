@@ -2,14 +2,14 @@
  *  \file IMP/statistics/Embedding.h
  *  \brief Cluster sets of points.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPSTATISTICS_EMBEDDING_H
 #define IMPSTATISTICS_EMBEDDING_H
 
-#include "statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include <IMP/algebra/VectorD.h>
 #include <IMP/base/Object.h>
 #include <IMP/base/object_macros.h>

@@ -1,7 +1,7 @@
 /**
  *  \file KMData.h   \brief Holds data points to cluster using k-means
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include "../statistics_config.h"
+#include <IMP/statistics/statistics_config.h>
 #include <IMP/base_types.h>
 IMPSTATISTICS_BEGIN_INTERNAL_NAMESPACE
 

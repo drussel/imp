@@ -6,13 +6,13 @@
  *  in tools/maintenance/container_templates/container
  *  by tools/maintenance/make-container.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPCONTAINER_DYNAMIC_LIST_QUAD_CONTAINER_H
 #define IMPCONTAINER_DYNAMIC_LIST_QUAD_CONTAINER_H
 
-#include "container_config.h"
+#include <IMP/container/container_config.h>
 #include <IMP/internal/InternalDynamicListQuadContainer.h>
 
 IMPCONTAINER_BEGIN_NAMESPACE

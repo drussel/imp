@@ -2,14 +2,14 @@
  *  \file IMP/base/WarningContext.h
  *  \brief Logging and error reporting support.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPBASE_CREATE_WARNING_CONTEXT_H
 #define IMPBASE_CREATE_WARNING_CONTEXT_H
 
-#include "base_config.h"
+#include <IMP/base/base_config.h>
 #include "showable_macros.h"
 #include <IMP/compatibility/map.h>
 

@@ -2,7 +2,7 @@
  *  \file IMP/multifit/anchor_graph.h
  *  \brief anchor graph utilities
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,7 +12,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <vector>
 #include <IMP/algebra/Vector3D.h>
-#include "multifit_config.h"
+#include <IMP/multifit/multifit_config.h>
 #include "FittingSolutionRecord.h"
 #include <IMP/Object.h>
 

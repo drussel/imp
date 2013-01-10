@@ -2,14 +2,14 @@
  *  \file IMP/core/DistanceRestraint.h
  *  \brief Distance restraint between two particles.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_DISTANCE_RESTRAINT_H
 #define IMPCORE_DISTANCE_RESTRAINT_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "DistancePairScore.h"
 #include "XYZ.h"
 #include <IMP/generic.h>

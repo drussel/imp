@@ -2,13 +2,13 @@
  *  \file IMP/display/LogOptimizerState.h
  *  \brief Write geometry to a file during optimization
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDISPLAY_LOG_OPTIMIZER_STATE_H
 #define IMPDISPLAY_LOG_OPTIMIZER_STATE_H
 
-#include "display_config.h"
+#include <IMP/display/display_config.h>
 #include "declare_Geometry.h"
 #include "Writer.h"
 #include <IMP/OptimizerState.h>

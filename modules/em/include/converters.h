@@ -2,14 +2,14 @@
  *  \file IMP/em/converters.h
  *  \brief Converters of density values
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEM_CONVERTERS_H
 #define IMPEM_CONVERTERS_H
 
-#include "em_config.h"
+#include <IMP/em/em_config.h>
 #include <IMP/base_types.h>
 #include <IMP/macros.h>
 #include "DensityMap.h"

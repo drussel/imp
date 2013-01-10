@@ -2,14 +2,14 @@
  *  \file IMP/example/complex_assembly.h
  *  \brief A simple unary function.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPEXAMPLE_COMPLEX_ASSEMBLY_H
 #define IMPEXAMPLE_COMPLEX_ASSEMBLY_H
 
-#include "example_config.h"
+#include <IMP/example/example_config.h>
 #include <IMP/base_types.h>
 #include <IMP/algebra/BoundingBoxD.h>
 

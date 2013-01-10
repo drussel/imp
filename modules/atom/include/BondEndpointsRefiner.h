@@ -2,13 +2,13 @@
  *  \file IMP/atom/BondEndpointsRefiner.h
  *  \brief Return the endpoints of a bond.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPATOM_BOND_ENDPOINTS_REFINER_H
 #define IMPATOM_BOND_ENDPOINTS_REFINER_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 
 #include <IMP/Refiner.h>
 #include <IMP/refiner_macros.h>

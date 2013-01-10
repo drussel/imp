@@ -2,14 +2,14 @@
  *  \file IMP/atom/DopePairScore.h
  *  \brief Dope scoring
  *
- *  Copyright 2007-2010 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPATOM_DOPE_PAIR_SCORE_H
 #define IMPATOM_DOPE_PAIR_SCORE_H
 
-#include "atom_config.h"
+#include <IMP/atom/atom_config.h>
 #include "Hierarchy.h"
 #include <IMP/core/StatisticalPairScore.h>
 

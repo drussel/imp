@@ -1,14 +1,14 @@
 /**
  *  \file IMP/algebra/BoundingBoxD.h   \brief A bounding box in D dimensions.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPALGEBRA_BOUNDING_BOX_D_H
 #define IMPALGEBRA_BOUNDING_BOX_D_H
 
-#include "algebra_config.h"
+#include <IMP/algebra/algebra_config.h>
 #include "VectorD.h"
 #include "algebra_macros.h"
 #include <IMP/base/exception.h>

@@ -2,14 +2,14 @@
  *  \file IMP/core/BallMover.h
  *  \brief A modifier which variables within a ball.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPCORE_BALL_MOVER_H
 #define IMPCORE_BALL_MOVER_H
 
-#include "core_config.h"
+#include <IMP/core/core_config.h>
 #include "MonteCarlo.h"
 #include "MoverBase.h"
 

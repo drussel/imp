@@ -2,13 +2,13 @@
  *  \file IMP/domino/utility.h
  *  \brief Functions to get report statistics about the used attributes.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPDOMINO_UTILITY_H
 #define IMPDOMINO_UTILITY_H
 
-#include "domino_config.h"
+#include <IMP/domino/domino_config.h>
 #include "Assignment.h"
 #include "Subset.h"
 #include "particle_states.h"
