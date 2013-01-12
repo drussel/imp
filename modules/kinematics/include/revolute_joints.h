@@ -31,16 +31,16 @@ IMPKINEMATICS_BEGIN_NAMESPACE
 
 class KinematicForest;
 
-inline void nice_print_trans(const IMP::algebra::Transformation3D& T,
-                             std::string description)
-{
-  std::pair< IMP::algebra::Vector3D, double > aa;
-  aa = IMP::algebra::get_axis_and_angle( T.get_rotation() );
-  IMP_LOG( VERBOSE, description << "axis = " << aa.first
-           << "; angle = " << IMP_RAD_2_DEG(aa.second) << " deg"
-           << "; translation = " << T.get_translation()
-           << std::endl );
-}
+// inline void nice_print_trans(const IMP::algebra::Transformation3D& T,
+//                              std::string description)
+// {
+//   std::pair< IMP::algebra::Vector3D, double > aa;
+//   aa = IMP::algebra::get_axis_and_angle( T.get_rotation() );
+//   IMP_LOG( VERBOSE, description << "axis = " << aa.first
+//            << "; angle = " << IMP_RAD_2_DEG(aa.second) << " deg"
+//            << "; translation = " << T.get_translation()
+//            << std::endl );
+// }
 
 
 /********************** RevoluteJoint ***************/
@@ -152,7 +152,7 @@ public Joint{
         IMP::algebra::get_rotation_about_point(rot_axis_origin_, R);
 
       // debug prints
-      nice_print_trans(R_origin, "R_origin: ");
+      //nice_print_trans(R_origin, "R_origin: ");
 
       return R_origin;
     }
@@ -214,7 +214,7 @@ DihedralAngleRevoluteJoint : public RevoluteJoint{
         > 1e-12 ,
         "witnesses b and c must be non identical beyone numerical error" );
     ReferenceFrame3D rf_parent = get_parent_node().get_reference_frame();
-    nice_print_trans(rf_parent.get_transformation_to(), "Parent trans: ");
+    //nice_print_trans(rf_parent.get_transformation_to(), "Parent trans: ");
     rot_axis_origin_ = rf_parent.get_local_coordinates( b_.get_coordinates() );
     IMP_LOG( VERBOSE, "global b_ " << b_.get_coordinates()
              <<  " and local parent b_ " << rot_axis_origin_ << std::endl);

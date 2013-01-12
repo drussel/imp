@@ -12,9 +12,11 @@ IMPKINEMATICS_BEGIN_NAMESPACE
 
 int RRT::RRTNode::node_counter_ = 0;
 
-RRT::RRT(Model *m, DOFsSampler* sampler, LocalPlanner* planner,
+RRT::RRT(Model *m, DOFsSampler* dofs_sampler, LocalPlanner* planner,
          const DOFs& cspace_dofs) :
-  model_(m), sampler_(sampler), local_planner_(planner),
+  Sampler(m, "rrt_sampler"),
+  dofs_sampler_(dofs_sampler),
+  local_planner_(planner),
   cspace_dofs_(cspace_dofs),
   default_parameters_(100) // 100 iterations by default
 {
@@ -60,7 +62,7 @@ void RRT::run() {
   Parameters current_counters;
   while( ! is_stop_condition(default_parameters_, current_counters) ){
     std::cerr << "RRT " << current_counters.number_of_iterations_ << std::endl;
-    DOFValues q_rand = sampler_->get_sample();
+    DOFValues q_rand = dofs_sampler_->get_sample();
     RRTNode* q_near_node = get_q_near(q_rand);
     std::vector<DOFValues> new_nodes =
       local_planner_->plan(q_near_node->get_DOFValues(), q_rand);

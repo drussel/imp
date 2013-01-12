@@ -41,7 +41,8 @@ std::vector<DOFValues> PathLocalPlanner::plan(DOFValues q_from,
   }
   // add last valid path node in any case
   else {
-    if(d_->get_dofs_values() != dofs_list.back()) {
+    if(dofs_list.size() > 0 &&
+       d_->get_dofs_values() != dofs_list.back()) {
       dofs_list.push_back( d_->get_dofs_values() );
     }
   }

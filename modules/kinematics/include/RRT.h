@@ -1,22 +1,30 @@
 /**
- * \file RRT \brief
+ * \file RRT
+ * \brief simple RRT implementation
  *
- * Copyright 2007-2010 Sali Lab. All rights reserved.
+ *  \authors Dina Schneidman, Barak Raveh
+ *
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #ifndef IMPKINEMATICS_RR_T_H
 #define IMPKINEMATICS_RR_T_H
 
-#include "kinematics_config.h"
-#include "DOF.h"
-#include "DOFValues.h"
-#include "local_planners.h"
+#include <IMP/kinematics/kinematics_config.h>
+#include <IMP/kinematics/DOF.h>
+#include <IMP/kinematics/DOFValues.h>
+#include <IMP/kinematics/local_planners.h>
+
+#include <IMP/Sampler.h>
+#include <IMP/ConfigurationSet.h>
 
 IMPKINEMATICS_BEGIN_NAMESPACE
 
-class IMPKINEMATICSEXPORT RRT {
+class IMPKINEMATICSEXPORT RRT : public IMP::Sampler {
  public:
+  IMP_OBJECT_METHODS(RRT);
+
   // simple RRT node implementation
   // we may replace it with something from boost so we can use boost graph
   class RRTNode {
@@ -97,6 +105,14 @@ class IMPKINEMATICSEXPORT RRT {
   RRT(Model *m, DOFsSampler* sampler, LocalPlanner* planner,
       const DOFs& cspace_dofs);
 
+  // function required by Sampler
+  // TODO: think how to save configurations in internal coords
+  // to be more memory efficient
+  IMP::ConfigurationSet* do_sample() const {
+    const_cast<RRT*>(this)->run();
+    return nullptr;
+  }
+
   void run();
 
   std::vector<DOFValues> get_DOFValues();
@@ -137,10 +153,8 @@ class IMPKINEMATICSEXPORT RRT {
             counters.number_of_collisions_ > parameters.number_of_collisions_);
   }
 
-
  private:
-  IMP::Model *model_;
-  DOFsSampler* sampler_;
+  DOFsSampler* dofs_sampler_;
   LocalPlanner* local_planner_;
   typedef std::vector<RRTNode*> RRTTree;
   RRTTree tree_;

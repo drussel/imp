@@ -6,6 +6,7 @@
 #include <IMP/Particle.h>
 
 #include <IMP/algebra/Vector3D.h>
+#include <IMP/container/generic.h>
 
 #include <IMP/core/XYZR.h>
 #include <IMP/core/SphereDistancePairScore.h>
@@ -87,6 +88,9 @@ int main(int argc, char **argv)
   IMP::ParticlesTemp bonds =  topology->add_bonds(mhd);
   IMP::ParticlesTemp angles = ff->create_angles(bonds);
   IMP::ParticlesTemp dihedrals = ff->create_dihedrals(bonds);
+  std::cerr << "# bonds " << bonds.size()
+            << " # angles " << angles.size()
+            << " # dihedrals " << dihedrals.size() << std::endl;
 
   // add radius
   ff->add_radii(mhd);
@@ -103,8 +107,11 @@ int main(int argc, char **argv)
   IMP_NEW(IMP::container::ClosePairContainer, cpc, (lsc, 15.0));
   cpc->add_pair_filter(pair_filter);
 
-  IMP::core::SoftSpherePairScore score(1);
-  IMP_NEW(IMP::container::PairsRestraint, pr, (&score, cpc));
+  IMP_NEW(IMP::core::SoftSpherePairScore,  score,(1));
+  IMP_NEW(IMP::container::PairsRestraint, pr, (score, cpc));
+
+  // TODO: check why not working: should be much faster
+  //IMP::base::Pointer<IMP::Restraint> pr= IMP::container::create_restraint(score, cpc);
   model->add_restraint(pr);
 
   // create phi/psi joints
@@ -119,23 +126,27 @@ int main(int argc, char **argv)
   // create dofs
   DOFs dofs;
   for(unsigned int i=0; i<joints.size(); i++) {
+    std::cerr << "Angle = " << joints[i]->get_angle() << std::endl;
     IMP_NEW(DOF, dof, (joints[i]->get_angle(),
                        -IMP::algebra::PI,
                        IMP::algebra::PI,
                        IMP::algebra::PI/360));
     dofs.push_back(dof);
   }
-
-  std::cerr << "DOFs done" << std::endl;
   UniformBackboneSampler sampler(joints, dofs);
+  DOFValues val(dofs);
+  std::cerr << "DOFs done" << std::endl;
+
   DirectionalDOF dd(dofs);
   PathLocalPlanner planner(model, &sampler, &dd, 10);
   std::cerr << "Start RRT" << std::endl;
-  RRT rrt(model, &sampler, &planner, dofs);
+  IMP_NEW(RRT, rrt, (model, &sampler, &planner, dofs));
   std::cerr << "Start RRT run" << std::endl;
-  rrt.run();
+  rrt->run();
   std::cerr << "Done RRT" << std::endl;
-  std::vector<DOFValues> dof_values = rrt.get_DOFValues();
+
+  // output PDBs
+  std::vector<DOFValues> dof_values = rrt->get_DOFValues();
   for(unsigned int i = 0; i<dof_values.size(); i++) {
     sampler.apply(dof_values[i]);
     kfss->do_before_evaluate();

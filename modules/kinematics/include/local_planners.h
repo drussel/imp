@@ -18,22 +18,27 @@ IMPKINEMATICS_BEGIN_NAMESPACE
 /* general interface */
 class IMPKINEMATICSEXPORT LocalPlanner{
 public:
-  LocalPlanner(Model* model, DOFsSampler* sampler) :
-    model_(model), sampler_(sampler) {}
+  LocalPlanner(Model* model, DOFsSampler* dofs_sampler) :
+    model_(model), dofs_sampler_(dofs_sampler) {
+    sf_= model_->create_model_scoring_function();
+  }
 
   virtual std::vector<DOFValues> plan(DOFValues q_near,
                                       DOFValues q_rand) = 0;
 
   bool is_valid(const DOFValues& values) {
-    sampler_->apply(values);
-    double score = model_->evaluate(false);
-    std::cerr << "score = " << score << std::endl;
-    return true; //(model_->evaluate(false)>0)?false:true; //_if_below(); //???
+    dofs_sampler_->apply(values);
+    double score = sf_->evaluate_if_below(false, 0.0); //TODO: what should be here?
+    //std::cerr << "score = " << score << std::endl;
+    if(score <= 0.000001)
+      return true;
+    return false;
   }
 
 protected:
-  Model* model_;
-  DOFsSampler* sampler_;
+  OwnerPointer<Model> model_;
+  DOFsSampler* dofs_sampler_;
+  OwnerPointer<ScoringFunction> sf_;
 };
 
 
@@ -44,10 +49,10 @@ protected:
 class IMPKINEMATICSEXPORT PathLocalPlanner : public LocalPlanner {
 public:
   // default path sampling is linear
-  PathLocalPlanner(Model* model, DOFsSampler* sampler,
+  PathLocalPlanner(Model* model, DOFsSampler* dofs_sampler,
                    DirectionalDOF* directional_dof,
                    int save_step_interval = 1) :
-    LocalPlanner(model, sampler),
+    LocalPlanner(model, dofs_sampler),
     d_(directional_dof),
     save_step_interval_(save_step_interval) {}
 

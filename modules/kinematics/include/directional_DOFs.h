@@ -3,7 +3,7 @@
  * \brief
  * \authors Dina Schneidman, Barak Raveh
  *
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -21,13 +21,12 @@ IMPKINEMATICS_BEGIN_NAMESPACE
 */
 class IMPKINEMATICSEXPORT DirectionalDOF {
 public:
-  DirectionalDOF(const DOFs& dofs):
-    dofs_(dofs), endpoint1_(dofs_.size()), endpoint2_(dofs_.size()),
-    current_delta_(dofs_.size()) {}
+  DirectionalDOF(const DOFs& dofs): dofs_(dofs) {}
 
   void set_end_points(const DOFValues& q1, const DOFValues& q2) {
     endpoint1_ = q1;
     endpoint2_ = q2;
+    current_delta_.resize(dofs_.size());
     // TODO: check that the size of dofs_, q1 and q2 is the same
     // IMP_CHECK...
 
@@ -41,7 +40,7 @@ public:
     }
 
     for(unsigned int i=0; i<dofs_.size(); i++) {
-      current_delta_[i] = (endpoint1_[i], endpoint2_[i])/step_number_;
+      current_delta_[i] = (endpoint2_[i] - endpoint1_[i])/step_number_;
     }
 
     current_step_number_ = 0;

@@ -31,9 +31,10 @@ UniformBackboneSampler::UniformBackboneSampler(
 }
 
 DOFValues UniformBackboneSampler::get_sample() const {
-  DOFValues v(dofs_.size());
+  DOFValues v;
+  v.reserve(dofs_.size());
   for(unsigned int i=0; i<dofs_.size(); i++) {
-    v[i] = u_rand_[i](const_cast<UniformBackboneSampler*>(this)->rng_);
+    v.push_back(u_rand_[i](const_cast<UniformBackboneSampler*>(this)->rng_));
   }
   const_cast<UniformBackboneSampler*>(this)->last_sample_ = v;
   return v;
