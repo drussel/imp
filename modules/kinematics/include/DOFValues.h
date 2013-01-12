@@ -1,7 +1,10 @@
 /**
- * \file DOFValues \brief
+ * \file DOFValues
+ * \brief a simple class for storage of DOF values.
  *
- * Copyright 2007-2010 Sali Lab. All rights reserved.
+ *  \authors Dina Schneidman, Barak Raveh
+ *
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -19,13 +22,10 @@ class IMPKINEMATICSEXPORT DOFValues : public std::vector<double> {
 public:
   // Constructor from DOFs
   DOFValues(const DOFs& dofs) {
-    resize(dofs.size());
+    reserve(dofs.size());
     for(unsigned int i=0; i<dofs.size(); i++)
       push_back(dofs[i]->get_value());
   }
-
-  // Constructor that allocates memory
-  DOFValues(unsigned int n) { resize(n); }
 
   // Empty Constructor
   DOFValues() {}

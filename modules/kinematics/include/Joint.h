@@ -4,13 +4,13 @@
  *         as part of a kinematic tree
  *  \authors Dina Schneidman, Barak Raveh
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef IMPKINEMATICS_JOINT_H
 #define IMPKINEMATICS_JOINT_H
 
-#include "kinematics_config.h"
+#include <IMP/kinematics/kinematics_config.h>
 #include <IMP/kinematics/KinematicNode.h>
 #include <IMP/base/Object.h>
 #include <IMP/compatibility/nullptr.h>

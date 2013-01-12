@@ -28,9 +28,7 @@ class IMPKINEMATICSEXPORT KinematicForestScoreState : public IMP::ScoreState {
 
   // functions that ScoreState requires
   void do_before_evaluate() {
-    std::cerr << " before kf update " << std::endl;
     kf_->update_all_external_coordinates();
-    std::cerr << " after kf update " << std::endl;
   }
 
   void do_after_evaluate(DerivativeAccumulator *da) { IMP_UNUSED(da); }
