@@ -121,6 +121,11 @@ IMP_SWIG_OBJECT(IMP::kernel,Configuration, Configurations);
 IMP_SWIG_OBJECT(IMP::kernel,Model, Models);
 IMP_SWIG_OBJECT(IMP::kernel,Particle, Particles);
 
+IMP_SWIG_SHOWABLE_VALUE(IMP::kernel, ImplementDecoratorTraits);
+IMP_SWIG_SHOWABLE_VALUE(IMP::kernel, ImplementDecorator0);
+IMP_SWIG_SHOWABLE_VALUE(IMP::kernel, ImplementDecorator1);
+
+
 #if IMP_HAS_DEPRECATED
 IMP_SWIG_BASE_OBJECT(IMP::kernel::internal,PythonRestraint, PythonRestraints);
 IMP_SWIG_BASE_OBJECT(IMP::kernel::internal,PythonScoreState, PythonScoreStates);
@@ -170,9 +175,9 @@ IMP_SWIG_BASE_OBJECT(IMP::kernel, ScoringFunction, ScoringFunctions);
 IMP_SWIG_BASE_OBJECT(IMP::kernel, ModelObject, ModelObjects);
 
 
-IMP_SWIG_DECORATOR(IMP::kernel::internal, _TrivialDecorator, _TrivialDecorators);
-IMP_SWIG_DECORATOR(IMP::kernel::internal, _TrivialDerivedDecorator, _TrivialDerivedDecorators);
-IMP_SWIG_DECORATOR_WITH_TRAITS(IMP::kernel::internal, _TrivialTraitsDecorator, _TrivialTraitsDecorators);
+IMP_SWIG_DECORATOR_2(IMP::kernel::internal, _TrivialDecorator, _TrivialDecorators);
+IMP_SWIG_DECORATOR_2(IMP::kernel::internal, _TrivialDerivedDecorator, _TrivialDerivedDecorators);
+IMP_SWIG_DECORATOR_WITH_TRAITS_2(IMP::kernel::internal, _TrivialTraitsDecorator, _TrivialTraitsDecorators);
 IMP_SWIG_OBJECT(IMP::kernel::internal, _ConstRestraint, _ConstRestraints);
 IMP_SWIG_OBJECT(IMP::kernel::internal, _ConstOptimizer, _ConstOptimizers);
 IMP_SWIG_GRAPH(IMP::kernel, DependencyGraph, DependencyGraph, IMP::kernel::ModelObject*);
@@ -197,16 +202,6 @@ namespace kernel {
   %template(ParticleIndex) ::IMP::base::Index<IMP::ParticleIndexTag>;
 }
 }
-
-%inline %{
-namespace IMP {
-namespace kernel {
-template <class T, class P, class E>
-class Decorators;
-}
-}
-%}
-
 
 %pythoncode %{
   def ParticlePair(a, b):
@@ -252,6 +247,7 @@ namespace kernel {
 %include "IMP/kernel/Undecorator.h"
 %include "IMP/kernel/declare_Model.h"
 %include "IMP/kernel/Decorator.h"
+%include "IMP/kernel/decorator_helpers.h"
 %include "IMP/kernel/UnaryFunction.h"
 %include "IMP/kernel/OptimizerState.h"
 %include "IMP/kernel/Refiner.h"
@@ -281,6 +277,16 @@ namespace kernel {
 %include "IMP/kernel/declare_TripletContainer.h"
 %include "IMP/kernel/io.h"
 %include "IMP/kernel/internal/swig.h"
+namespace IMP {
+namespace kernel {
+namespace internal {
+%template(_TrivialDecorator) IMP::kernel::ImplementDecorator0<_TrivialDecoratorImplementation>;
+%template(_TrivialDerivedDecorator) IMP::kernel::ImplementDecorator0<_TrivialDerivedDecoratorImplementation>;
+%template(_TrivialTraitsDecorator) IMP::kernel::ImplementDecoratorTraits<_TrivialTraitsDecoratorImplementation, IMP::kernel::StringKey>;
+}
+}
+}
+
 %include "IMP/kernel/scoped.h"
 
 

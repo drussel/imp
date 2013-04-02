@@ -68,6 +68,7 @@ ${PROJECT_SOURCE_DIR}/modules/kernel/include/declare_Particle.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/declare_Restraint.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/declare_RestraintSet.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/declare_ScoringFunction.h
+${PROJECT_SOURCE_DIR}/modules/kernel/include/decorator_helpers.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/decorator_macros.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/dependency_graph.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/doxygen.h

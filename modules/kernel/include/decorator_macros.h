@@ -15,7 +15,7 @@
 #include <IMP/base/warning_macros.h>
 #include <IMP/kernel/internal/static.h>
 
-/** Use IMP_DECORATOR_2() as this macro is deprecated.*/
+/** Use IMP::kernel::ImplementDecorator0 and kin as this macro is deprecated.*/
 #define IMP_DECORATOR(Name, Parent)                                     \
   public:                                                               \
   /* Should be private but SWIG accesses it through the comparison
@@ -202,6 +202,21 @@ public:                                                                 \
     IMP_DECORATOR_SET(AttributeKey, t);                         \
   }                                                             \
   IMP_REQUIRE_SEMICOLON_CLASS(getset_##name)
+
+
+#define IMP_DECORATORS_DECL_2(Name, PluralName)      \
+  class Name;                                        \
+  typedef IMP::base::Vector<Name> PluralName
+
+#define IMP_DECORATORS_DEF_2(Name, PluralName)                \
+  inline std::ostream &operator<<(std::ostream &out, Name n) {  \
+    n.show(out);                                                \
+    return out;                                                 \
+  }
+
+#define IMP_DECORATORS_2(Name, PluralName)      \
+  IMP_DECORATORS_DECL_2(Name, PluralName);      \
+  IMP_DECORATORS_DEF_2(Name, PluralName)
 
 
 #ifdef IMP_DOXYGEN

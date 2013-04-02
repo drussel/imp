@@ -69,19 +69,6 @@ ParticlesTemp _ConstPairScore::get_input_particles(Particle *p) const {
 }
 
 
-void _TrivialDecorator::show(std::ostream &out) const {
-  out << "trivial decorator " << get_particle()->get_name();
-}
-void _TrivialDerivedDecorator::show(std::ostream &out) const {
-  out << "trivial derived decorator " << get_particle()->get_name();
-}
-
-void _TrivialTraitsDecorator::show(std::ostream &out) const {
-  out << "trivial traits decorator "<< get_particle()->get_name()
-      << " with " << get_decorator_traits();
-}
-
-
 
 double _ConstOptimizer::do_optimize(unsigned int n) {
   for (unsigned int i=0; i < n; ++i) {

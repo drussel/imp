@@ -16,6 +16,7 @@
 #include "../PairScore.h"
 #include "../macros.h"
 #include "../Decorator.h"
+#include "../decorator_helpers.h"
 #include "../file.h"
 #include "../Optimizer.h"
 #include "container_helpers.h"
@@ -64,60 +65,86 @@ public:
 };
 IMP_OBJECTS(_ConstPairScore, _ConstPairScores);
 
-
-class IMPKERNELEXPORT _TrivialDecorator: public Decorator {
-public:
-  IMP_DECORATOR(_TrivialDecorator, Decorator);
-  static _TrivialDecorator setup_particle(Particle *p) {
-    p->add_attribute(IntKey("trivial_attribute"), 1);
-    return _TrivialDecorator(p);
+class _TrivialDecoratorImplementation: public Decorator {
+protected:
+  static void do_setup(Model *m, ParticleIndex pi) {
+    m->add_attribute(IntKey("trivial_attribute"), pi, 1);
   }
-  static bool particle_is_instance(Particle *p) {
-    return p->has_attribute(IntKey("trivial_attribute"));
+  static void do_teardown(Model *m, ParticleIndex pi) {
+    m->remove_attribute(IntKey("trivial_attribute"), pi);
   }
-};
-
-class IMPKERNELEXPORT _TrivialDerivedDecorator: public _TrivialDecorator {
-public:
-  IMP_DECORATOR(_TrivialDerivedDecorator, _TrivialDecorator);
-  static _TrivialDerivedDecorator setup_particle(Particle *p) {
-    p->add_attribute(IntKey("trivial_attribute_2"), 2);
-    _TrivialDecorator::setup_particle(p);
-    return _TrivialDerivedDecorator(p);
+  static bool do_get_was_setup(Model *m, ParticleIndex pi) {
+    return m->get_has_attribute(IntKey("trivial_attribute"), pi);
   }
-  static bool particle_is_instance(Particle *p) {
-    return p->has_attribute(IntKey("trivial_attribute_2"));
+  static std::string get_name() {
+    return "TrivialDecorator";
+  }
+  void do_show(std::ostream &) const {
   }
 };
 
-IMP_DECORATORS(_TrivialDecorator, _TrivialDecorators, ParticlesTemp);
-IMP_DECORATORS(_TrivialDerivedDecorator,
-               _TrivialDerivedDecorators, _TrivialDecorators);
+typedef IMP::kernel::ImplementDecorator0<_TrivialDecoratorImplementation>
+_TrivialDecorator;
+
+class  _TrivialDerivedDecoratorTraits: public _TrivialDecorator {
+  static void do_setup(Model *m, ParticleIndex pi) {
+    _TrivialDecorator::setup(m, pi);
+    m->add_attribute(IntKey("trivial_attribute_2"), pi, 1);
+  }
+  static void do_teardown(Model *m, ParticleIndex pi) {
+    m->remove_attribute(IntKey("trivial_attribute_2"), pi);
+    _TrivialDecorator::teardown(m, pi);
+  }
+  static bool do_get_was_setup(Model *m, ParticleIndex pi) {
+    return m->get_has_attribute(IntKey("trivial_attribute_2"), pi)
+        && _TrivialDecorator::get_was_setup(m, pi);
+  }
+  static std::string get_name() {
+    return "TrivialDerivedDecorator";
+  }
+  void do_show(std::ostream &) const {
+  }
+};
+
+typedef IMP::kernel::ImplementDecorator0<_TrivialDerivedDecoratorImplementation>
+_TrivialDerivedDecorator;
+
+IMP_DECORATORS_2(_TrivialDecorator, _TrivialDecorators);
+IMP_DECORATORS_2(_TrivialDerivedDecorator,
+                 _TrivialDerivedDecorators);
 
 
-class IMPKERNELEXPORT _TrivialTraitsDecorator:
-public Decorator
+class _TrivialTraitsDecoratorImplementation: public Decorator
 {
-public:
-  IMP_DECORATOR_WITH_TRAITS(_TrivialTraitsDecorator, Decorator,
-                       StringKey, sk,
-                       get_default_key());
-  static _TrivialTraitsDecorator setup_particle(Particle *p,
-                                                StringKey k=get_default_key()) {
-    p->add_attribute(k, "hi");
-    return _TrivialTraitsDecorator(p, k);
+  StringKey k_;
+ protected:
+  static void do_setup(Model *m, ParticleIndex pi, StringKey k) {
+    m->add_attribute(k, pi, "hi");
   }
-  static bool particle_is_instance(Particle *p,
-                                   StringKey k=get_default_key()) {
-    return p->has_attribute(k);
+  static void do_teardown(Model *m, ParticleIndex pi, StringKey k) {
+    m->remove_attribute(k, pi);
   }
-  static StringKey get_default_key() {
-    return StringKey("traits dec");
+  static bool do_get_was_setup(Model *m, ParticleIndex pi, StringKey k) {
+    return m->get_has_attribute(k, pi);
+  }
+  void set_traits(StringKey k) {
+    k_ = k;
+  }
+  static StringKey get_default_traits() {
+    return StringKey("mykey");
+  }
+  static std::string get_name() {
+    return "TrivialTraitsDecorator";
+  }
+  void do_show(std::ostream &) const {
   }
 };
 
-IMP_DECORATORS_WITH_TRAITS(_TrivialTraitsDecorator,
-                           _TrivialTraitsDecorators, Particles);
+typedef ImplementDecoratorTraits<_TrivialTraitsDecoratorImplementation>
+_TrivialTraitsDecorator;
+
+IMP_DECORATORS_2(_TrivialTraitsDecorator,
+                 _TrivialTraitsDecorators);
 
 
 

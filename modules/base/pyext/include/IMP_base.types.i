@@ -593,7 +593,33 @@ _value_types.append(#Name)
 
 
 
+%define IMP_SWIG_DECORATOR_BASE_2(Namespace, Name, PluralName)
+IMP_SWIG_VALUE_CHECKS(Namespace, Name, SWIGTYPE);
+IMP_SWIG_SEQUENCE_TYPEMAP(Namespace, Namespace::Name, PluralName, const&);
+IMP_SWIG_SEQUENCE_TYPEMAP(Namespace, Namespace::Name, PluralName,);
 
+%feature("valuewrapper") PluralName;
+%enddef
+
+%define IMP_SWIG_DECORATOR_2(Namespace, Name, PluralName)
+IMP_SWIG_DECORATOR_BASE_2(Namespace, Name, PluralName);
+%{
+  BOOST_STATIC_ASSERT(Convert< Namespace::Name >::converter==3);
+%}
+%pythoncode %{
+_value_types.append(#Name)
+%}
+%enddef
+
+%define IMP_SWIG_DECORATOR_WITH_TRAITS_2(Namespace, Name, PluralName)
+IMP_SWIG_DECORATOR_BASE_2(Namespace, Name, PluralName);
+%{
+  BOOST_STATIC_ASSERT(Convert< Namespace::Name >::converter==4);
+%}
+%pythoncode %{
+_value_types.append(#Name)
+%}
+%enddef
 
 
 

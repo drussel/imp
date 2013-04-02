@@ -28,7 +28,7 @@ template <class Decorator>
 class DecoratorUndecorator: public Undecorator {
   DecoratorUndecorator(Model *m, std::string name): Undecorator(m, name) {}
   virtual void teardown(ParticleIndex pi) const IMP_OVERRIDE {
-    Decorator::teardown_particle(Undecorator::get_model(), pi);
+    Decorator::teardown(Undecorator::get_model(), pi);
   }
 };
 
@@ -40,6 +40,25 @@ Undecorator* create_undecorator(Model *m, std::string name) {
     undecorators[name] = new DecoratorUndecorator<Decorator>(m, name);
   }
   return undecorators.find(name)->second;
+}
+
+
+template <class Decorator, class Traits>
+class TraitsDecoratorUndecorator: public Undecorator {
+  Traits tr_;
+  TraitsDecoratorUndecorator(Model *m, Traits tr, std::string name):
+      Undecorator(m, name), tr_(tr) {}
+  virtual void teardown(ParticleIndex pi) const IMP_OVERRIDE {
+    Decorator::teardown(Undecorator::get_model(), pi, tr_);
+  }
+};
+
+/** Create an undecorator for a given Decorator that calls the
+    decorator types teardown_particle() method.*/
+template <class Decorator, class Traits>
+Undecorator* create_traits_undecorator(Model *m, Traits tr,
+                                       std::string name) {
+  return new TraitsDecoratorUndecorator<Decorator, Traits>(m, tr, name);
 }
 
 #endif
