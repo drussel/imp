@@ -117,11 +117,6 @@ class Decorator: public base::Value
 private:
   WeakPointer<Model> model_;
   ParticleIndex pi_;
-  int compare(base::Object *o) const {
-    if (o < get_particle()) return -1;
-    else if (o > get_particle()) return 1;
-    else return 0;
-  }
 public:
  ParticleIndex get_particle_index() const {
     return pi_;
@@ -130,6 +125,11 @@ public:
   typedef Particle* ParticleP;
 #endif
 #ifndef IMP_DOXYGEN
+  int compare(base::Object *o) const {
+    if (o < get_particle()) return -1;
+    else if (o > get_particle()) return 1;
+    else return 0;
+  }
   Decorator(Model *m, ParticleIndex pi) {
     initialize(m, pi);
   }

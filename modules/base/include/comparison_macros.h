@@ -93,31 +93,31 @@
   int __cmp__(const Name &o) const {                                    \
     return compare(o);                                                  \
   }                                                                     \
-  IMP_HELPER_MACRO_POP_WARNINGS                                        \
+  IMP_HELPER_MACRO_POP_WARNINGS                                         \
   IMP_REQUIRE_SEMICOLON_CLASS(comparisons)
 
 #define IMP_COMPARISONS(Name)                                           \
   IMP_SWIG_COMPARISONS(Name);                                           \
   IMP_HELPER_MACRO_PUSH_WARNINGS                                        \
   bool operator==(const Name &o) const {                                \
-    return (Name::compare(o) == 0);                                     \
+    return (compare(o) == 0);                                           \
   }                                                                     \
   bool operator!=(const Name &o) const {                                \
-    return (Name::compare(o) != 0);                                     \
+    return (compare(o) != 0);                                           \
   }                                                                     \
   bool operator<(const Name &o) const {                                 \
-    return (Name::compare(o) <0);                                       \
+    return (compare(o) <0);                                             \
   }                                                                     \
   bool operator>(const Name &o) const {                                 \
     return (compare(o) > 0);                                            \
   }                                                                     \
   bool operator>=(const Name &o) const {                                \
-    return !(Name::compare(o) < 0);                                     \
+    return !(compare(o) < 0);                                           \
   }                                                                     \
   bool operator<=(const Name &o) const {                                \
-    return !(Name::compare(o) > 0);                                     \
+    return !(compare(o) > 0);                                           \
   }                                                                     \
-  IMP_HELPER_MACRO_POP_WARNINGS                                        \
+  IMP_HELPER_MACRO_POP_WARNINGS                                         \
   template <class T> friend int compare(const T&a, const T&b)
 
 #define IMP_COMPARISONS_1(Name, field)                                  \

@@ -591,17 +591,28 @@ _value_types.append(#Name)
 %enddef
 
 
+%inline %{
+  namespace IMP {
+    namespace kernel {
+      template <class P> class ImplementDecorator;
+      template <class P> class ImplementDecorator0;
+      template <class P, class Q> class ImplementDecorator1;
+    }
+  }
+  %}
 
 
 %define IMP_SWIG_DECORATOR_BASE_2(Namespace, Name, PluralName)
 IMP_SWIG_VALUE_CHECKS(Namespace, Name, SWIGTYPE);
 IMP_SWIG_SEQUENCE_TYPEMAP(Namespace, Namespace::Name, PluralName, const&);
 IMP_SWIG_SEQUENCE_TYPEMAP(Namespace, Namespace::Name, PluralName,);
-
 %feature("valuewrapper") PluralName;
 %enddef
 
-%define IMP_SWIG_DECORATOR_2(Namespace, Name, PluralName)
+%define IMP_SWIG_DECORATOR_0(Namespace, Name, PluralName)
+%template(Name) IMP::kernel::ImplementDecorator<Namespace::Name##Implementation>;
+%template(Name) IMP::kernel::ImplementDecorator0<Namespace::Name##Implementation>;
+%rename(_##Name##Implementation) Namespace::Name##Implementation;
 IMP_SWIG_DECORATOR_BASE_2(Namespace, Name, PluralName);
 %{
   BOOST_STATIC_ASSERT(Convert< Namespace::Name >::converter==3);

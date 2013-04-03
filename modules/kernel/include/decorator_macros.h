@@ -204,19 +204,6 @@ public:                                                                 \
   IMP_REQUIRE_SEMICOLON_CLASS(getset_##name)
 
 
-#define IMP_DECORATORS_DECL_2(Name, PluralName)      \
-  class Name;                                        \
-  typedef IMP::base::Vector<Name> PluralName
-
-#define IMP_DECORATORS_DEF_2(Name, PluralName)                \
-  inline std::ostream &operator<<(std::ostream &out, Name n) {  \
-    n.show(out);                                                \
-    return out;                                                 \
-  }
-
-#define IMP_DECORATORS_2(Name, PluralName)      \
-  IMP_DECORATORS_DECL_2(Name, PluralName);      \
-  IMP_DECORATORS_DEF_2(Name, PluralName)
 
 
 #ifdef IMP_DOXYGEN

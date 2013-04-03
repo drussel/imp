@@ -123,6 +123,7 @@ ${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/scoring_functions.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/static.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/swig.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/swig_helpers.h
+${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/undecorators.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/units.h
 ${PROJECT_SOURCE_DIR}/modules/kernel/include/internal/utility.h)
 

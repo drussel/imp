@@ -85,8 +85,15 @@ protected:
 
 typedef IMP::kernel::ImplementDecorator0<_TrivialDecoratorImplementation>
 _TrivialDecorator;
+IMP_VALUES(_TrivialDecorator, _TrivialDecorators);
 
-class  _TrivialDerivedDecoratorTraits: public _TrivialDecorator {
+// work around swig
+#ifdef SWIG
+%template(_TrivialDecoratorBase) IMP::kernel::ImplementDecorator<IMP::kernel::internal::_TrivialDecoratorImplementation>;
+%template(_TrivialDecorator) IMP::kernel::ImplementDecorator0<IMP::kernel::internal::_TrivialDecoratorImplementation>;
+#endif
+
+class  _TrivialDerivedDecoratorImplementation: public _TrivialDecorator {
   static void do_setup(Model *m, ParticleIndex pi) {
     _TrivialDecorator::setup(m, pi);
     m->add_attribute(IntKey("trivial_attribute_2"), pi, 1);
@@ -109,9 +116,8 @@ class  _TrivialDerivedDecoratorTraits: public _TrivialDecorator {
 typedef IMP::kernel::ImplementDecorator0<_TrivialDerivedDecoratorImplementation>
 _TrivialDerivedDecorator;
 
-IMP_DECORATORS_2(_TrivialDecorator, _TrivialDecorators);
-IMP_DECORATORS_2(_TrivialDerivedDecorator,
-                 _TrivialDerivedDecorators);
+IMP_VALUES(_TrivialDerivedDecorator,
+           _TrivialDerivedDecorators);
 
 
 class _TrivialTraitsDecoratorImplementation: public Decorator
@@ -140,11 +146,12 @@ class _TrivialTraitsDecoratorImplementation: public Decorator
   }
 };
 
-typedef ImplementDecoratorTraits<_TrivialTraitsDecoratorImplementation>
+typedef ImplementDecoratorTraits<_TrivialTraitsDecoratorImplementation,
+                                 StringKey>
 _TrivialTraitsDecorator;
 
-IMP_DECORATORS_2(_TrivialTraitsDecorator,
-                 _TrivialTraitsDecorators);
+IMP_VALUES(_TrivialTraitsDecorator,
+           _TrivialTraitsDecorators);
 
 
 

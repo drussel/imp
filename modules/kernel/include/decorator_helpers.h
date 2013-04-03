@@ -11,34 +11,40 @@
 
 #include <IMP/kernel/kernel_config.h>
 #include "Decorator.h"
+#include "internal/undecorators.h"
 
 IMPKERNEL_BEGIN_NAMESPACE
 
 /** Implementation class. */
 template <class Implementation>
 class ImplementDecorator: public Implementation {
-  void add_undecorator(Model* m, ParticleIndex pi) {
-    m->add_undecorator(pi, internal::create_undecorator<Implementation>(m,
+ protected:
+  static void add_undecorator(Model* m, ParticleIndex pi) {
+    m->add_undecorator(pi, internal::create_undecorator<ImplementDecorator<Implementation> >(m,
                                              Implementation::get_name()));
   }
  public:
   typedef ImplementDecorator<Implementation> This;
   static bool get_was_setup(Model *m, ParticleIndex pi) {
-    return Implementation::do_get_is_setup(m, pi);
+    return Implementation::do_get_was_setup(m, pi);
   }
+
   static This teardown(Model *m, ParticleIndex pi) {
     IMP_USAGE_CHECK(get_was_setup(m, pi),
                     "Particle is not an instance in teardown");
     Implementation::do_teardown(m, pi);
   }
+
   void show(std::ostream &out) {
     Implementation::do_show(out);
   }
+
 #ifndef IMP_DOXYGEN
   // backwards compat
   static bool particle_is_instance(Model *m, ParticleIndex pi) {
     return get_was_setup(m, pi);
   }
+
   static void teardown_particle(Model *m, ParticleIndex pi) {
     teardown(m, pi);
   }
@@ -46,13 +52,14 @@ class ImplementDecorator: public Implementation {
   static bool particle_is_instance(Particle *p) {
     return get_was_setup(p->get_model(), p->get_index());
   }
+
   static void teardown_particle(Particle *p) {
     teardown(p->get_model(), p->get_index());
   }
 
   static This decorate_particle(Particle *p) {
     if (!get_was_setup(p->get_model(), p->get_index())) {
-      setup(p->get_model(), p->get_index());
+      Implementation::setup(p->get_model(), p->get_index());
     }
     return This(p);
   }
@@ -74,16 +81,17 @@ class ImplementDecorator: public Implementation {
 template <class Implementation>
 class ImplementDecorator0: public ImplementDecorator<Implementation> {
  public:
+  using Decorator::compare;
   IMP_COMPARISONS(ImplementDecorator0);
   IMP_COMPARISONS(Particle*);
   typedef ImplementDecorator0<Implementation> This;
   static This setup(Model *m, ParticleIndex pi) {
     Implementation::do_setup(m, pi);
-    add_undecorator(m, pi);
+    ImplementDecorator<Implementation>::add_undecorator(m, pi);
     return This(m, pi);
   }
   ImplementDecorator0(Model *m, ParticleIndex pi) {
-    IMP_USAGE_CHECK(get_was_setup(m, pi),
+    IMP_USAGE_CHECK(ImplementDecorator<Implementation>::get_was_setup(m, pi),
                     "Particle is not an instance in teardown");
     Decorator::initialize(m, pi);
   }
@@ -97,7 +105,8 @@ class ImplementDecorator0: public ImplementDecorator<Implementation> {
   }
 
   ImplementDecorator0(Particle *p) {
-    IMP_USAGE_CHECK(get_was_setup(m, pi),
+    IMP_USAGE_CHECK(ImplementDecorator<Implementation>
+                    ::get_was_setup(p->get_model(), p->get_index()),
                     "Particle is not an instance in teardown");
     Decorator::initialize(p->get_model(), p->get_index());
   }
@@ -107,17 +116,19 @@ class ImplementDecorator0: public ImplementDecorator<Implementation> {
 /** Like ImplementDecorator0 but requres are argument to the setup functions.*/
 template <class Implementation, class Argument>
 class ImplementDecorator1: public ImplementDecorator<Implementation> {
+  typedef ImplementDecorator<Implementation> P;
+  using Decorator::compare;
  public:
-  IMP_COMPARISONS(ImplementDecorator0);
+  IMP_COMPARISONS(ImplementDecorator1);
   IMP_COMPARISONS(Particle*);
-  typedef ImplementDecorator1<Implementation> This;
+  typedef ImplementDecorator1<Implementation, Argument> This;
   static This setup(Model *m, ParticleIndex pi, const Argument &t) {
     Implementation::do_setup(m, pi, t);
-    add_undecorator(m, pi);
+    P::add_undecorator(m, pi);
     return This(m, pi);
   }
   ImplementDecorator1(Model *m, ParticleIndex pi) {
-    IMP_USAGE_CHECK(get_was_setup(m, pi),
+    IMP_USAGE_CHECK(P::get_was_setup(m, pi),
                     "Particle is not an instance in teardown");
     Decorator::initialize(m, pi);
   }
@@ -126,12 +137,13 @@ class ImplementDecorator1: public ImplementDecorator<Implementation> {
   static This setup_particle(Model *m, ParticleIndex pi, const Argument &t) {
     return setup(m, pi, t);
   }
+
   static This setup_particle(Particle *p, const Argument &t) {
     return setup(p->get_model(), p->get_index(), t);
   }
 
   ImplementDecorator1(Particle *p) {
-    IMP_USAGE_CHECK(get_was_setup(m, pi),
+    IMP_USAGE_CHECK(P::get_was_setup(p->get_model(), p->get_index()),
                     "Particle is not an instance in teardown");
     Decorator::initialize(p->get_model(), p->get_index());
   }
@@ -141,15 +153,16 @@ class ImplementDecorator1: public ImplementDecorator<Implementation> {
 /** Like ImplementDecorator0 but requres are a traits argument.*/
 template <class Implementation, class Traits>
 class ImplementDecoratorTraits: public Implementation {
-void add_undecorator(Model* m, ParticleIndex pi) {
+  using Decorator::compare;
+  void add_undecorator(Model* m, ParticleIndex pi) {
     m->add_undecorator(pi,
                        internal::create_traits_undecorator<Implementation>(m),
                        Implementation::get_name());
   }
  public:
-  IMP_COMPARISONS(ImplementDecorator0);
+  IMP_COMPARISONS(ImplementDecoratorTraits);
   IMP_COMPARISONS(Particle*);
-  typedef ImplementDecoratorTraits<Implementation> This;
+  typedef ImplementDecoratorTraits<Implementation, Traits> This;
   static This setup(Model *m, ParticleIndex pi,
                     const Traits &t = Implementation::get_default_traits()) {
     Implementation::do_setup(m, pi, t);
@@ -221,13 +234,13 @@ void add_undecorator(Model* m, ParticleIndex pi) {
     return setup(p->get_model(), p->get_index(), t);
   }
 
-  ImplementDecorator1(Particle *p, const Traits &t
+  ImplementDecoratorTraits(Particle *p, const Traits &t
                       = Implementation::get_default_traits()) {
-    IMP_USAGE_CHECK(get_was_setup(m, pi, t),
+    IMP_USAGE_CHECK(get_was_setup(p->get_model(), p->get_index(), t),
                     "Particle is not an instance in teardown");
-    ImplementDecorator<Implementation>::set_traits(t);
-    ImplementDecorator<Implementation>::initialize(p->get_model(),
-                                                   p->get_index());
+    Implementation::set_traits(t);
+    Decorator::initialize(p->get_model(),
+                          p->get_index());
   }
 #endif
 };
