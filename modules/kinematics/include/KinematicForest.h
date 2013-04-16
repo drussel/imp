@@ -1,9 +1,9 @@
 /**
  *  \file KinematicForest.h
- * \brief Wrapper class for a kinematic tree made of KinematicNode
-           objects, interconnected by joints. This data structure
-           allows for kinematic control of the tree and
-           interconversion between internal and external coordinates.
+ *  \brief Wrapper class for a kinematic forest (collection of trees)
+          made of KinematicNode objects, interconnected by joints. This data
+          structure allows for kinematic control of the tree and
+          interconversion between internal and external coordinates.
  *  \authors Dina Schneidman, Barak Raveh
  *
  *  Copyright 2007-2012 IMP Inventors. All rights reserved.
