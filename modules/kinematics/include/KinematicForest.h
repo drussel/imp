@@ -19,7 +19,7 @@
 #include <IMP/kinematics/TransformationJoint.h>
 #include <IMP/base/Object.h>
 #include <IMP/Decorator.h>
-#include <IMP/compatibility/set.h>
+#include <IMP/base/set.h>
 #include <IMP/exception.h>
 #include <IMP/Object.h>
 #include <IMP/base/check_macros.h>
@@ -113,7 +113,7 @@ IMP_OBJECT(KinematicForest);
     }
     // tree BFS traversal from roots
     std::queue<KinematicNode> q;
-    IMP::compatibility::set<KinematicNode>::iterator it;
+    IMP::base::set<KinematicNode>::iterator it;
     for(it = roots_.begin(); it != roots_.end(); it++){
       q.push( *it );
     }
@@ -236,10 +236,10 @@ IMP_OBJECT(KinematicForest);
 
   /** the root nodes that serves as spatial anchor to the
       kinematic trees in the forest */
-  IMP::compatibility::set<KinematicNode> roots_;
+  IMP::base::set<KinematicNode> roots_;
 
   /** the set of nodes in the tree */
-  IMP::compatibility::set<KinematicNode> nodes_;
+  IMP::base::set<KinematicNode> nodes_;
 
   // TODO: do we really need this?
   Joints joints_;

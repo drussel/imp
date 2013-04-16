@@ -17,8 +17,10 @@
 
 #include <IMP/core/rigid_bodies.h>
 #include <IMP/atom/Atom.h>
-#include <IMP/compatibility/nullptr.h>
 
+
+#include <IMP/base/map.h>
+#include <IMP/base/Vector.h>
 #include <vector>
 #include <iostream>
 
@@ -135,7 +137,7 @@ private:
        the joints are stored using ProteinAngleType as an index */
     typedef std::vector<Joint*> ResidueJoints;
     /* mapping between residue and its joints */
-    IMP::compatibility::map<IMP::ParticleIndex,
+    IMP::base::map<IMP::ParticleIndex,
                             ResidueJoints> residue_to_joints_;
   };
 
@@ -150,8 +152,8 @@ private:
   Graph graph_;
 
   // mapping between atom ParticleIndex and node number in the graph
-  IMP::compatibility::map<IMP::ParticleIndex, int> particle_index_to_node_map_;
-  IMP::compatibility::vector<IMP::ParticleIndex> node_to_particle_index_map_;
+  IMP::base::map<IMP::ParticleIndex, int> particle_index_to_node_map_;
+  IMP::base::Vector<IMP::ParticleIndex> node_to_particle_index_map_;
 
   // rigid bodies
   IMP::core::RigidBodies rbs_;

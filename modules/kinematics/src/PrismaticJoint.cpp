@@ -11,7 +11,7 @@
 #include <IMP/kinematics/KinematicNode.h>
 #include <IMP/kinematics/PrismaticJoint.h>
 #include <IMP/Object.h>
-#include <IMP/compatibility/nullptr.h>
+//#include <IMP/compatibility/nullptr.h>
 #include <IMP/exception.h>
 #include <IMP/algebra/Transformation3D.h>
 
