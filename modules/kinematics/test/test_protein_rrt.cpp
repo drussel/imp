@@ -58,30 +58,35 @@ int main(int argc, char **argv)
   // read in the input protein
   IMP::Pointer<IMP::Model> model = new IMP::Model();
   std::cerr << "Starting reading pdb file " << fname << std::endl;
-  IMP::atom::Hierarchy mhd = IMP::atom::read_pdb(fname, model,
-                                            new IMP::atom::NonWaterNonHydrogenPDBSelector(),
-                                            //new IMP::atom::ATOMPDBSelector(),
-                                            // don't add radii
-                                            true, true);
+  IMP::atom::Hierarchy mhd =
+    IMP::atom::read_pdb(fname, model,
+                        new IMP::atom::NonWaterNonHydrogenPDBSelector(),
+                        //new IMP::atom::ATOMPDBSelector(),
+                        // don't add radii
+                        true, true);
   const std::string topology_file_name = "top_heav.lib";
   const std::string parameter_file_name = "par.lib";
   std::ifstream test(topology_file_name.c_str());
   if(!test) {
-    std::cerr << "Please provide topology file " << topology_file_name << std::endl;
+    std::cerr << "Please provide topology file " << topology_file_name
+              << std::endl;
     exit(1);
   }
   std::ifstream test1(parameter_file_name.c_str());
   if(!test1) {
-    std::cerr << "Please provide parameter file " << parameter_file_name << std::endl;
+    std::cerr << "Please provide parameter file " << parameter_file_name
+              << std::endl;
     exit(1);
   }
 
   IMP::atom::CHARMMParameters*
-    ff =  new IMP::atom::CHARMMParameters(topology_file_name, parameter_file_name);
+    ff =  new IMP::atom::CHARMMParameters
+    (topology_file_name, parameter_file_name);
   IMP::Pointer<IMP::atom::CHARMMTopology> topology = ff->create_topology(mhd);
   //topology->apply_default_patches();
   topology->setup_hierarchy(mhd);
-  //IMP::atom::CHARMMStereochemistryRestraint* r = new IMP::atom::CHARMMStereochemistryRestraint(mhd, topology);
+  //IMP::atom::CHARMMStereochemistryRestraint* r =
+  //  new IMP::atom::CHARMMStereochemistryRestraint(mhd, topology);
 
 
   IMP::ParticlesTemp atoms = IMP::atom::get_by_type(mhd, IMP::atom::ATOM_TYPE);
@@ -111,7 +116,8 @@ int main(int argc, char **argv)
   IMP_NEW(IMP::container::PairsRestraint, pr, (score, cpc));
 
   // TODO: check why not working: should be much faster
-  //IMP::base::Pointer<IMP::Restraint> pr= IMP::container::create_restraint(score, cpc);
+  //IMP::base::Pointer<IMP::Restraint> pr=
+  //   IMP::container::create_restraint(score, cpc);
   model->add_restraint(pr);
 
   // create phi/psi joints
@@ -150,7 +156,8 @@ int main(int argc, char **argv)
   for(unsigned int i = 0; i<dof_values.size(); i++) {
     sampler.apply(dof_values[i]);
     kfss->do_before_evaluate();
-    std::string filename = "node" + std::string(boost::lexical_cast<std::string>(i+1)) + ".pdb";
+    std::string filename = "node"
+      + std::string(boost::lexical_cast<std::string>(i+1)) + ".pdb";
     IMP::atom::write_pdb(mhd, filename);
   }
   return 0;

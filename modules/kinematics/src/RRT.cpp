@@ -71,7 +71,9 @@ void RRT::run() {
     current_counters.number_of_iterations_++;
     if(new_nodes.size() > 0) current_counters.actual_tree_size_++;
     current_counters.tree_size_ = tree_.size();
-    std::cerr << "RRT done iteration " <<  current_counters.number_of_iterations_-1 << " added " << new_nodes.size() << " new nodes " << std::endl;
+    std::cerr << "RRT done iteration "
+              <<  current_counters.number_of_iterations_-1 << " added "
+              << new_nodes.size() << " new nodes " << std::endl;
   }
 }
 

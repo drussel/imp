@@ -28,7 +28,7 @@ public:
 
   bool is_valid(const DOFValues& values) {
     dofs_sampler_->apply(values);
-    double score = sf_->evaluate_if_below(false, 0.0); //TODO: what should be here?
+    double score = sf_->evaluate_if_below(false, 0.0) //TODO: what here?
     //std::cerr << "score = " << score << std::endl;
     if(score <= 0.000001)
       return true;
