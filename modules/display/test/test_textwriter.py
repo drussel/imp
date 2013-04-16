@@ -7,19 +7,19 @@ import os
 class DummyWriter(IMP.display.TextWriter):
     def __init__(self, name):
         IMP.display.TextWriter.__init__(self, name)
-    def _do_open(self):
+    def do_open(self):
         print "opening"
-        print >> self._get_stream(), "open"
-    def _do_close(self):
+        print >> self.get_stream(), "open"
+    def do_close(self):
         print "closing"
-        print >> self._get_stream(), "close"
+        print >> self.get_stream(), "close"
     def poke(self):
-        print >> self._get_stream(), "hi"
+        print >> self.get_stream(), "hi"
     def close(self):
         print "bye"
         self.do_close()
 
-class TestBL(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def _testopen(self, fname):
         open(fname, "r")
 

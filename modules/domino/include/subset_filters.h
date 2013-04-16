@@ -18,13 +18,13 @@
 #include "subset_scores.h"
 #include <IMP/Object.h>
 #include <IMP/Pointer.h>
-#include <IMP/compatibility/map.h>
+#include <IMP/base/map.h>
 #include <IMP/Configuration.h>
 #include <IMP/Model.h>
 #include <IMP/macros.h>
 #include <boost/dynamic_bitset.hpp>
 #include <IMP/base/utility_macros.h>
-#include <IMP/compatibility/vector_property_map.h>
+#include <IMP/base/vector_property_map.h>
 
 #include <boost/pending/disjoint_sets.hpp>
 
@@ -82,7 +82,8 @@ class IMPDOMINOEXPORT SubsetFilterTable: public IMP::base::Object {
  public:
   SubsetFilterTable(std::string name="SubsetFilterTable%1%"): Object(name){}
   /** Return a SubsetFilter which acts on the Subset s, given that all
-      the prior_subsets have already been filtered.
+      the prior_subsets have already been filtered. This should return
+      nullptr if there is no filtering to be done.
    */
   virtual SubsetFilter* get_subset_filter(const Subset &s,
                                           const Subsets &prior_subsets) const=0;
@@ -166,27 +167,24 @@ class IMPDOMINOEXPORT DisjointSetsSubsetFilterTable:
   boost::vector_property_map<int> parent_, rank_;
   mutable boost::disjoint_sets<boost::vector_property_map<int>,
                                boost::vector_property_map<int> > disjoint_sets_;
-  IMP::compatibility::map<const Particle*, int> index_;
+  IMP::base::map<const Particle*, int> index_;
   mutable base::Vector<ParticlesTemp> sets_;
-  mutable IMP::compatibility::map<const Particle *, int> set_indexes_;
+  mutable IMP::base::map<const Particle *, int> set_indexes_;
 
   int get_index(Particle *p);
 
   void build_sets() const;
-  IMP_PROTECTED_METHOD(unsigned int,
-                       get_number_of_sets, (),  const, {
+protected:
+  unsigned int get_number_of_sets() const {
     build_sets();
     return sets_.size();
-                       });
-  IMP_PROTECTED_METHOD(ParticlesTemp, get_set,
-                       (unsigned int i), const, {
-                         return sets_[i];
-                       });
-  IMP_PROTECTED_CONSTRUCTOR(DisjointSetsSubsetFilterTable,
-                            (ParticleStatesTable *pst,
-                             std::string name), );
-  IMP_PROTECTED_CONSTRUCTOR(DisjointSetsSubsetFilterTable,
-                            (std::string name),);
+  }
+  ParticlesTemp get_set(unsigned int i) const {
+    return sets_[i];
+  }
+  DisjointSetsSubsetFilterTable(ParticleStatesTable *pst,
+                                std::string name);
+  DisjointSetsSubsetFilterTable(std::string name);
   IMP_INTERNAL_METHOD(void,
                       get_indexes, (const Subset &s,
                                     const Subsets &excluded,
@@ -271,7 +269,7 @@ class IMPDOMINOEXPORT ListSubsetFilterTable:
   public SubsetFilterTable {
  public:
 #if !defined(IMP_DOXYGEN) && !defined(SWIG)
-  IMP::compatibility::map<Particle*,int > map_;
+  IMP::base::map<Particle*,int > map_;
   base::Vector< boost::dynamic_bitset<> > states_;
   Pointer<ParticleStatesTable> pst_;
   mutable double num_ok_, num_test_;
@@ -313,7 +311,7 @@ IMP_OBJECTS(ListSubsetFilterTable,
 */
 class IMPDOMINOEXPORT PairListSubsetFilterTable:
   public SubsetFilterTable {
-  IMP::compatibility::map<ParticlePair, IntPairs> allowed_;
+  IMP::base::map<ParticlePair, IntPairs> allowed_;
   void fill(const Subset &s,
             const Subsets &e,
             IntPairs& indexes,

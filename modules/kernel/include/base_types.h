@@ -1,5 +1,5 @@
 /**
- *  \file IMP/base_types.h    \brief Basic types used by IMP.
+ *  \file IMP/kernel/base_types.h    \brief Basic types used by IMP.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
@@ -8,7 +8,7 @@
 #ifndef IMPKERNEL_BASE_TYPES_H
 #define IMPKERNEL_BASE_TYPES_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "Key.h"
 #include "key_macros.h"
 #include <IMP/base/object_macros.h>
@@ -19,8 +19,7 @@
 #include <IMP/base/Array.h>
 #include <IMP/base/Index.h>
 
-IMP_BEGIN_NAMESPACE
-
+IMPKERNEL_BEGIN_NAMESPACE
 
 /** @name Attribute Keys
     Each type of attribute has an associated type of key. The keys can
@@ -36,7 +35,7 @@ IMP_DECLARE_KEY_TYPE(IntKey, 1);
 //! The type used to identify string attributes in the Particles
 IMP_DECLARE_KEY_TYPE(StringKey, 2);
 //! The type used to identify a particle attribute in the Particles
-IMP_DECLARE_KEY_TYPE(ParticleKey, 3);
+IMP_DECLARE_KEY_TYPE(ParticleIndexKey, 3);
 //! The type used to identify an Object attribute
 IMP_DECLARE_KEY_TYPE(ObjectKey, 4);
 //! The type used to identify a non-ref counted Object attribute
@@ -44,7 +43,14 @@ IMP_DECLARE_KEY_TYPE(WeakObjectKey, 9);
 //! The type used to identify int attributes in the Particles
 IMP_DECLARE_KEY_TYPE(IntsKey, 5);
 //! The type used to identify a particle attribute in the Particles
-IMP_DECLARE_KEY_TYPE(ParticlesKey, 6);
+IMP_DECLARE_KEY_TYPE(ParticleIndexesKey, 6);
+
+#ifndef IMP_DOXYGEN
+// for backwards compat, no way to provide a warning on this
+typedef ParticleIndexesKey ParticlesKey;
+typedef ParticleIndexKey ParticleKey;
+#endif
+
 //! The type used to identify a particle attribute in the Particles
 IMP_DECLARE_KEY_TYPE(ObjectsKey, 7);
 
@@ -142,6 +148,6 @@ IMP_VALUES(ParticleIndexPair, ParticleIndexPairs);
 IMP_VALUES(ParticleIndexTriplet, ParticleIndexTriplets);
 IMP_VALUES(ParticleIndexQuad, ParticleIndexQuads);
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_BASE_TYPES_H */

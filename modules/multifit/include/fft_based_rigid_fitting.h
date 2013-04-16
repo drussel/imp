@@ -119,35 +119,42 @@ class IMPMULTIFITEXPORT FFTFitting : public base::Object {
  //! Detect the top fits
  FittingSolutionRecords detect_top_fits(
      const internal::RotScoresVec &rot_scores,
-     bool cluster_fits, double max_translation);
+     bool cluster_fits, double max_translation,
+     double max_clustering_trans,
+     double max_clustering_rotation);
  public:
   FFTFitting() : base::Object("FFTFitting%1%") {}
   //! Fit a molecule inside its density
   /**
      \param[in] dmap the density map to fit into
-     \param[in[ density_threshold voxels below this value will be treated as 0
-     \param[in] mol2fit the molecule to fit The molecule has to be a rigid body
+     \param[in] density_threshold voxels below this value will be treated as 0
+     \param[in] mol2fit the molecule to fit. The molecule has to be a rigid body
      \param[in] angle_sampling_interval_rad Sample every internal angles
      \param[in] num_fits_to_report number of top fits to report
      \param[in] cluster_fits if true the fits are clustered.
                 Not recommended for refinement mode
      \param[in] num_angle_per_voxel number of rotations to save per voxel
-     \param[in] angles_filename a file containing angles tp sample.
-                if not specificied, all angles are sampled
+     \param[in] max_clustering_translation cluster transformations whose
+                translational distance is lower than the parameter
+     \param[in] max_clustering_angle cluster transformations whose
+                rotational distance is lower than the parameter
+     \param[in] angles_filename a file containing angles to sample.
+                if not specified, all angles are sampled
    */
   FFTFittingOutput *do_global_fitting(em::DensityMap *dmap,
                         double density_threshold,
                         atom::Hierarchy mol2fit,
                         double angle_sampling_interval_rad,
                         int num_fits_to_report,
-                        double max_trans,
+                        double max_clustering_translation,
+                        double max_clustering_angle,
                         bool cluster_fits=true,
                         int num_angle_per_voxel=1,
                         const std::string &angles_filename="");
   //! Locally fit a molecule inside its density
   /**
      \param[in] dmap the density map to fit into
-     \param[in[ density_threshold voxels below this value will be treated as 0
+     \param[in] density_threshold voxels below this value will be treated as 0
      \param[in] mol2fit the molecule to fit. The molecule has to be a rigid body
      \param[in] angle_sampling_interval_rad sample the mol
                 within the range of  +- this angle
@@ -156,18 +163,24 @@ class IMPMULTIFITEXPORT FFTFitting : public base::Object {
      \param[in] cluster_fits if true the fits are clustered.
                 Not recommended for refinement mode
      \param[in] num_angle_per_voxel number of rotations to save per voxel
-     \param[in] angles_filename a file containing angles tp sample.
-                if not specificied, all angles are sampled
+     \param[in] max_clustering_translation cluster transformations whose
+                translational distance is lower than the parameter
+     \param[in] max_clustering_angle cluster transformations whose
+                rotational distance is lower than the parameter
+     \param[in] angles_filename a file containing angles to sample.
+                if not specified, all angles are sampled
    */
   FFTFittingOutput *do_local_fitting(em::DensityMap *dmap,
               double density_threshold,
               atom::Hierarchy mol2fit,
               double angle_sampling_interval_rad,
-                            double max_angle_sampling_rad,
-                            double max_translation,
-                            int num_fits_to_report,
-                            bool cluster_fits,
-                            int num_angle_per_voxel,
+              double max_angle_sampling_rad,
+              double max_translation,
+              int num_fits_to_report,
+              bool cluster_fits,
+              int num_angle_per_voxel,
+              double max_clustering_translation,
+              double max_clustering_rotation,
               const std::string &angles_filename="");
 };
 

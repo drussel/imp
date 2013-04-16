@@ -21,29 +21,7 @@ using namespace IMP::benchmark;
 #define ATTRIBUTES
 #endif
 
-namespace {
-  std::string get_module_version() {
-  return IMP::benchmark::get_module_version();
-}
-  std::string get_module_name() {
-    return std::string("benchmark");
-  }
-
-class DistanceScore: public SingletonModifier {
-public:
-  algebra::Vector3D v_;
-  mutable double score_;
-  DistanceScore(): score_(0){}
-  IMP_SINGLETON_MODIFIER(DistanceScore);
-};
-
-void DistanceScore::do_show(std::ostream &) const {}
-
-void DistanceScore::apply(Particle *p) const {
-  XYZ d(p);
-  score_+= IMP::algebra::get_distance(d.get_coordinates(), v_);
-}
-}
+IMP_COMPILER_ENABLE_WARNINGS
 
 namespace {
 
@@ -109,88 +87,6 @@ double compute_distances_no_particle_access(Model *m,
   }
   return tdist;
 }
-
-// TEST 5
-
-ParticlesTemp DistanceScore::get_input_particles(Particle *) const {
-  return ParticlesTemp();
-}
-
-ParticlesTemp DistanceScore::get_output_particles(Particle *) const {
-  return ParticlesTemp();
-}
-
-ContainersTemp DistanceScore::get_input_containers(Particle *) const {
-  return ContainersTemp();
-}
-
-ContainersTemp DistanceScore::get_output_containers(Particle *) const {
-  return ContainersTemp();
-}
-
-#if 0
-double compute_distances_decorator_access(
-                        PackedSingletonContainer *ps,
-                        DistanceScore *ds) ATTRIBUTES;
-
-double compute_distances_decorator_access(
-                        PackedSingletonContainer *ps,
-                        DistanceScore *ds) {
-  ds->score_=0;
-  unsigned int n=ps->get_number_of_particles();
-  for (unsigned int i = 0; i < n; i++) {
-    ds->v_=XYZ(ps->get_particle(i)).get_coordinates();
-    ps->apply(ds);
-  }
-  return ds->score_;
-}
-#endif
-
-// TEST 2
-class MyParticle : public IMP::Particle {
-public:
-  MyParticle(IMP::Model *m) : IMP::Particle(m) {}
-  IMP::algebra::Vector3D v_;
-};
-
-
-  /*double compute_distances_class_access(
-               const std::vector<MyParticle*>& particles) ATTRIBUTES;
-
-  double compute_distances_class_access(
-   const std::vector<MyParticle*>& particles){
-  double tdist=0;
-  for (unsigned int i = 0; i < particles.size(); i++) {
-    for (unsigned int j = 0; j < particles.size(); j++) {
-      tdist += IMP::algebra::get_distance(particles[i]->v_, particles[j]->v_);
-    }
-  }
-  return tdist;
-  }*/
-
-// TEST 2.5
-class MyParticle2 : public IMP::Particle {
-public:
-  MyParticle2(IMP::Model *m) : IMP::Particle(m) {
-    v_= new IMP::algebra::Vector3D();
-  }
-  IMP::algebra::Vector3D *v_;
-};
-
-
-  /*double compute_distances_class_access(
-                   const std::vector<MyParticle2*>& particles) ATTRIBUTES;
-
-double compute_distances_class_access(
-    const std::vector<MyParticle2*>& particles){
-  double tdist=0;
-  for (unsigned int i = 0; i < particles.size(); i++) {
-    for (unsigned int j = 0; j < particles.size(); j++) {
-      tdist+= IMP::algebra::get_distance(*particles[i]->v_, *particles[j]->v_);
-    }
-  }
-  return tdist;
-  }*/
 
 // TEST 3
 double compute_distances_direct_access(
@@ -434,7 +330,8 @@ void do_benchmark(std::string descr, unsigned int n) {
 }
 
 int main(int argc, char **argv) {
-  IMP::base::setup_from_argv(argc, argv, 0);
+  IMP::base::setup_from_argv(argc, argv,
+                             "Benchmark accessing particle attributes");
   do_benchmark("small", 100);
   do_benchmark("large", 1000);
   do_benchmark("huge", 10000);

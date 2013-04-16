@@ -6,18 +6,34 @@ import RMF
 from IMP.algebra import *
 
 class Tests(IMP.test.TestCase):
+    def _write_restraint(self, name):
+        f= RMF.create_rmf_file(name)
+        m= IMP.Model()
+        p= IMP.Particle(m)
+        IMP.rmf.add_particles(f, [p]);
+        r= IMP.kernel._ConstRestraint(1, [p])
+        r.set_model(m)
+        r.evaluate(False)
+        IMP.rmf.add_restraint(f, r)
+        IMP.rmf.save_frame(f, 0)
+    def _read_restraint(self, name):
+        IMP.base.add_to_log(IMP.base.TERSE, "Starting reading back\n")
+        f= RMF.open_rmf_file_read_only(name)
+        m= IMP.Model()
+        ps=IMP.rmf.create_particles(f, m);
+        rs=IMP.RestraintSet.get_from(IMP.rmf.create_restraints(f, m)[0])
+        IMP.rmf.load_frame(f, 0)
+        r= rs.get_restraints()[0]
+        print [IMP.Particle.get_from(x).get_index() for x in r.get_inputs()]
+        print [x.get_index() for x in ps]
+        self.assertEqual(r.get_inputs(), ps)
     def test_0(self):
         """Test writing restraints rmf"""
+        RMF.set_log_level("Off")
         for suffix in RMF.suffixes:
-            f= RMF.create_rmf_file(self.get_tmp_file_name("restr."+suffix))
-            m= IMP.Model()
-            p= IMP.Particle(m)
-            IMP.rmf.add_particles(f, [p]);
-            r= IMP._ConstRestraint(1, [p])
-            r.set_model(m)
-            r.evaluate(False)
-            IMP.rmf.add_restraint(f, r)
-            IMP.rmf.save_frame(f, 0)
+            name=self.get_tmp_file_name("restr."+suffix)
+            self._write_restraint(name)
+            self._read_restraint(name)
     def test_1(self):
         for suffix in RMF.suffixes:
             """Test writing restraints to rmf with no particles"""
@@ -26,7 +42,7 @@ class Tests(IMP.test.TestCase):
             f= RMF.create_rmf_file(nm)
             m= IMP.Model()
             p= IMP.Particle(m)
-            r= IMP._ConstRestraint(1)
+            r= IMP.kernel._ConstRestraint(1)
             r.set_name("R")
             r.set_model(m)
             r.evaluate(False)
@@ -38,11 +54,11 @@ class Tests(IMP.test.TestCase):
     def test_2(self):
         """Test writing dynamic restraints"""
         for suffix in RMF.suffixes:
-            RMF.set_show_hdf5_errors(True)
+            RMF.HDF5.set_show_errors(True)
             path=self.get_tmp_file_name("dynamic_restraints."+suffix)
             print path
             f= RMF.create_rmf_file(path)
-            IMP.set_log_level(IMP.SILENT)
+            IMP.base.set_log_level(IMP.base.SILENT)
             m= IMP.Model()
             ps= [IMP.Particle(m) for i in range(0,10)]
             ds= [IMP.core.XYZR.setup_particle(p) for p in ps]

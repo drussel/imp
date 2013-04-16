@@ -29,13 +29,13 @@ class MockFunc:
             self.__update()
         return self.__eval(self.__evalargs)
 
-class TestCovariance1DFunction(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """ test of tau**2 exp( -(q-q')**2/(2 lambda**2) )  """
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
         self.m = IMP.Model()
-        IMP.set_log_level(0)
+        IMP.base.set_log_level(0)
         self.tau = Scale.setup_particle(IMP.Particle(self.m), 1.0)
         self.lam = Scale.setup_particle(IMP.Particle(self.m),  1.0)
         self.particles=[self.tau,self.lam]
@@ -60,7 +60,7 @@ class TestCovariance1DFunction(IMP.test.TestCase):
             self.assertFalse(self.cov.has_changed())
 
     def testFail(self):
-        if IMP.get_check_level() >= IMP.USAGE_AND_INTERNAL:
+        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             q=IMP.Particle(self.m)
             self.assertRaises(IMP.InternalException, Covariance1DFunction,
                               self.tau,q)

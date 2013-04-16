@@ -1,3 +1,6 @@
+## \example base/log.py
+## Show various ways to use the log and control it.
+
 import IMP.base
 
 class DummyObject(IMP.base.Object):
@@ -8,8 +11,8 @@ class DummyObject(IMP.base.Object):
         state=IMP.base.SetLogState(self.get_log_level())
         context= IMP.base.CreateLogContext(self.get_name()+"::add_log")
         self.set_was_used(True)
-        if IMP.base.get_log_level() >=IMP.base.VERBOSE:
-            IMP.base.add_to_log("A verbose message in the object\n")
+        IMP.base.add_to_log(IMP.base.VERBOSE,
+                            "A verbose message in the object\n")
 # we can set the log level for all of IMP
 IMP.base.set_log_level(IMP.base.TERSE)
 
@@ -20,7 +23,7 @@ IMP.base.set_log_timer(True)
 lc= IMP.base.CreateLogContext("my context")
 
 # we can print a message
-IMP.base.add_to_log("This is my log message\n")
+IMP.base.add_to_log(IMP.base.TERSE, "This is my log message\n")
 
 o= DummyObject()
 o.set_log_level(IMP.base.VERBOSE)

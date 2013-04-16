@@ -24,7 +24,7 @@
 #include <IMP/base/log.h>
 #include <boost/progress.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <IMP/compatibility/vector_property_map.h>
+#include <IMP/base/vector_property_map.h>
 
 IMPCORE_BEGIN_NAMESPACE
 
@@ -63,13 +63,17 @@ public:
 
 
 namespace {
-class ScoreWeightedIncrementalBallMover :public Mover
+class ScoreWeightedIncrementalBallMover :
+    public MonteCarloMover
 {
 public:
   ScoreWeightedIncrementalBallMover(const ParticlesTemp &ps,
                                     unsigned int n,
                                     Float radius);
-  IMP_MOVER(ScoreWeightedIncrementalBallMover);
+  virtual kernel::ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE;
+  virtual MonteCarloMoverResult do_propose() IMP_OVERRIDE;
+  virtual void do_reject() IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(ScoreWeightedIncrementalBallMover);
 private:
   const ParticlesTemp ps_;
   unsigned int n_;
@@ -84,7 +88,7 @@ ScoreWeightedIncrementalBallMover
 ::ScoreWeightedIncrementalBallMover(const ParticlesTemp& sc,
                                     unsigned int n,
                                     Float radius):
-  Mover(sc[0]->get_model(), "IncrementalBallMover%1%"),
+  MonteCarloMover(sc[0]->get_model(), "IncrementalBallMover%1%"),
   ps_(sc),
   n_(n),
   radius_(radius),
@@ -121,7 +125,7 @@ ScoreWeightedIncrementalBallMover
   }
 }
 
-ParticlesTemp ScoreWeightedIncrementalBallMover::propose_move(Float /*size*/) {
+MonteCarloMoverResult ScoreWeightedIncrementalBallMover::do_propose() {
   // damnit, why didn't these functions make it into the standard
   /*std::random_sample(sc_->particles_begin(), sc_->particles_end(),
     moved_.begin(), moved_.end());*/
@@ -147,7 +151,9 @@ ParticlesTemp ScoreWeightedIncrementalBallMover::propose_move(Float /*size*/) {
   // if the score is tiny, give up
   moved_.clear();
   old_coords_.clear();
-  if (total < .0001) return ParticlesTemp();
+  if (total < .0001) {
+    return MonteCarloMoverResult(ParticleIndexes(), 1.0);
+  }
   for (unsigned int i=0; i< weights.size(); ++i) {
     weights[i]/=(total/n_);
   }
@@ -173,12 +179,12 @@ ParticlesTemp ScoreWeightedIncrementalBallMover::propose_move(Float /*size*/) {
         d.set_coordinates(algebra::get_random_vector_in<3>
                           (algebra::Sphere3D(d.get_coordinates(),
                                              radius_)));
-        IMP_LOG(VERBOSE, "Proposing move of particle " << d->get_name()
+        IMP_LOG_VERBOSE( "Proposing move of particle " << d->get_name()
                 << " to " << d.get_coordinates() << std::endl);
       }
     }
     if (moved_.empty()) {
-      IMP_LOG(TERSE, "trying again to find particles to move "
+      IMP_LOG_TERSE( "trying again to find particles to move "
               << total << std::endl);
     } else {
       break;
@@ -189,25 +195,23 @@ ParticlesTemp ScoreWeightedIncrementalBallMover::propose_move(Float /*size*/) {
     std::cout <<moved_[i]->get_name() << " ";
   }
   std::cout << std::endl;*/
-  return moved_;
+  return MonteCarloMoverResult(get_indexes(moved_), 1.0);
 }
 
 
-void ScoreWeightedIncrementalBallMover::reset_move() {
+void ScoreWeightedIncrementalBallMover::do_reject() {
   for (unsigned int i=0; i< moved_.size(); ++i) {
     XYZ cd(moved_[i]);
     cd.set_coordinates(old_coords_[i]);
   }
 }
 
-ParticlesTemp ScoreWeightedIncrementalBallMover::get_output_particles() const {
-  return ps_;
+kernel::ModelObjectsTemp
+ScoreWeightedIncrementalBallMover::do_get_inputs() const {
+  return kernel::ModelObjectsTemp(ps_.begin(), ps_.end());
 }
 
 
-void ScoreWeightedIncrementalBallMover::do_show(std::ostream &out) const {
-  out << "on " << ps_ << std::endl;
-}
 
 }
 
@@ -296,10 +300,15 @@ void MCCGSampler
        algebra::Vector3D(pms.bounds_.find(XK)->second.second,
                          pms.bounds_.find(YK)->second.second,
                          pms.bounds_.find(ZK)->second.second));
-  IMP_FOREACH_SINGLETON(sc,{
-      XYZ d(_1);
-    d.set_coordinates(algebra::get_random_vector_in(bb));
-    });
+  IMP_CONTAINER_FOREACH(
+                        IMP::internal::InternalListSingletonContainer,
+                        sc,
+                        {
+                          // _1 is the ParticleIndex for a singleton container
+                          IMP::core::XYZ d(get_model(), _1);
+                          d.set_coordinates(algebra::get_random_vector_in(bb));
+                        }
+                        );
 }
 
 
@@ -385,17 +394,17 @@ ConfigurationSet *MCCGSampler::do_sample() const {
     ret->load_configuration(-1);
     if (!is_refining_) {
       randomize(pms,sc);
-      IMP_LOG(TERSE, "Randomized configuration" << std::endl);
+      IMP_LOG_TERSE( "Randomized configuration" << std::endl);
     }
     try {
       mc->optimize(pms.mc_steps_);
     } catch (base::ModelException) {
-      IMP_LOG(TERSE, "Optimization ended by exception" << std::endl);
+      IMP_LOG_TERSE( "Optimization ended by exception" << std::endl);
       ++failures;
       continue;
     }
     if (mc->get_scoring_function()->get_had_good_score()) {
-      IMP_LOG(TERSE, "Found configuration with score "
+      IMP_LOG_TERSE( "Found configuration with score "
               << get_model()->evaluate(false) << std::endl);
       ret->save_configuration();
       IMP_IF_CHECK(base::USAGE_AND_INTERNAL) {
@@ -410,7 +419,7 @@ ConfigurationSet *MCCGSampler::do_sample() const {
                            << std::endl);
       }
     } else {
-      IMP_LOG(TERSE, "Rejected configuration with score "
+      IMP_LOG_TERSE( "Rejected configuration with score "
               << get_model()->evaluate(false) << std::endl);
       if (rejected_) {
         rejected_->save_configuration();

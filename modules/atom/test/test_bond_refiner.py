@@ -4,12 +4,12 @@ import IMP.core
 import IMP.atom
 import math
 
-class AllPairsContainerTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for bond refined"""
 
     def test_allp(self):
         """Check that BondRefiner works"""
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         m=IMP.Model()
         p0= IMP.Particle(m)
         b0= IMP.atom.Bonded.setup_particle(p0)

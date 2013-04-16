@@ -205,7 +205,9 @@ NAME_DEF(NO2, N);
 
 NAME_DEF(UNKNOWN, UNKNOWN_ELEMENT);
 
-Atom Atom::setup_particle(Particle *p, AtomType t) {
+Atom Atom::setup_particle(Model *m,
+                          ParticleIndex pi, AtomType t) {
+  Particle *p= m->get_particle(pi);
   p->add_attribute(get_atom_type_key(), t.get_index());
   if (!Hierarchy::particle_is_instance(p)) {
     Hierarchy::setup_particle(p);
@@ -296,7 +298,7 @@ Atom get_atom(Residue rd, AtomType at) {
     Atom a(mhd.get_child(i));
     if (a.get_atom_type() == at) return a;
   }
-  IMP_LOG(VERBOSE, "Atom not found " << at << std::endl);
+  IMP_LOG_VERBOSE( "Atom not found " << at << std::endl);
   return Atom();
 }
 

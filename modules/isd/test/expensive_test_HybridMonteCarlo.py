@@ -22,13 +22,13 @@ class TestHybridMonteCarlo(IMP.test.TestCase):
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(0)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.xyzs=[]
         self.nuisances=[]
         self.restraints=[]
         self.setup_system()
-        self.setup_HMC()
+        self.setup_HMC(temp=1/kB)
 
     def setup_xyz(self,coords, mass):
         a=IMP.Particle(self.m)
@@ -58,7 +58,7 @@ class TestHybridMonteCarlo(IMP.test.TestCase):
         self.nuisances.append(ga)
         self.restraints.append(ln)
 
-    def setup_HMC(self, temp=1/kB, nsteps=10, tstep=1.0, persistence=1):
+    def setup_HMC(self, temp, nsteps=10, tstep=1.0, persistence=1):
         self.hmc = IMP.isd.HybridMonteCarlo(self.m, kB*temp, nsteps, tstep,
                 persistence)
         self.hmc.set_was_used(True)

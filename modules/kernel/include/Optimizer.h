@@ -1,5 +1,5 @@
 /**
- *  \file IMP/Optimizer.h     \brief Base class for all optimizers.
+ *  \file IMP/kernel/Optimizer.h     \brief Base class for all optimizers.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
@@ -8,7 +8,7 @@
 #ifndef IMPKERNEL_OPTIMIZER_H
 #define IMPKERNEL_OPTIMIZER_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "base_types.h"
 #include "VersionInfo.h"
 #include "Object.h"
@@ -17,11 +17,11 @@
 #include "Particle.h"
 #include "Pointer.h"
 #include "OptimizerState.h"
-#include <IMP/compatibility/vector.h>
+#include <IMP/base/Vector.h>
 #include <limits>
 #include <cmath>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 //! Base class for all optimizers.
 /** An optimizer attempts to improve the current configuration of the
@@ -43,7 +43,7 @@ IMP_BEGIN_NAMESPACE
 
     \implementationwithoutexample{Optimizer, IMP_OPTIMIZER}
 */
-class IMPEXPORT Optimizer: public IMP::base::Object
+class IMPKERNELEXPORT Optimizer: public IMP::base::Object
 {
  public:
   Optimizer();
@@ -139,12 +139,13 @@ class IMPEXPORT Optimizer: public IMP::base::Object
 
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(Optimizer);
 
+protected:
   //! override this function to do actual optimization
-  IMP_PROTECTED_METHOD(virtual double, do_optimize, (unsigned int ns),, =0);
+  virtual double do_optimize(unsigned int ns) =0;
   //! Update optimizer states, should be called at each successful step
   /** Make sure the scoring function restraints are up to date before this is
       called (eg by calling evaluate).*/
-  IMP_PROTECTED_METHOD(void, update_states,(),const,) ;
+  void update_states() const;
 
   /** @name Methods for getting and setting optimized attributes
       Optimizers don't have to go through the particles themselves
@@ -155,9 +156,9 @@ class IMPEXPORT Optimizer: public IMP::base::Object
       they can get and set the values and derivatives as needed.
   */
   //!@{
-  IMP_PROTECTED_METHOD(FloatIndexes, get_optimized_attributes,(), const, {
+  FloatIndexes get_optimized_attributes() const {
     return get_model()->get_optimized_attributes();
-    });
+  }
   IMP_PROTECTED_METHOD(void, set_value,(FloatIndex fi, double v), const, {
       get_model()->set_attribute(fi.get_key(), fi.get_particle(), v);
     });
@@ -223,7 +224,7 @@ class IMPEXPORT Optimizer: public IMP::base::Object
 
 #ifndef IMP_DOXYGEN
   //! Return the restraint sets used in evaluation.
-  /** Use IMP::get_restraints() to get the actual restraints used.
+  /** Use IMP::kernel::get_restraints() to get the actual restraints used.
    */
     IMP_PROTECTED_METHOD(Restraints, get_restraints, (), const,);
 #endif
@@ -240,6 +241,6 @@ class IMPEXPORT Optimizer: public IMP::base::Object
 
 IMP_OBJECTS(Optimizer,Optimizers);
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_OPTIMIZER_H */

@@ -54,12 +54,12 @@ class Tests(IMP.test.TestCase):
         """Testing default subset states writing to an hdf5 data set"""
         (ps0, ss0, ass0, m0)= self._setup_round_trip()
         (ps1, ss1, ass1, m1)= self._setup_round_trip()
-        try:
+        if not IMP.domino.IMP_DOMINO_HAS_RMF:
+            self.skipTest("domino configured without RMF")
+        else:
             import RMF
-        except:
-            self.skipTest("no RMF found")
         name= self.get_tmp_file_name("round_trip.hdf5")
-        h5= RMF.create_hdf5_file(name)
+        h5= RMF.HDF5.create_file(name)
         pss= IMP.domino.WriteHDF5AssignmentContainer(h5, ss0, ps0, "assignments")
         pss.set_cache_size(3)
         self._test_out(pss, ass0)
@@ -99,39 +99,12 @@ class Tests(IMP.test.TestCase):
         self.assertEqual(sac.get_number_of_assignments(), 10)
         print sac.get_assignments()
 
-    def test_cluster(self):
-        """Testing the cluster container"""
-        m= IMP.Model()
-        #IMP.set_log_level(IMP.VERBOSE)
-        ps= [IMP.Particle(m) for i in range(0,3)]
-        s= IMP.domino.Subset(ps)
-        pst= IMP.domino.ParticleStatesTable()
-        ik= IMP.IntKey("hi")
-        na=40
-        iss= IMP.domino.IndexStates(na, ik)
-        for p in ps:
-            p.add_attribute(ik, 1)
-            pst.set_particle_states(p, iss)
-        nc=50
-        cac= IMP.domino.ClusteredAssignmentContainer(nc, s, pst)
-        #cac.set_log_level(IMP.VERBOSE)
-        for i in range(0,na):
-            print i
-            for j in range(0,na):
-                for k in range(0,na):
-                    ass=IMP.domino.Assignment([i,j,k])
-                    cac.add_assignment(ass)
-        print cac.get_assignments()
-        self.assertLess(len(cac.get_assignments()), nc)
-        print cac.get_r()
-        self.assertLess(cac.get_r(), 20)
-
     def test_heap_container(self):
         """Testing heap sample container"""
 
         #create particles
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         ps=[]
         for i in range(0,3):
             p= IMP.Particle(m)

@@ -11,12 +11,12 @@ from IMP.isd import Switching,Nuisance
 #unit testing framework
 import IMP.test
 
-class TestSwitchingParam(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """tests switching parameters"""
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = Switching.setup_particle(IMP.Particle(self.m), .5)
 

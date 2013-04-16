@@ -1,3 +1,9 @@
+## \example domino/six_particles_optimization.py
+## Optimize six particles on a 2D unit grid. In order to remove translation degrees
+## of freedom, the 0th particle is pinned at the origin by allowing it only a
+## single conformation. To remove flips, the first particle is restrained to
+## have a positive x coordinate.
+
 import IMP
 import IMP.domino
 import IMP.core
@@ -65,19 +71,19 @@ def create_sampler(m, r, pst):
     filters.append(IMP.domino.ExclusionSubsetFilterTable(pst))
     # filter states that score worse than the cutoffs in the Model
     filters.append(IMP.domino.RestraintScoreSubsetFilterTable(rc))
-    filters[-1].set_log_level(IMP.SILENT)
+    filters[-1].set_log_level(IMP.base.SILENT)
     # try to be intelligent about enumerating the states in each subset
     states= IMP.domino.BranchAndBoundAssignmentsTable(pst, filters);
-    states.set_log_level(IMP.SILENT);
+    states.set_log_level(IMP.base.SILENT);
     s.set_assignments_table(states)
     s.set_subset_filter_tables(filters)
 
     return s
 
-IMP.set_log_level(IMP.TERSE)
+IMP.base.set_log_level(IMP.base.TERSE)
 m=IMP.Model()
 # don't print information during Model.evaluate
-m.set_log_level(IMP.SILENT)
+m.set_log_level(IMP.base.SILENT)
 
 print "creating representation"
 ps=create_representation(m)

@@ -1,3 +1,6 @@
+## \example core/optimize_balls.py
+## This example optimizes a set of a balls to form 100 chains packed into a box. It illustrates using Monte Carlo (incremental) and conjugate gradients in conjunction in a non-trivial optimization.
+
 import IMP.core
 import IMP.display
 import IMP.container
@@ -19,7 +22,7 @@ lps= IMP.core.HarmonicDistancePairScore(1.5*radius, k)
 sps= IMP.core.SoftSpherePairScore(k)
 
 m= IMP.Model()
-IMP.set_log_level(IMP.SILENT)
+IMP.base.set_log_level(IMP.base.SILENT)
 aps=[]
 filters=[]
 movers=[]
@@ -55,10 +58,12 @@ rss.add_restraint(bbr)
 
 cg= IMP.core.ConjugateGradients(m)
 mc=IMP.core.MonteCarlo(m)
+mc.set_name("MC")
 sm= IMP.core.SerialMover(movers)
 mc.add_mover(sm)
 # we are special casing the nbl term
 isf= IMP.core.IncrementalScoringFunction(aps, [rss])
+isf.set_name("I")
 # use special incremental support for the non-bonded part
 # apply the pair score sps to all touching ball pairs from the list of particles
 # aps, using the filters to remove undersired pairs
@@ -69,7 +74,7 @@ isf.add_close_pair_score(sps, 0, aps, filters)
 # ExcludedVolumeRestraint
 nbl= IMP.core.ExcludedVolumeRestraint(aps, k, 1)
 nbl.set_pair_filters(filters)
-sf= IMP.core.RestraintsScoringFunction([rss, nbl])
+sf= IMP.core.RestraintsScoringFunction([rss, nbl], "RSF")
 
 if True:
     mc.set_incremental_scoring_function(isf)
@@ -97,6 +102,8 @@ for i in range(1,11):
     # move each particle 100 times
     print factor
     for j in range(0,5):
+        print "stage", j
+        isf.set_log_level(IMP.base.TERSE)
         mc.set_kt(100.0/(3*j+1))
         print "mc", mc.optimize(ni*nj*np*(j+1)*100), m.evaluate(False), cg.optimize(10)
     del rs

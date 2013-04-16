@@ -29,13 +29,13 @@ class MockFunc:
             self.__update()
         return self.__eval(self.__evalargs)
 
-class TestGeneralizedGuinierPorodFunction(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """ test of Generalized Guinier Porod function """
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.G = Scale.setup_particle(IMP.Particle(self.m), 10.0)
         self.Rg = Scale.setup_particle(IMP.Particle(self.m), 10.0)

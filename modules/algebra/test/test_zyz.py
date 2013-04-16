@@ -4,7 +4,7 @@ import IMP.algebra
 import math
 import random
 
-class CylinderTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def test_cylinder_construction(self):
         """Check Euler ZYZ conversions"""
         rot= random.uniform(0,math.pi)
@@ -14,7 +14,7 @@ class CylinderTests(IMP.test.TestCase):
         print rot
         print tilt
         print psi
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         r= IMP.algebra.get_rotation_from_fixed_zyz(rot, tilt, psi)
         e= IMP.algebra.get_fixed_zyz_from_rotation(r)
         print "Out"

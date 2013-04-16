@@ -26,11 +26,12 @@ SingleParticleScoringFunction
 
 namespace {
 std::pair<Ints, Restraints> get_my_restraints(Particle *p,
-                       const compatibility::map<Restraint*, int> &all,
-                       const DependencyGraph &dg,
-                       const DependencyGraphVertexIndex &index) {
-  RestraintsTemp cr= get_dependent_restraints(p, ParticlesTemp(),
-                                              dg, index);
+                       const base::map<Restraint*, int> &all,
+                                              Model *m) {
+  RestraintsTemp cr
+    = get_dependent_restraints(p, ParticlesTemp(),
+                               m->get_dependency_graph(),
+                               m->get_dependency_graph_vertex_index());
   Restraints mr;
   Ints mi;
   for (unsigned int j=0; j < cr.size(); ++j) {
@@ -42,7 +43,7 @@ std::pair<Ints, Restraints> get_my_restraints(Particle *p,
       mr.push_back(cr[j]);
     }
   }
-  IMP_LOG(TERSE, "Particle " << Showable(p) << " has restraints "
+  IMP_LOG_TERSE( "Particle " << Showable(p) << " has restraints "
           << mr << std::endl);
   return std::make_pair(mi, mr);
 }
@@ -50,44 +51,47 @@ std::pair<Ints, Restraints> get_my_restraints(Particle *p,
 }
 
 void
-SingleParticleScoringFunction::do_update_dependencies(const DependencyGraph &dg,
-                                     const DependencyGraphVertexIndex &index) {
+SingleParticleScoringFunction::do_update_dependencies() {
   IMP_OBJECT_LOG;
-  compatibility::map<Restraint*, int> mp;
-  IMP_LOG(TERSE, "All restraints are " << all_restraints_ << std::endl);
+  base::map<Restraint*, int> mp;
+  IMP_LOG_TERSE( "All restraints are " << all_restraints_ << std::endl);
   for (unsigned int i=0; i< all_restraints_.size(); ++i) {
     mp[all_restraints_[i]]= i;
   }
   Restraints mr;
-  boost::tie(indexes_, mr)= get_my_restraints(get_model()->get_particle(pi_),
-                                             mp, dg, index);
-  IMP_LOG(TERSE, "Found " << mr << " for particle "
+  boost::tie(indexes_, mr)
+    = get_my_restraints(get_model()->get_particle(pi_),
+                        mp,
+                        get_model());
+  IMP_LOG_TERSE( "Found " << mr << " for particle "
           << Showable(get_model()->get_particle(pi_)) << std::endl);
   // so that model dependencies are not reset
-  IMP::internal::RestraintsScoringFunction::mutable_access_restraints()=mr;
-  IMP::internal::RestraintsScoringFunction::do_update_dependencies(dg, index);
+  IMP::internal::RestraintsScoringFunction::set_restraints(mr);
+  IMP::internal::RestraintsScoringFunction::do_update_dependencies();
 }
 
 
 ScoreStatesTemp
 SingleParticleScoringFunction
-::get_required_score_states(const DependencyGraph &dg,
-                            const DependencyGraphVertexIndex &index) const {
+::get_required_score_states() const {
   IMP_OBJECT_LOG;
   ScoreStatesTemp from_restraints
-      =IMP::internal::RestraintsScoringFunction::get_required_score_states(dg,
-                                                                        index);
-  IMP_LOG(TERSE, "Score states from restraints are " << from_restraints
+      =IMP::internal::RestraintsScoringFunction::get_required_score_states();
+  IMP_LOG_TERSE( "Score states from restraints are " << from_restraints
           << "(" << IMP::internal::RestraintsScoringFunction::get_restraints()
           << ")" << std::endl);
-  ScoreStatesTemp from_dummy
-      = IMP::get_required_score_states(dummy_restraints_, dg, index);
-  IMP_LOG(TERSE, "Score states from dummy are " << from_dummy
+  ScoreStatesTemp from_dummy;
+  for (unsigned int i=0; i< dummy_restraints_.size(); ++i) {
+    from_dummy+= get_model()->get_required_score_states(dummy_restraints_[i]);
+  }
+  IMP_LOG_TERSE( "Score states from dummy are " << from_dummy
           << "(" << dummy_restraints_ << ")" << std::endl);
   ScoreStatesTemp deps
       = IMP::get_dependent_score_states(get_model()->get_particle(pi_),
-                                        ModelObjectsTemp(), dg, index);
-  IMP_LOG(TERSE, "Dependent score states are " << deps << std::endl);
+                                        ModelObjectsTemp(),
+                                        get_model()->get_dependency_graph(),
+                            get_model()->get_dependency_graph_vertex_index());
+  IMP_LOG_TERSE( "Dependent score states are " << deps << std::endl);
   std::sort(deps.begin(), deps.end());
   ScoreStatesTemp allin= from_restraints+from_dummy;
   std::sort(allin.begin(), allin.end());
@@ -96,7 +100,7 @@ SingleParticleScoringFunction
   std::set_intersection(allin.begin(), allin.end(),
                         deps.begin(), deps.end(),
                         std::back_inserter(ret));
-  IMP_LOG(TERSE, "Particle " << Showable(get_model()->get_particle(pi_))
+  IMP_LOG_TERSE( "Particle " << Showable(get_model()->get_particle(pi_))
           << " will update " << get_update_order(ret) << std::endl);
   return get_update_order(ret);
 }

@@ -16,7 +16,7 @@
 
 #define IMP_CHECK_VALUE(n) IMP_IF_CHECK(IMP::base::USAGE) {      \
     if (!is_good_value(n)) {                                     \
-      IMP_LOG(TERSE, #n << " is " << n << std::endl);            \
+      IMP_LOG_TERSE( #n << " is " << n << std::endl);            \
       failure();                                                 \
     }                                                            \
   }
@@ -27,13 +27,13 @@ IMPCORE_BEGIN_NAMESPACE
 
 namespace {
 //! Estimate of limit of machine precision
-const double eps = 1.2e-7;
+const double cg_eps = 1.2e-7;
 
 template <class NT>
 bool is_good_value(const NT &f) {
-  if (compatibility::isnan(f)
+  if (base::isnan(f)
       || std::abs(f) > std::numeric_limits<NT>::max() /1024.0f) {
-    IMP_LOG(VERBOSE, "Bad value found in CG: " << f << std::endl);
+    IMP_LOG_VERBOSE( "Bad value found in CG: " << f << std::endl);
     return false;
   }
   else return true;
@@ -158,7 +158,7 @@ bool ConjugateGradients::line_search(base::Vector<NT> &x,
     NT dal, at;
 
     /* TEST FOR FAILURE OF THE LINEAR SEARCH. */
-    if (alpha * step <= eps) {
+    if (alpha * step <= cg_eps) {
       return false;
     }
 
@@ -200,7 +200,7 @@ bool ConjugateGradients::line_search(base::Vector<NT> &x,
 
       /* IF THEY HAVE BEEN MET, TEST IF TWO POINTS HAVE BEEN TRIED
          AND IF THE TRUE LINE MINIMUM HAS NOT BEEN FOUND. */
-      if (ifun - ncalls > 1 || fabs(dal / dg) <= eps) {
+      if (ifun - ncalls > 1 || fabs(dal / dg) <= cg_eps) {
         break;
       }
     }
@@ -295,7 +295,7 @@ Float ConjugateGradients::do_optimize(unsigned int max_steps)
 #else
     x[i] = get_value(float_indices[i]); //scaled
 #endif
-    IMP_USAGE_CHECK(!compatibility::isnan(x[i])
+    IMP_USAGE_CHECK(!base::isnan(x[i])
                     && std::abs(x[i]) < std::numeric_limits<NT>::max(),
               "Bad input to CG");
   }
@@ -349,7 +349,7 @@ g20:
   dxsq = -dg1;
 
   /* Test if the initial point is the minimizer. */
-  if (dxsq <= eps * eps * std::max(NT(1.0), xsq)) {
+  if (dxsq <= cg_eps * cg_eps * std::max(NT(1.0), xsq)) {
     goto end;
   }
 

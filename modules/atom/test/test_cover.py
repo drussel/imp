@@ -4,7 +4,7 @@ import IMP.test
 import IMP.atom
 import IMP.display
 
-class PDBReadWriteTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def _perturb(self, mp, rb=None):
         rot = IMP.algebra.get_random_rotation_3d()
         bx= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(0,0,0),
@@ -37,8 +37,8 @@ class PDBReadWriteTest(IMP.test.TestCase):
 
         #! read PDB
         mp= IMP.atom.read_pdb(self.open_input_file("input.pdb"),
-                              m, IMP.atom.NonWaterPDBSelector())
-        s= IMP.atom.Selection(mp, residue_indexes=[26, 123])
+                              m, IMP.atom.CAlphaPDBSelector())
+        s= IMP.atom.Selection(mp, residue_indexes=[26, 30])
         d= IMP.atom.create_cover(s, "my cover")
         m.update()
         print d.get_radius()
@@ -53,11 +53,11 @@ class PDBReadWriteTest(IMP.test.TestCase):
 
         #! read PDB
         mp= IMP.atom.read_pdb(self.open_input_file("input.pdb"),
-                              m, IMP.atom.NonWaterPDBSelector())
+                              m, IMP.atom.CAlphaPDBSelector())
         rb= IMP.atom.create_rigid_body(mp)
-        #IMP.set_log_level(IMP.VERBOSE)
+        #IMP.base.set_log_level(IMP.base.VERBOSE)
         #IMP.atom.show_molecular_hierarchy(mp)
-        s= IMP.atom.Selection(mp, residue_indexes=[26, 123])
+        s= IMP.atom.Selection(mp, residue_indexes=[26, 30])
         print "selected:"
         for p in s.get_selected_particles():
             print p.get_name()

@@ -1,10 +1,11 @@
 /**
- *  \file ProjectionOverlapFilter.h
+ *  \file domino_filters.h
  *  \brief SubsetFilter for checking overlap between projections and images
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
+
 #ifndef IMPEM2D_DOMINO_FILTERS_H
 #define IMPEM2D_DOMINO_FILTERS_H
 
@@ -47,7 +48,7 @@ public:
                                         subset_restrained_(subset_to_restrain),
                                         ps_table_(ps_table),
                                           max_distance_(max_distance) {
-    IMP_LOG(TERSE, "DistanceFilter created" << std::endl);
+    IMP_LOG_TERSE( "DistanceFilter created" << std::endl);
   }
   void show(std::ostream &out = std::cout) const {
     out << "DistanceFilter" << std::endl;

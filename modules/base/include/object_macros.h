@@ -30,10 +30,16 @@
                         get_version_info() const,                       \
   return ::IMP::base::VersionInfo(get_module_name(),                    \
                                   get_module_version()));               \
-IMP_IMPLEMENT_INLINE(virtual void do_show(std::ostream &out) const,     \
-                      show);                                            \
-IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name, IMP::base::Object::_on_destruction(); \
-                                  destructor;)
+  IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name,                               \
+                                    try {                               \
+                                      IMP::base::Object::_on_destruction(); \
+                                      destructor;                       \
+                                    } catch (const std::exception &e) { \
+                                      IMP_LOG_VARIABLE(e);              \
+                                      IMP_WARN("Caught exception "      \
+                                               << e.what()              \
+                                               << " in destructor.");   \
+                                    })
 
 
 //! Use IMP_OBJECT_METHODS()
@@ -43,7 +49,7 @@ IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name, IMP::base::Object::_on_destruction(); \
                         get_version_info() const,                       \
   return ::IMP::base::VersionInfo(get_module_name(),                    \
                                   get_module_version()));               \
-IMP_IMPLEMENT(virtual void do_show(std::ostream &out) const);           \
+  virtual void do_show(std::ostream &out) const;                        \
 IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name, IMP::base::Object::_on_destruction();)
 
 //! Define the basic things needed by any Object
@@ -60,7 +66,7 @@ IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name, IMP::base::Object::_on_destruction();)
                                   get_module_version()));               \
 IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name, IMP::base::Object::_on_destruction();)
 
-#ifdef IMP_USE_DEPRECATED
+#if IMP_HAS_DEPRECATED
 //! for backwards compat
 #define IMP_OBJECT_2(Name) IMP_OBJECT_METHODS(Name)
 #endif
@@ -71,8 +77,7 @@ IMP_REF_COUNTED_INLINE_DESTRUCTOR(Name, IMP::base::Object::_on_destruction();)
     different.
  */
 #define IMP_OBJECTS(Name, PluralName)           \
-/** Store a set of objects.
-    \relates Name */                                            \
+  /** Store a set of objects.*/                                 \
   typedef IMP::base::Vector<IMP::base::Pointer<Name> >          \
   PluralName;                                                   \
 /** Pass a set of objects.

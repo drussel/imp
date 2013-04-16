@@ -1,13 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __doc__ = "Cluster assembly solutions."
 
 from optparse import OptionParser
-import fastcluster
-import scipy.cluster.hierarchy
 import itertools
-import numpy,math
-from collections import Counter
+import math
 import IMP.multifit
 import IMP.container
 
@@ -74,7 +71,6 @@ class AlignmentClustering:
         self.asmb.set_was_used(True)
         self.prot_data=IMP.multifit.read_proteomics_data(self.prot_fn)
         self.alignment_params = IMP.multifit.AlignmentParams(self.align_fn)
-        self.alignment_params.process_parameters()
         self.mapping_data=IMP.multifit.read_protein_anchors_mapping(self.prot_data,self.map_fn)
 
         self.align=IMP.multifit.ProteomicsEMAlignmentAtomic(self.mapping_data,self.asmb,
@@ -98,12 +94,13 @@ class AlignmentClustering:
         """
             Cluster configurations for a model based on RMSD.
             An IMP.ConfigurationSet is built using the reference frames for
-            of the components of the assembly for each solution
-            @param confs_RFs A lsit containing a tuples of reference frames.
-                Each tuple contains the reference frame for the rigid body
-                of one component of the assembly
+            all of the components of the assembly for each solution
+            @param max_comb_ind Maximum number of components to consider
             @param max_rmsd Maximum RMSD tolerated when clustering
         """
+        import fastcluster
+        import scipy.cluster.hierarchy
+
         self.mdl = self.align.get_model()
         self.all_ca=[]
         for mh in self.mhs:
@@ -138,7 +135,7 @@ class AlignmentClustering:
         self.uniques=get_uniques(self.cluster_inds)
         print "number of clusters",len(self.uniques)
 
-        #return cluseters by their size
+        #return clusters by their size
         return self.uniques
 
 
@@ -190,7 +187,7 @@ class AlignmentClustering:
 
         map_solution.calcRMS()
         coarse_cc = IMP.em.CoarseCC()
-        # base the calculation of the cross_correlation coefficient on the threshold]
+        # base the calculation of the cross_correlation coefficient on the threshold
         # for the native map, because the threshold for the map of the model changes
         # with each model
         #map_solution.get_header().show()
@@ -212,6 +209,7 @@ class AlignmentClustering:
             self.clusters_data[cluster_ind]=self.analyze_cluster(cluster_ind,max_comb_ind)
 
     def analyze_cluster(self,query_cluster_ind,max_comb_ind):
+        import numpy
         #load reference
         mhs_native=[]
         mhs_native_ca=[]
@@ -295,7 +293,10 @@ def usage():
     usage =  """%prog [options] <asmb> <asmb.proteomics> <asmb.mapping>
            <alignment.params> <combinations> <output: clustered combinations>
 
-Clustering assembly solutions
+Clustering of assembly solutions.
+
+This program uses the Python 'fastcluster' module, which can be obtained from
+http://math.stanford.edu/~muellner/fastcluster.html
 """
     parser = OptionParser(usage)
     parser.add_option("-m", "--max", type="int", dest="max", default=999999999,
@@ -308,7 +309,7 @@ Clustering assembly solutions
     return options,args
 
 def main():
-    IMP.set_log_level(IMP.WARNING)
+    IMP.base.set_log_level(IMP.WARNING)
     options,args = usage()
     asmb_fn = args[0]
     prot_fn = args[1]

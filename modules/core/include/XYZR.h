@@ -12,6 +12,7 @@
 #include "XYZ.h"
 #include <IMP/algebra/Sphere3D.h>
 #include <IMP/display/particle_geometry.h>
+#include <IMP/display/geometry_macros.h>
 #include <IMP/display/primitive_geometries.h>
 #include <limits>
 
@@ -57,10 +58,21 @@ public:
      \param[in] s The sphere to use to set the position and radius
    */
   static XYZR setup_particle(Particle *p,
-                     const algebra::Sphere3D &s) {
+                             // See XYZ::setup_particle before you change this
+                     const algebra::Sphere3D s) {
     XYZ::setup_particle(p, s.get_center());
     p->add_attribute(get_radius_key(), s.get_radius(), false);
     return XYZR(p);
+  }
+
+  /** Add the coordinates and radius from the sphere to the particle.
+   */
+  static XYZR setup_particle(Model *m, ParticleIndex pi,
+                             // See XYZ::setup_particle before you change this
+                             const algebra::Sphere3D s) {
+    XYZ::setup_particle(m, pi, s.get_center());
+    m->add_attribute(get_radius_key(), pi, s.get_radius(), false);
+    return XYZR(m, pi);
   }
 
   //! Check if the particle has the required attributes
@@ -177,9 +189,6 @@ inline void set_sphere_d_geometry(XYZR d, const algebra::Sphere3D &v) {
 IMP_PARTICLE_GEOMETRY(XYZR, core::XYZR,
  {
    display::SphereGeometry *g= new display::SphereGeometry(d.get_sphere());
-   if (display::Colored::particle_is_instance(d)) {
-     g->set_color(display::Colored(d).get_color());
-   }
    ret.push_back(g);
   });
 
@@ -212,7 +221,7 @@ IMPCORE_END_NAMESPACE
 #ifndef SWIG
 // swig doesn't like having the overloads in different namespaces
 // it will do the conversion implicitly anyway
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 /** \genericgeometry */
 inline const algebra::Sphere3D get_sphere_d_geometry(Particle *p) {
   return core::XYZR(p).get_sphere();
@@ -228,7 +237,7 @@ inline const algebra::BoundingBoxD<3>
 get_bounding_box_d_geometry(Particle *p) {
   return get_bounding_box(core::XYZR(p).get_sphere());
 }
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 #endif
 
 #endif  /* IMPCORE_XYZ_R_H */

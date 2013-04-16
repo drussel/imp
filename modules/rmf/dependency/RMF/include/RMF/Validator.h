@@ -2,7 +2,7 @@
  *  \file RMF/Validator.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,6 +12,8 @@
 #include <RMF/config.h>
 #include "FileHandle.h"
 #include <boost/intrusive_ptr.hpp>
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 /** Validators check invariants of the RMF hierarchy. Use the
@@ -83,7 +85,7 @@ inline void intrusive_ptr_release(Creator *a)
   }
 }
 
-typedef vector<boost::intrusive_ptr<Creator> > Creators;
+typedef std::vector<boost::intrusive_ptr<Creator> > Creators;
 RMFEXPORT Creators& get_validators();
 
 template <class V>
@@ -95,5 +97,7 @@ struct Registrar {
 #endif
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_VALIDATOR_H */

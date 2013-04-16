@@ -1,3 +1,6 @@
+## \example kernel/chain.py
+## This example shows how to set up an optimization involving several particles constrained to be connected in a loop. It uses non bonded lists and a variety of restraints.
+
 import IMP
 import IMP.core
 import random
@@ -9,9 +12,9 @@ import IMP.container
 # the head and the tail of the chain are restrained to be close to one
 # another.
 
-IMP.set_log_level(IMP.TERSE)
+IMP.base.set_log_level(IMP.base.TERSE)
 m= IMP.Model()
-m.set_log_level(IMP.SILENT)
+m.set_log_level(IMP.base.SILENT)
 # The particles in the chain
 ps=IMP.core.create_xyzr_particles(m, 10, 1.0)
 chain= IMP.container.ListSingletonContainer(ps, "chain")

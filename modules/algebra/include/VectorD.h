@@ -23,7 +23,7 @@
 #include <boost/random/normal_distribution.hpp>
 #include <boost/static_assert.hpp>
 
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_USAGE
 #define IMP_VECTOR_CHECK check_vector()
 #define IMP_VECTOR_CHECK_INDEX(i) check_index(i)
 #define IMP_VECTOR_CHECK_COMPATIBLE(o) \
@@ -53,12 +53,16 @@ class VectorD: public GeometricPrimitiveD<D>
   }
   template <int OD>
   void check_compatible_vector(const VectorD<OD> &o) const {
+    IMP_USAGE_CHECK_VARIABLE(o);
     IMP_USAGE_CHECK(o.get_dimension() == get_dimension(),
                     "Dimensions don't match: "
                     << get_dimension() << " vs "
                     << o.get_dimension());
   }
   void check_index(unsigned int i) const {
+#if IMP_HAS_CHECKS < IMP_INTERNAL
+    IMP_UNUSED(i);
+#endif
     IMP_INTERNAL_CHECK(i < data_.get_dimension(),
                        "Invalid component of vector requested: "
                        << i << " of " <<get_dimension());
@@ -558,33 +562,33 @@ inline CommasIO<D> commas_io(const VectorD<D> &v) {
 #endif // doxygen
 
 #endif  //swig
-/** \relates VectorD */
+/** 1D vector typedef for swig */
 typedef VectorD<1> Vector1D;
-/** \relates VectorD */
+/** 1D vectors typedef for swig */
 typedef base::Vector<VectorD<1> > Vector1Ds;
-/** \relates VectorD */
+/** 2D vector typedef for swig */
 typedef VectorD<2> Vector2D;
-/** \relates VectorD */
+/** 2D vectors typedef for swig */
 typedef base::Vector<VectorD<2> > Vector2Ds;
-/** \relates VectorD */
+/** 3D vector typedef for swig */
 typedef VectorD<3> Vector3D;
-/** \relates VectorD */
+/** 3D vectors typedef for swig */
 typedef base::Vector<VectorD<3> > Vector3Ds;
-/** \relates VectorD */
+/** 4D vector typedef for swig */
 typedef VectorD<4> Vector4D;
-/** \relates VectorD */
+/** 4D vectors typedef for swig */
 typedef base::Vector<VectorD<4> > Vector4Ds;
-/** \relates VectorD */
+/** 5D vector typedef for swig */
 typedef VectorD<5> Vector5D;
-/** \relates VectorD */
+/** 5D vectors typedef for swig */
 typedef base::Vector<VectorD<5> > Vector5Ds;
-/** \relates VectorD */
+/** 6D vector typedef for swig */
 typedef VectorD<6> Vector6D;
-/** \relates VectorD */
+/** 6D vector typedef for swig */
 typedef base::Vector<VectorD<6> > Vector6Ds;
-/** \relates VectorD */
+/** KD vector typedef for swig */
 typedef VectorD<-1> VectorKD;
-/** \relates VectorD */
+/** KD vectors typedef for swig */
 typedef base::Vector<VectorD<-1> > VectorKDs;
 
 
@@ -649,33 +653,33 @@ public:
   VectorInputD(double v): VectorD<1>(v){}
 };
 
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<1> VectorInput1D;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef base::Vector<VectorInputD<1> > VectorInput1Ds;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<2> VectorInput2D;
-/** \relates VectorInputD */
+/** Typedef for python.*/
 typedef base::Vector<VectorInputD<2> > VectorInput2Ds;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<3> VectorInput3D;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef base::Vector<VectorInputD<3> > VectorInput3Ds;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<4> VectorInput4D;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef base::Vector<VectorInputD<4> > VectorInput4Ds;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<5> VectorInput5D;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef base::Vector<VectorInputD<5> > VectorInput5Ds;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<6> VectorInput6D;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef base::Vector<VectorInputD<6> > VectorInput6Ds;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef VectorInputD<-1> VectorInputKD;
-/** \relates VectorInputD */
+/** Typedef for python. */
 typedef base::Vector<VectorInputD<-1> > VectorInputKDs;
 
 

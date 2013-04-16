@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # This benchmark tries to compute the scores for the first 10 entries in the
 # benchmark file using ComplementarityRestraint.
@@ -66,8 +66,8 @@ def perform_benchmark(model, tr_list, r1, r2, rb1, rb2, maxiter):
                              elapsed, pct_error)
 
 
-IMP.set_log_level(IMP.SILENT)
+IMP.base.set_log_level(IMP.base.SILENT)
 tr_list = read_transformations()
 model = IMP.Model()
 r1, r2, rb1, rb2 = load_proteins(model)
-perform_benchmark(model, tr_list, r1, r2, rb1, rb2, 10)
+perform_benchmark(model, tr_list, r1, r2, rb1, rb2, 4)

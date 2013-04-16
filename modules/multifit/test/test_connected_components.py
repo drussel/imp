@@ -6,13 +6,13 @@ import IMP.core
 import IMP.atom
 import IMP.multifit
 
-class ConnectedComponentsTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test connected components """
 
     def setUp(self):
         """Build test model and optimizer"""
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.VERBOSE)#SILENT)
+        IMP.base.set_log_level(IMP.base.VERBOSE)#SILENT)
 
     def test_connected_components(self):
         """test connected components"""

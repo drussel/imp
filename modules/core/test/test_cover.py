@@ -4,12 +4,12 @@ import IMP.core
 import IMP.algebra
 import random
 
-class TestREFCover(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for RefinerCover"""
     def test_it(self):
         """Test cover refined"""
         m= IMP.Model()
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         n= random.randrange(1,10)
         ps=[]
         ds=IMP.core.XYZRs()

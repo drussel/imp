@@ -17,7 +17,7 @@ WeightedExcludedVolumeRestraint::WeightedExcludedVolumeRestraint(
   FloatKey weight_key):
     Restraint(IMP::internal::get_model(rbs),
               "Weighted Excluded Volume Restraint") {
-  IMP_LOG(TERSE,"Load WeightedExcludedVolumeRestraint \n");
+  IMP_LOG_TERSE("Load WeightedExcludedVolumeRestraint \n");
   rb_refiner_=refiner;
   add_particles(rbs);
   rbs_=rbs;
@@ -42,7 +42,7 @@ double WeightedExcludedVolumeRestraint::unprotected_evaluate(
                          DerivativeAccumulator *accum) const
 {
   bool calc_deriv = accum? true: false;
-  IMP_LOG(VERBOSE,"before resample\n");
+  IMP_LOG_VERBOSE("before resample\n");
   // //generate the transformed maps
   // std::vector<DensityMap*> transformed_maps;
   // for(int rb_i=0;rb_i<rbs_.size();rb_i++){
@@ -99,33 +99,20 @@ double WeightedExcludedVolumeRestraint::unprotected_evaluate(
   return score;
 }
 
-ParticlesTemp WeightedExcludedVolumeRestraint::get_input_particles() const
+ModelObjectsTemp WeightedExcludedVolumeRestraint::do_get_inputs() const
 {
-  ParticlesTemp pt;
+  ModelObjectsTemp ret
+    = rb_refiner_->get_inputs(get_model(),
+                              IMP::get_indexes(ParticlesTemp(particles_begin(),
+                                                             particles_end())));
   for (ParticleConstIterator it= particles_begin();
        it != particles_end(); ++it) {
-      ParticlesTemp cur= rb_refiner_->get_input_particles(*it);
-      pt.insert(pt.end(), cur.begin(), cur.end());
       ParticlesTemp curr= rb_refiner_->get_refined(*it);
-      pt.insert(pt.end(), curr.begin(), curr.end());
+      ret += curr;
   }
-  return pt;
+  return ret;
 }
 
-ContainersTemp WeightedExcludedVolumeRestraint::get_input_containers() const {
-  ContainersTemp pt;
-  for (ParticleConstIterator it= particles_begin();
-       it != particles_end(); ++it) {
-      ContainersTemp cur= rb_refiner_->get_input_containers(*it);
-      pt.insert(pt.end(), cur.begin(), cur.end());
-  }
-  return pt;
-}
-
-void WeightedExcludedVolumeRestraint::do_show(std::ostream& out) const
-{
-  out<<"WeightedExcludedVolumeRestraint"<<std::endl;
-}
 IMP_LIST_IMPL(WeightedExcludedVolumeRestraint,
               Particle, particle,Particle*, Particles);
 

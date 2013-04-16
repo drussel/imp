@@ -1,13 +1,5 @@
 %include "IMP_base.random.i"
 
-namespace IMP {
-namespace base {
-%warnfilter(403) FailureHandlerBase;
-%implicitconv TextInput;
-%implicitconv TextOutput;
-}
-}
-
 
 %extend IMP::base::Object {
   bool __eq__(const Object *o) const {
@@ -39,7 +31,7 @@ IMP_SWIG_RAII(IMP::base, SetLogState);
 IMP_SWIG_RAII(IMP::base, SetNumberOfThreads);
 IMP_SWIG_RAII(IMP::base, SetCheckState);
 IMP_SWIG_OBJECT(IMP::base, Object, Objects);
-IMP_SWIG_OBJECT(IMP::base, FailureHandler, FailureHandlers);
+IMP_SWIG_OBJECT(IMP::base::internal, _TestObject, _TestObjects);
 IMP_SWIG_DIRECTOR(IMP::base, Object);
 IMP_SWIG_VALUE(IMP::base, VersionInfo, VersionInfos);
 /*IMP_SWIG_VALUE(IMP::base, TextOutput, TextOutputs);
@@ -47,6 +39,8 @@ IMP_SWIG_VALUE(IMP::base, TextInput, TextInputs);*/
 IMP_SWIG_RAII(IMP::base, CreateLogContext)
 IMP_SWIG_RAII(IMP::base, WarningContext)
 IMP_SWIG_RAII(IMP::base, SetLogTarget);
+IMP_SWIG_VALUE(IMP::base::internal, _TestValue, _TestValues);
+
 
 IMP_SWIG_NATIVE_PAIR(IMP, double, DerivativePair, DerivativePairs);
 IMP_SWIG_NATIVE_PAIR(IMP, double, FloatRange, FloatRanges);
@@ -64,6 +58,7 @@ IMP_SWIG_NATIVE_VALUE(double);
 IMP_SWIG_NATIVE_VALUE(int);
 IMP_SWIG_NATIVE_VALUE(std::string);
 
+IMP_SWIG_VALUE_TEMPLATE(IMP::base, Index);
 IMP_SWIG_VALUE(IMP::base::internal, _Protection, _Protections);
 
 %rename(_InputAdaptor) IMP::base::InputAdaptor;
@@ -75,9 +70,9 @@ IMP_SWIG_VALUE(IMP::base::internal, _Protection, _Protections);
 %include "IMP/base/NonCopyable.h"
 %include "IMP/base/RAII.h"
 %include "IMP/base/Value.h"
-%include "IMP/base/flags.h"
 %include "IMP/base/Vector.h"
 %include "IMP/base/types.h"
+%include "IMP/base/flags.h"
 %include "IMP/base/enums.h"
 %include "IMP/base/VersionInfo.h"
 %include "IMP/base/RefCounted.h"
@@ -85,7 +80,6 @@ IMP_SWIG_VALUE(IMP::base::internal, _Protection, _Protections);
 %include "IMP/base/log.h"
 %include "IMP/base/declare_Object.h"
 %include "IMP/base/Object.h"
-%include "IMP/base/FailureHandler.h"
 %include "IMP/base/SetLogState.h"
 %include "IMP/base/WarningContext.h"
 %include "IMP/base/CreateLogContext.h"
@@ -100,15 +94,19 @@ IMP_SWIG_VALUE(IMP::base::internal, _Protection, _Protections);
 %include "IMP/base/threads.h"
 
 %pythoncode %{
-import IMP
-ModelException=IMP.ModelException
-#used_modules=[]
-#def show_used_modules():
-#    for m in used_modules:
-#        print "%-20s %s" % (m.get_module(), m.get_version())
 
 import _graph_show
 show_altgraph= _graph_show.show_altgraph
 show_graphviz= _graph_show.show_graphviz
 get_networkx_graph= _graph_show.get_networkx_graph
+%}
+
+%{
+#if IMP_BASE_HAS_LOG4CXX
+namespace {
+struct LogInit {
+LogInit() {IMP::base::internal::init_logger();}
+} loginit;
+}
+#endif
 %}

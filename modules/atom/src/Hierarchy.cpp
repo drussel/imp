@@ -22,7 +22,7 @@
 #include <IMP/algebra/geometric_alignment.h>
 #include <IMP/core/rigid_bodies.h>
 
-#include <IMP/compatibility/set.h>
+#include <IMP/base/set.h>
 
 #include <boost/random/uniform_int.hpp>
 
@@ -46,26 +46,26 @@ void Hierarchy::show(std::ostream &out) const
   bool found=false;
   if (get_as_atom()) {
     found=true;
-    out << get_as_atom();
+    out << get_as_atom() << " ";
   }
   if (get_as_residue()){
     found=true;
-    out << get_as_residue();
+    out << get_as_residue() << " ";
   }
   if (get_as_chain()) {
     found=true;
-    out << get_as_chain();
+    out << get_as_chain() << " ";
   } else if (get_as_molecule()) {
     found=true;
-    out << get_as_molecule();
+    out << get_as_molecule() << " ";
   }
   if (get_as_fragment()) {
     found=true;
-    out << get_as_fragment();
+    out << get_as_fragment() << " ";
   }
   if (get_as_domain()) {
     found=true;
-    out << get_as_domain();
+    out << get_as_domain() << " ";
   }
   if (core::RigidBody::particle_is_instance(get_particle())) {
     found=true;
@@ -334,7 +334,7 @@ create_fragment(const Hierarchies &ps)
 Bonds get_internal_bonds(Hierarchy mhd)
 {
   ParticlesTemp ps= core::get_all_descendants(mhd);
-  IMP::compatibility::set<Particle*> sps(ps.begin(), ps.end());
+  IMP::base::set<Particle*> sps(ps.begin(), ps.end());
   Bonds ret;
   for (ParticlesTemp::iterator pit = ps.begin();
        pit != ps.end(); ++pit) {
@@ -613,7 +613,7 @@ algebra::BoundingBox3D get_bounding_box(const Hierarchy &h) {
       bb+= algebra::BoundingBox3D(core::XYZ(rep[i]).get_coordinates());
     }
   }
-  IMP_LOG(VERBOSE, "Bounding box is " << bb << std::endl);
+  IMP_LOG_VERBOSE( "Bounding box is " << bb << std::endl);
   return bb;
 }
 

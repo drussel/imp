@@ -28,6 +28,8 @@
 #include "jama_lu.h"
 
 IMPALGEBRA_BEGIN_INTERNAL_NAMESPACE
+IMP_CLANG_PRAGMA(diagnostic push)
+IMP_CLANG_PRAGMA(diagnostic ignored "-Wshadow")
 namespace TNT
 {
 using namespace std;
@@ -343,7 +345,7 @@ inline bool is_inversable(const Array2D<T> &M)
   //check if the values of inv are all numbers
   for(int d1=0;d1<inv.dim1();d1++){
   for(int d2=0;d2<inv.dim2();d2++){
-    if(IMP::compatibility::isnan(inv[d1][d2])) {
+    if(IMP::base::isnan(inv[d1][d2])) {
       return false;
     }
   }
@@ -450,7 +452,7 @@ inline void set_row(Array2D<T> &M, const Array1D<T> &v,int i)
 }
 
 } // namespace TNT
-
+IMP_CLANG_PRAGMA(diagnostic pop)
 IMPALGEBRA_END_INTERNAL_NAMESPACE
 
 #endif /* IMPALGEBRA_TNT_ARRAY_2D_UTILS_H */

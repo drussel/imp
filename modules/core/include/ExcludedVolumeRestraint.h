@@ -48,7 +48,7 @@ class IMPCOREEXPORT ExcludedVolumeRestraint: public Restraint
   // moved stuff
   mutable ParticleIndexes rbs_;
   mutable ParticleIndexes xyzrs_;
-  mutable IMP::compatibility::map<ParticleIndex, ParticleIndexes> constituents_;
+  mutable IMP::base::map<ParticleIndex, ParticleIndexes> constituents_;
   double slack_;
   mutable algebra::Transformation3Ds rbs_backup_;
   mutable algebra::Vector3Ds xyzrs_backup_;
@@ -87,6 +87,9 @@ public:
    IMP_OBJECT_METHODS(ExcludedVolumeRestraint);;
   Restraints do_create_decomposition() const;
   Restraints do_create_current_decomposition() const;
+#ifndef IMP_DOXYGEN
+  const ParticleIndexPairs& get_indexes() const {return cur_list_;}
+#endif
   IMP_LIST_ACTION(public, PairFilter, PairFilters, pair_filter,
                   pair_filters,
                   PairPredicate*, PairPredicates,,,);

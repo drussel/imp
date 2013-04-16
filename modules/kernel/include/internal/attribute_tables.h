@@ -8,7 +8,7 @@
 #ifndef IMPKERNEL_INTERNAL_ATTRIBUTE_TABLES_H
 #define IMPKERNEL_INTERNAL_ATTRIBUTE_TABLES_H
 
-#include "../kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include <boost/dynamic_bitset.hpp>
 #include "../Key.h"
 #include "../utility.h"
@@ -20,7 +20,7 @@
 #include <IMP/algebra/Sphere3D.h>
 
 
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
 #define IMP_CHECK_MASK(mask, particle_index, key, operation, entity)    \
   IMP_USAGE_CHECK(!mask || mask->size() >                               \
                   get_as_unsigned_int(particle_index),                  \
@@ -49,7 +49,7 @@
   dest+=increment
 #endif
 
-IMP_BEGIN_INTERNAL_NAMESPACE
+IMPKERNEL_BEGIN_INTERNAL_NAMESPACE
 
 typedef boost::dynamic_bitset<> Mask;
 
@@ -59,14 +59,13 @@ public:
   typedef typename Traits::Key Key;
 private:
   base::Vector<typename Traits::Container > data_;
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   Mask *read_mask_, *write_mask_, *add_remove_mask_;
 #endif
-  compatibility::set<Key> caches_;
+  base::set<Key> caches_;
 
    void do_add_attribute(Key k, ParticleIndex particle,
                            typename Traits::PassValue value) {
-     using IMP::operator<<;
      IMP_USAGE_CHECK(Traits::get_is_valid(value), "Can't set to invalid value: "
                      << value << " for attribute " << k);
     if (data_.size() <= k.get_index()) {
@@ -82,7 +81,7 @@ public:
     IMP_SWAP_MEMBER(caches_);
   }
 
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   void set_masks(Mask *read_mask,
                  Mask *write_mask,
                  Mask *add_remove_mask) {
@@ -93,7 +92,7 @@ public:
 #endif
 
   BasicAttributeTable()
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   : read_mask_(nullptr), write_mask_(nullptr), add_remove_mask_(nullptr)
 #endif
   {}
@@ -105,15 +104,15 @@ public:
   }
   void add_cache_attribute(Key k, ParticleIndex particle,
                            typename Traits::PassValue value) {
-#pragma omp critical(imp_cache)
+IMP_OMP_PRAGMA(critical(imp_cache))
     {
     caches_.insert(k);
     do_add_attribute(k, particle, value);
   }
   }
   void clear_caches(ParticleIndex particle) {
-#pragma omp critical(imp_cache)
-    for (typename compatibility::set<Key>::const_iterator it=caches_.begin();
+IMP_OMP_PRAGMA(critical(imp_cache))
+    for (typename base::set<Key>::const_iterator it=caches_.begin();
          it != caches_.end(); ++it) {
       if (data_.size() > it->get_index()
           && data_[it->get_index()].size() > get_as_unsigned_int(particle)) {
@@ -137,7 +136,7 @@ public:
   }
   void set_attribute(Key k, ParticleIndex particle,
                      typename Traits::PassValue value) {
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
     if (caches_.find(k)==caches_.end()) {
       IMP_CHECK_MASK( write_mask_, particle, k, SET, ATTRIBUTE);
     }
@@ -238,7 +237,7 @@ class FloatAttributeTable {
   // make use bitset
   BasicAttributeTable<internal::BoolAttributeTableTraits> optimizeds_;
   FloatRanges ranges_;
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   Mask *read_mask_, *write_mask_,*add_remove_mask_,
                 *read_derivatives_mask_, *write_derivatives_mask_;
 #endif
@@ -260,14 +259,14 @@ public:
     IMP_SWAP_MEMBER(internal_coordinate_derivatives_);
   }
   FloatAttributeTable()
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   : read_mask_(nullptr), write_mask_(nullptr),
     add_remove_mask_(nullptr),
     read_derivatives_mask_(nullptr),
     write_derivatives_mask_(nullptr)
 #endif
 {}
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   void set_masks(Mask *read_mask,
                  Mask *write_mask,
                  Mask *add_remove_mask,
@@ -444,6 +443,9 @@ public:
                    ADD, ATTRIBUTE);
     IMP_USAGE_CHECK(!get_has_attribute(k, particle),
                     "Can't add attribute that is there");
+    IMP_USAGE_CHECK(FloatAttributeTableTraits::get_is_valid(v),
+                    "Can't set float attribute to " << v
+                    << " that is a special value.");
     if (k.get_index() <4) {
       if (spheres_.size() <= get_as_unsigned_int(particle)) {
         spheres_.resize(get_as_unsigned_int(particle)+1, get_invalid_sphere());
@@ -623,6 +625,17 @@ public:
     }
     return ret;
   }
+  unsigned int size() const {return data_.size()+7;}
+  unsigned int size(int i) const {
+
+    if (i < 4) {
+      return spheres_.size();
+    } else if (i < 7) {
+      return internal_coordinates_.size();
+    } else {
+      return data_.size(i-7);
+    }
+  }
 };
 
 IMP_SWAP(FloatAttributeTable);
@@ -646,12 +659,12 @@ ParticlesAttributeTable;
 
 
 struct Masks {
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   mutable Mask read_mask_, write_mask_, add_remove_mask_,
     read_derivatives_mask_, write_derivatives_mask_;
 #endif
 };
-IMP_END_INTERNAL_NAMESPACE
+IMPKERNEL_END_INTERNAL_NAMESPACE
 
 #ifndef SWIG
 #define IMP_MODEL_IMPORT(Base)                  \

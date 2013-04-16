@@ -7,10 +7,10 @@
 #ifndef IMPALGEBRA_INTERNAL_VECTOR_GENERATORS_H
 #define IMPALGEBRA_INTERNAL_VECTOR_GENERATORS_H
 #include <IMP/algebra/algebra_config.h>
-#include <IMP/base_types.h>
 #include "../VectorD.h"
 #include "../SphereD.h"
 #include "../SphericalVector3D.h"
+#include "../utility.h"
 #ifdef IMP_ALGEBRA_USE_IMP_CGAL
 #include <IMP/cgal/internal/sphere_cover.h>
 #endif
@@ -73,7 +73,7 @@ inline VectorD<3> get_random_vector_on(const SphereD<3> &s) {
   do {
     double x1=rand(base::random_number_generator);
     double x2=rand(base::random_number_generator);
-    double ssq=square(x1)+square(x2);
+    double ssq=get_squared(x1)+get_squared(x2);
     if (ssq <=1) {
       VectorD<3> ret;
       double sq=std::sqrt(1-ssq);
@@ -86,14 +86,14 @@ inline VectorD<3> get_random_vector_on(const SphereD<3> &s) {
 }
 
 /*inline VectorD<3> get_random_vector_on(const SphereD<3> &s) {
-  double cur_radius2=square(s.get_radius());
+  double cur_radius2=get_squared(s.get_radius());
   Floats up(s.get_center().get_dimension());
   for (unsigned int i=s.get_dimension()-1; i>0; --i) {
     double r= std::sqrt(cur_radius2);
     ::boost::uniform_real<> rand(-r, r);
     up[i]= rand(random_number_generator);
     // radius of circle
-    cur_radius2= cur_radius2-square(up[i]);
+    cur_radius2= cur_radius2-get_squared(up[i]);
   }
   ::boost::uniform_int<> rand(0, 1);
   double x= std::sqrt(cur_radius2);
@@ -108,7 +108,7 @@ inline VectorD<3> get_random_vector_on(const SphereD<3> &s) {
                      "Error generating vector on sphere: "
                      << VectorD<3>(up.begin(), up.end())
                      << " for " << s.get_radius());
-  //IMP_LOG(VERBOSE, "Random vector on sphere is " << up << std::endl);
+  //IMP_LOG_VERBOSE( "Random vector on sphere is " << up << std::endl);
 
   return s.get_center()+ VectorD<3>(up.begin(), up.end());
   }*/

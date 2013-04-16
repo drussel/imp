@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __doc__ = 'Build initial parameters files.'
 
@@ -47,31 +47,6 @@ def get_density_data(name,density_fn,resolution,spacing,threshold,
     msg+=anchor_dir_name+name+"_em_fine_anchors.txt|"+anchor_dir_name+name+"_em_fine_anchors_FINE.txt|\n"
     return msg;
 
-def get_log_data(intermediate_fn,output_fn,model_fn):
-    msg  = "# log Parameters:\n"
-    msg += "output "+output_fn+"\n"
-    msg += "model "+model_fn+"\n"
-    if intermediate_fn != "":
-        msg += "intermediate "+intermediate_fn+"\n"
-    return msg
-def get_clustering_data():
-    msg="#    Clustering Parameters:\n";
-    msg +="#    clusterParams < axis_angle_thr DEGREES > < min_cluster_size > < distance_between_centers_of_mass >\n";
-    msg += "clusterParams 18 1 2.0\n";
-    return msg;
-
-def get_base_data():
-    msg = "\n#    Base Parameters:\n"
-    msg += "#    baseParams <min_base_dist> <max_base_dist>\n"
-    msg +="baseParams 5.0 50.0\n";
-    return msg;
-
-def get_grid_data():
-    msg = "\n#    Grid Parameters:\n"
-    msg+="#      grid <grid_step> <max_distance> <vol_func_radius>\n"
-    msg += "grid 0.5 6.0 6.0\n"
-    return msg
-
 def get_protein_data(pdb_list,coarse_level,anchor_dir_name,fit_dir_name,fit_fn_header,add_reference_fn):
     sd=IMP.multifit.SettingsData()
     sd.set_was_used(True)
@@ -97,6 +72,8 @@ def create_alignment_param_file(asmb_name,coarse_level):
     #TODO - make load_atomic and rigid parameters
     shutil.copy(IMP.multifit.get_data_path("atomic.alignment.param"),
                 asmb_name + ".alignment.param")
+    shutil.copy(IMP.multifit.get_data_path("atomic.alignment.param.refined"),
+                asmb_name + ".alignment.param.refined")
 
 def create_assembly_input_file(pdb_list,coarse_level,anchor_dir,fit_dir,asmb_name,
                                density_map_fn,resolution,spacing,threshold,
@@ -110,6 +87,14 @@ def create_assembly_input_file(pdb_list,coarse_level,anchor_dir,fit_dir,asmb_nam
     msg=msg+get_density_data(asmb_name,density_map_fn,resolution,spacing,
                              threshold,origin,anchor_dir,fit_dir)
     f=open(asmb_input_fn,"w")
+    f.write(msg)
+    f.close()
+    #refinement assembly input
+    msg=""
+    msg=msg+get_protein_data(pdb_list,coarse_level,anchor_dir,fit_dir,fit_fn_header+".refined",add_reference_fn)
+    msg=msg+get_density_data(asmb_name,density_map_fn,resolution,spacing,
+                             threshold,origin,anchor_dir,fit_dir)
+    f=open(asmb_input_fn+".refined","w")
     f.write(msg)
     f.close()
 

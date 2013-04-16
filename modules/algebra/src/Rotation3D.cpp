@@ -52,8 +52,10 @@ Rotation3D get_rotation_from_matrix(double m11,double m12,double m13,
               "The passed matrix is not a rotation matrix (col 0, col 2).");
     IMP_USAGE_CHECK(std::abs(c1 *c2) < .1,
               "The passed matrix is not a rotation matrix (col 1, col 2).");
-    IMP_CHECK_CODE(double det = m11*(m22*m33- m23*m32) + m12*(m23*m31-m21*m33)
-                   + m13*(m21*m32-m22*m31));
+#if IMP_HAS_CHECKS >= IMP_USAGE
+    double det = m11*(m22*m33- m23*m32) + m12*(m23*m31-m21*m33)
+                   + m13*(m21*m32-m22*m31);
+#endif
     IMP_USAGE_CHECK(std::abs(det-1) < .1, "The determinant of the rotation "
                     "matrix is not 1. Got " << det);
   }
@@ -81,10 +83,10 @@ Rotation3D get_rotation_from_matrix(double m11,double m12,double m13,
       Vector3D xr= ret.get_rotated(get_basis_vector_d<3>(0));
       Vector3D yr= ret.get_rotated(get_basis_vector_d<3>(1));
       Vector3D zr= ret.get_rotated(get_basis_vector_d<3>(2));
-      IMP_LOG(TERSE, "Got:\n");
-      IMP_LOG(TERSE, xr[0] << " " <<  yr[0] << " " <<  zr[0] << std::endl);
-      IMP_LOG(TERSE, xr[1] << " " <<  yr[1] << " " <<  zr[1] << std::endl);
-      IMP_LOG(TERSE, xr[2] << " " <<  yr[2] << " " <<  zr[2] << std::endl);
+      IMP_LOG_TERSE( "Got:\n");
+      IMP_LOG_TERSE( xr[0] << " " <<  yr[0] << " " <<  zr[0] << std::endl);
+      IMP_LOG_TERSE( xr[1] << " " <<  yr[1] << " " <<  zr[1] << std::endl);
+      IMP_LOG_TERSE( xr[2] << " " <<  yr[2] << " " <<  zr[2] << std::endl);
     }
 #endif
   }
@@ -98,10 +100,10 @@ const Vector3D Rotation3D::get_derivative(const Vector3D &o,
        modules/algebra/tools
     */
     double t4 = v_[0]*o[0] - v_[3]*o[1] + v_[2]*o[2];
-    double t5 = square(v_[0]);
-    double t6 = square(v_[1]);
-    double t7 = square(v_[2]);
-    double t8 = square(v_[3]);
+    double t5 = get_squared(v_[0]);
+    double t6 = get_squared(v_[1]);
+    double t7 = get_squared(v_[2]);
+    double t8 = get_squared(v_[3]);
     double t9 = t5 + t6 + t7 + t8;
     double t10 = 1.0/t9;
     double t11 = 2*t4*t10;
@@ -110,7 +112,7 @@ const Vector3D Rotation3D::get_derivative(const Vector3D &o,
 
     double t19 = v_[1]*v_[3];
     double t20 = v_[0]*v_[2];
-    double t25 = square(t9);
+    double t25 = get_squared(t9);
     double t26 = 1.0/t25;
 
     double t27 = ((t5 + t6 - t7 - t8)*o[0] + 2*(t14 - t15)*o[1]
@@ -203,7 +205,7 @@ Rotation3Ds get_uniform_cover_rotations_3d(unsigned int n) {
 Rotation3D get_random_rotation_3d(const Rotation3D &center,
                                   double distance) {
   unsigned int count=0;
-  double d2= square(distance);
+  double d2= get_squared(distance);
   while (count < 10000) {
     Rotation3D rr= get_random_rotation_3d();
     if (get_distance(center, rr) < d2) {
@@ -255,7 +257,7 @@ Rotation3D get_rotation_from_fixed_zyz(double Rot, double Tilt, double Psi) {
   double s2 = std::sin(Tilt);
   double s3 = std::sin(Psi);
 
-  /*IMP_LOG(VERBOSE, "Intermedites front: "
+  /*IMP_LOG_VERBOSE( "Intermedites front: "
           << c1 << " " << c2 << " " << c3 << "\n"
           << s1 << " " << s2 << " " << s3 << std::endl);*/
   double d00 = c1 * c2 * c3 - s1 * s3;
@@ -315,7 +317,7 @@ FixedZYZ get_fixed_zyz_from_rotation(const Rotation3D &r) {
   double cos_rot= cos_rot_sin_tilt/sin_tilt;
   double sin_rot= sin_rot_sin_tilt/sin_tilt;
   double rot= std::atan2(sin_rot, cos_rot);
-  /*IMP_LOG(VERBOSE, "Intermedites back: "
+  /*IMP_LOG_VERBOSE( "Intermedites back: "
           << cos_rot << " " << cos_tilt << " "
           << cos_psi_sin_tilt/sin_tilt << "\n"
           << sin_rot << " " << sin_tilt << " "
@@ -333,10 +335,10 @@ FixedZYZ get_fixed_zyz_from_rotation(const Rotation3D &r) {
 
 FixedXYZ get_fixed_xyz_from_rotation(const Rotation3D &r) {
   VectorD<4> quat = r.get_quaternion();
-  double q00 = square(quat[0]);
-  double q11 = square(quat[1]);
-  double q22 = square(quat[2]);
-  double q33 = square(quat[3]);
+  double q00 = get_squared(quat[0]);
+  double q11 = get_squared(quat[1]);
+  double q22 = get_squared(quat[2]);
+  double q33 = get_squared(quat[3]);
   double mat11 = q00 +  q11 - q22 - q33;
   double mat21 = 2*(quat[1]*quat[2] + quat[0]*quat[3]);
   //double mat23 = 2*(quat[2]*quat[3] - quat[0]*quat[1]);
@@ -382,7 +384,7 @@ Rotation3D get_rotation_taking_first_to_second(const Vector3D &v1,
   double angle = std::acos(dot);
   //check a special case: the input vectors are parallel / antiparallel
   if (std::abs(dot) >.999999) {
-    IMP_LOG(VERBOSE," the input vectors are (anti)parallel "<<std::endl);
+    IMP_LOG_VERBOSE(" the input vectors are (anti)parallel "<<std::endl);
     return get_rotation_about_axis(get_orthogonal_vector(v1),
                                               angle);
   }

@@ -9,7 +9,7 @@
 #define IMPCORE_XY_Z_H
 
 #include <IMP/core/core_config.h>
-#include "../macros.h"
+#include <IMP/decorator_macros.h>
 #include "internal/dihedral_helpers.h"
 #include "internal/angle_helpers.h"
 
@@ -42,13 +42,27 @@ class IMPCOREEXPORT XYZ: public Decorator
   IMP_DECORATOR(XYZ, Decorator);
 
   /** Create a decorator with the passed coordinates. */
+  static XYZ setup_particle(Model *m,
+                            ParticleIndex pi,
+    // This method and the next one need to take a vector (not a ref)
+    // as otherwise, you can pass the vector from one and use it to
+    // create another. But this would resize the vector and so invalidate
+    // the passed reference. Ick.
+                            const algebra::Vector3D v=
+                            algebra::Vector3D(0,0,0)) {
+    m->add_attribute(get_coordinate_key(0),pi,v[0]);
+    m->add_attribute(get_coordinate_key(1),pi,v[1]);
+    m->add_attribute(get_coordinate_key(2),pi,v[2]);
+    return XYZ(m, pi);
+  }
+
   static XYZ setup_particle(Particle *p,
-                    const algebra::Vector3D &v=
-                    algebra::Vector3D(0,0,0)) {
-    p->add_attribute(get_coordinate_key(0),v[0]);
-    p->add_attribute(get_coordinate_key(1),v[1]);
-    p->add_attribute(get_coordinate_key(2),v[2]);
-    return XYZ(p);
+                            // See setup_particle, above, before touching this
+                            const algebra::Vector3D v=
+                            algebra::Vector3D(0,0,0)) {
+    return setup_particle(p->get_model(),
+                          p->get_index(),
+                          v);
   }
 
   IMP_DECORATOR_GET_SET(x, get_coordinate_key(0), Float, Float);
@@ -200,7 +214,7 @@ IMPCORE_END_NAMESPACE
 // use koenig lookup
 // swig doesn't like having the overloads in different namespaces
 // it will do the conversion implicitly anyway
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 /** \genericgeometry */
 inline const algebra::Vector3D get_vector_d_geometry(Particle *p) {
   return core::XYZ(p).get_coordinates();
@@ -210,7 +224,7 @@ inline void set_vector_d_geometry(Particle *p, const algebra::Vector3D &v) {
   core::XYZ(p).set_coordinates(v);
 }
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 #endif
 
 #endif  /* IMPCORE_XY_Z_H */

@@ -1,5 +1,6 @@
 /**
- *  \file IMP/exception.h    \brief Various general useful functions for IMP.
+ *  \file IMP/kernel/exception.h
+ *  \brief For backwards compatibility.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
@@ -8,14 +9,14 @@
 #ifndef IMPKERNEL_EXCEPTION_H
 #define IMPKERNEL_EXCEPTION_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include <IMP/base/exception.h>
 #include <IMP/base/check_macros.h>
 #include <IMP/base/SetLogState.h>
 #include <IMP/base/WarningContext.h>
 
-IMP_BEGIN_NAMESPACE
-
+IMPKERNEL_BEGIN_NAMESPACE
+#if !defined(SWIG) && !defined(IMP_DOXYGEN)
 using base::ValueException;
 using base::IOException;
 using base::IndexException;
@@ -27,8 +28,7 @@ using base::USAGE_AND_INTERNAL;
 using base::NONE;
 using base::SetLogState;
 using base::WarningContext;
-using base::set_print_exceptions;
-
-IMP_END_NAMESPACE
+#endif
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_EXCEPTION_H */

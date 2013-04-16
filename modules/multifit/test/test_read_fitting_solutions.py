@@ -7,7 +7,7 @@ import IMP.restrainer
 import os
 import time
 
-class ReadFittingSolutionsTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for reading fitting solutions"""
     def setup_filenames(self):
         self.protein_fns=[
@@ -22,7 +22,7 @@ class ReadFittingSolutionsTests(IMP.test.TestCase):
             # self.get_input_file_name("1z5s_D_fitting_solutions.txt")]
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.base.SILENT)
         self.setup_filenames()
         self.mdl=IMP.Model()
         self.mhs=IMP.atom.Hierarchies()

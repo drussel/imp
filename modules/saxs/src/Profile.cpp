@@ -10,7 +10,7 @@
 #include <IMP/saxs/internal/sinc_function.h>
 #include <IMP/saxs/internal/variance_helpers.h>
 
-#include <IMP/compatibility/math.h>
+#include <IMP/base/math.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/algebra/utility.h>
 #include <IMP/algebra/Vector3D.h>
@@ -51,7 +51,7 @@ Profile::Profile(const String& file_name) : experimental_(true)
 void Profile::init(bool variance)
 {
   profile_.clear();
-  int number_of_q_entries = (int)std::ceil((max_q_ - min_q_) / delta_q_ );
+  int number_of_q_entries = (int)std::ceil((max_q_ - min_q_) / delta_q_ )+1;
 
   for (int i=0; i<number_of_q_entries; i++) {
     IntensityEntry entry(min_q_ + i * delta_q_);
@@ -121,14 +121,14 @@ void Profile::read_SAXS_file(const String& file_name)
     }
   }
 
-  IMP_LOG(TERSE, "read_SAXS_file: " << file_name
+  IMP_LOG_TERSE( "read_SAXS_file: " << file_name
           << " size= " << profile_.size() << " delta= " << delta_q_
           << " min_q= " << min_q_ << " max_q= " << max_q_ << std::endl);
 
   // saxs_read: No experimental error specified, add errors
   if (!with_error) {
     add_errors();
-    IMP_LOG(TERSE, "read_SAXS_file: No experimental error specified"
+    IMP_LOG_TERSE( "read_SAXS_file: No experimental error specified"
             << " -> error added " << std::endl);
   }
 }
@@ -262,7 +262,7 @@ void Profile::calculate_profile_real(const Particles& particles,
                                      FormFactorType ff_type,
                                      bool variance, double variance_tau)
 {
-  IMP_LOG(TERSE, "start real profile calculation for "
+  IMP_LOG_TERSE( "start real profile calculation for "
           << particles.size() << " particles" << std::endl);
   RadialDistributionFunction r_dist; //fi(0) fj(0)
   RadialDistributionFunction r_dist2; //fi(0)^2 fj(0)^2
@@ -299,7 +299,7 @@ Float Profile::calculate_I0(const Particles& particles, FormFactorType ff_type)
 void Profile::calculate_profile_constant_form_factor(const Particles& particles,
                                                      Float form_factor)
 {
-  IMP_LOG(TERSE, "start real profile calculation for "
+  IMP_LOG_TERSE( "start real profile calculation for "
           << particles.size() << " particles" << std::endl);
   RadialDistributionFunction r_dist, r_dist2;
   // prepare coordinates and form factors in advance, for faster access
@@ -323,7 +323,7 @@ void Profile::calculate_profile_partial(const Particles& particles,
                                         const Floats& surface,
                                         FormFactorType ff_type)
 {
-  IMP_LOG(TERSE, "start real partial profile calculation for "
+  IMP_LOG_TERSE( "start real partial profile calculation for "
           << particles.size() << " particles " <<  std::endl);
 
   // copy coordinates and form factors in advance, to avoid n^2 copy operations
@@ -389,7 +389,7 @@ void Profile::calculate_profile_partial(const Particles& particles1,
                                         const Floats& surface2,
                                         FormFactorType ff_type)
 {
-  IMP_LOG(TERSE, "start real partial profile calculation for "
+  IMP_LOG_TERSE( "start real partial profile calculation for "
           << particles1.size() << " particles + "
           << particles2.size() <<  std::endl);
 
@@ -509,7 +509,7 @@ void Profile::calculate_profile_symmetric(const Particles& particles,
   IMP_USAGE_CHECK(n > 1,
                   "Attempting to use symmetric computation, symmetry order"
                   << " should be > 1. Got: " << n);
-  IMP_LOG(TERSE, "start real profile calculation for " << particles.size()
+  IMP_LOG_TERSE( "start real profile calculation for " << particles.size()
           << " particles with symmetry = " << n << std::endl);
   // split units, only number_of_distances units is needed
   unsigned int number_of_distances = n/2;
@@ -572,7 +572,7 @@ void Profile::calculate_profile_real(const Particles& particles1,
                                      FormFactorType ff_type,
                                      bool variance, double variance_tau)
 {
-  IMP_LOG(TERSE, "start real profile calculation for "
+  IMP_LOG_TERSE( "start real profile calculation for "
           << particles1.size() << " + " << particles2.size()
           << " particles" << std::endl);
   RadialDistributionFunction r_dist; //fi(0) fj(0)
@@ -686,8 +686,8 @@ squared_distribution_2_profile(const RadialDistributionFunction& r_dist,
         //if (i==0 && j==0)
         //    std::cout << "a " << a << " b " << b
         //        << " c " << c << " A " << A << std::endl;
-        //if (compatibility::isinf(erfpart)) continue;
-        //if (compatibility::isnan(erfpart)) continue;
+        //if (base::isinf(erfpart)) continue;
+        //if (base::isnan(erfpart)) continue;
         contrib += A*r_dist2[r];
         //std::cout << a << " " << b << " " << c
         //    << " " << A  << " " << " " << dist
@@ -812,7 +812,7 @@ double Profile::radius_of_gyration(double end_q_rg) const {
     }
   }
   double rg = radius_of_gyration_fixed_q(qlimit);
-  std::cerr << "Rg = " << rg  << std::endl;
+  //std::cerr << "Rg = " << rg  << std::endl;
   return rg;
 }
 
@@ -901,7 +901,7 @@ void Profile::calculate_profile_reciprocal(const Particles& particles,
     return;
   }
 
-  IMP_LOG(TERSE, "start reciprocal profile calculation for "
+  IMP_LOG_TERSE( "start reciprocal profile calculation for "
           << particles.size() << " particles" << std::endl);
   init();
   std::vector<algebra::Vector3D> coordinates;
@@ -939,7 +939,7 @@ void Profile::calculate_profile_reciprocal_partial(const Particles& particles,
     return;
   }
 
-  IMP_LOG(TERSE, "start partial reciprocal profile calculation for "
+  IMP_LOG_TERSE( "start partial reciprocal profile calculation for "
           << particles.size() << " particles" << std::endl);
 
   init();

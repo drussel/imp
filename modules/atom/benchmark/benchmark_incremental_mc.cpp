@@ -12,6 +12,8 @@ using namespace IMP::core;
 using namespace IMP::atom;
 using namespace IMP::container;
 using namespace IMP::algebra;
+
+namespace {
 const unsigned int np=10;//5
 const unsigned int nrb=10;
 const double radius=4;
@@ -113,15 +115,15 @@ void benchmark_it(std::string name, bool incr, bool nbl, bool longr) {
   //mc->set_log_level(VERBOSE);
   mc->set_return_best(false);
   mc->set_kt(1.0);
-  Movers mvs;
+  MonteCarloMovers mvs;
   for (unsigned int i=0; i< rbs.size(); ++i) {
     IMP_NEW(RigidBodyMover, mv, (rbs[i], 80, .2));
     mvs.push_back(mv);
   }
-  mc->add_mover(new SerialMover(get_as<MoversTemp>(mvs)));
+  mc->add_mover(new SerialMover(get_as<MonteCarloMovers>(mvs)));
   // trigger init
   mc->optimize(1);
-#if IMP_BUILD ==IMP_DEBUG
+#if IMP_BUILD == IMP_DEBUG
   unsigned int nsteps=300;
 #else
   unsigned int nsteps=30000;
@@ -134,10 +136,11 @@ void benchmark_it(std::string name, bool incr, bool nbl, bool longr) {
   //<< mc->get_average_number_of_incremental_restraints() << std::endl;
   IMP::benchmark::report(name+" mc", runtime, score);
 }
+}
 
 
 int main(int argc, char *argv[]) {
-  IMP::base::setup_from_argv(argc, argv, 0);
+  IMP::base::setup_from_argv(argc, argv, "Benchmark incremenal evaluation");
   benchmark_it("incremental nbl", true, true, argc>1);
   benchmark_it("non incremental", false, false, false);
   benchmark_it("incremental", true, false, argc>1);

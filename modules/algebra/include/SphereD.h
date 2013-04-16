@@ -25,7 +25,7 @@ template <int D>
 class SphereD: public GeometricPrimitiveD<D> {
 public:
   SphereD(){
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_USAGE
     radius_= std::numeric_limits<double>::quiet_NaN();
 #endif
   }
@@ -34,7 +34,7 @@ public:
     IMP_USAGE_CHECK(radius>=0, "Radius can't be negative");
   }
   double get_radius() const {
-    IMP_USAGE_CHECK(!compatibility::isnan(radius_),
+    IMP_USAGE_CHECK(!base::isnan(radius_),
               "Attempt to use uninitialized sphere.");
     return radius_;
   }

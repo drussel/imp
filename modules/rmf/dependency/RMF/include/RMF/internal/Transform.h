@@ -2,7 +2,7 @@
  *  \file RMF/internal/Transform.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,6 +12,8 @@
 #include <RMF/config.h>
 #include "../types.h"
 #include "../infrastructure_macros.h"
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 namespace internal {
@@ -41,6 +43,9 @@ public:
     ret[1] = get_dotprod(o, matrix_[1]);
     ret[2] = get_dotprod(o, matrix_[2]);
     return ret;
+  }
+  Floats get_quaternion() const {
+    return Floats(v_, v_+4);
   }
   RMF_SHOWABLE(Rotation, Floats(v_, v_ + 4));
 };
@@ -72,12 +77,19 @@ public:
     ret[2] += trans_[2];
     return ret;
   }
+  Floats get_translation() const {
+    return Floats(trans_, trans_+3);
+  }
+  Floats get_rotation() const {
+    return rot_.get_quaternion();
+  }
   RMF_SHOWABLE(Transform, "Rotation: " << rot_ << " and translation: "
                                        << Floats(trans_, trans_ + 3));
 };
 
 }   // namespace internal
 } /* namespace RMF */
+RMF_DISABLE_WARNINGS
 
 
 #endif /* RMF_INTERNAL_TRANSFORM_H */

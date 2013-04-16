@@ -250,12 +250,13 @@ namespace {
 ProteinLigandAtomPairScore::ProteinLigandAtomPairScore(double threshold):
   P(get_protein_ligand_type_key(), threshold,
     get_data_path("protein_ligand_rank_score.lib"),
-    ni+1){
+    ni+1), threshold_(threshold){
   }
 
 ProteinLigandAtomPairScore::ProteinLigandAtomPairScore(double threshold,
                                                        base::TextInput file):
-  P(get_protein_ligand_type_key(), threshold, file, ni+1){
+  P(get_protein_ligand_type_key(), threshold, file, ni+1),
+  threshold_(threshold){
   }
 
 void ProteinLigandRestraint::initialize(Hierarchy protein,
@@ -346,7 +347,7 @@ void add_protein_ligand_score_data(Atom atom) {
     }
   }
   if (type==-1 && atom.get_element() != H) {
-    IMP_LOG(TERSE, "Failed to find type for "
+    IMP_LOG_TERSE( "Failed to find type for "
             << atom << " " << rd << std::endl);
   }
   if (atom->has_attribute(get_protein_ligand_type_key())) {

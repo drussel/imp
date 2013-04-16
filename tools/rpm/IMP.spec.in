@@ -11,9 +11,13 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-root
 # Note that RHEL 5 doesn't have a new enough swig to build IMP. If you must
 # use RHEL 5 (we recommend RHEL 6) you will need to build a newer SWIG package
 # before building IMP.
-BuildRequires: scons >= 0.98, swig >= 1.3.40
+BuildRequires: swig >= 1.3.40
 BuildRequires: python-devel >= 2.3, gsl-devel, fftw-devel, hdf5-devel >= 1.8
-BuildRequires: libTAU-devel, zlib-devel
+BuildRequires: zlib-devel
+# Needed to build the cnmultifit module; obtain
+# from http://salilab.org/imp/libTAU.html
+# (Or, if you don't need cnmultifit, you can comment out this line)
+BuildRequires: libTAU-devel
 
 # The cmake included with RHEL 6 is too old; use cmake28 from EPEL instead.
 # RHEL 5 doesn't have cmake28; you will need to build this package yourself.
@@ -21,7 +25,7 @@ BuildRequires: libTAU-devel, zlib-devel
 BuildRequires: cmake28
 %define cmake cmake28
 %else
-BuildRequires: cmake
+BuildRequires: cmake >= 2.8
 %define cmake cmake
 %endif
 
@@ -29,17 +33,11 @@ BuildRequires: cmake
 # that is in EPEL instead
 %if 0%{?rhel} == 5
 BuildRequires: boost141-devel
-%define boost includepath=/usr/include/boost141 libpath=%{_libdir}/boost141
-%define cmake_opts -DCMAKE_INCLUDE_PATH=/usr/include/boost141 -DCMAKE_LIBRARY_PATH=%{_libdir}/boost141
+%define boost -DCMAKE_INCLUDE_PATH=/usr/include/boost141 -DCMAKE_LIBRARY_PATH=%{_libdir}/boost141
 %else
 BuildRequires: boost-devel >= 1.41
 %define boost %{nil}
-%define cmake_opts %{nil}
 %endif
-
-# You can safely comment out this line if you don't have Modeller;
-# IMP will simply build without the IMP.modeller module.
-BuildRequires: modeller
 
 # RHEL doesn't have a CGAL package, so build without CGAL on RHEL. It also
 # doesn't have a new enough OpenCV in EPEL, or the eigen package, so
@@ -59,28 +57,24 @@ BuildRequires: modeller
 # this adds no extra dependencies to the binary package.
 %if 0%{?fedora}
 BuildRequires: CGAL-devel, opencv-devel, eigen3-devel
-%define skipped_deps %{nil}
 %else
 %if 0%{?rhel_have_eigen3}
-%define skipped_deps cgal=no opencv21=no opencv22=no
 BuildRequires: eigen3-devel
-%else
-%define skipped_deps cgal=no opencv21=no opencv22=no eigen3=no
 %endif
 %endif
 
-# Normally scons will stop at the first error. Since an RPM cannot be built
-# if the build did not complete successfully, this is the default here too.
-# Pass '-D "keep_going 1"' to your rpmbuild invocation if you want it to
-# keep going; we use this in nightly builds to see every broken module,
-# not just the first one.
-%if 0%{?keep_going}
-%define kflag -k
+# Add compiler flags for C++11 support
+%if 0%{?fedora}
+%define cxx_flags -DCMAKE_CXX_FLAGS="-std=c++11"
 %else
-%define kflag %{nil}
+%if 0%{?rhel} >= 6
+%define cxx_flags -DCMAKE_CXX_FLAGS="-std=gnu++0x"
+%else
+%define cxx_flags %{nil}
+%endif
 %endif
 
-%define scons_opts %{skipped_deps} %{kflag} %{boost} modeller=yes
+%define cmake_opts %{cxx_flags} %{boost}
 
 %description
 IMP's broad goal is to contribute to a comprehensive structural
@@ -123,9 +117,26 @@ against IMP.
 %build
 # For now, bundle RMF with IMP (long term, may be better to put in a separate
 # RPM)
+mkdir build && cd build
+%{cmake} .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_INSTALL_DOCDIR=/usr/share/doc/%{name}-%{version} \
+            -DIMP_DISABLED_MODULES=scratch %{cmake_opts}
+
+# Normally make will stop at the first error. Since an RPM cannot be built
+# if the build did not complete successfully, this is the default here too.
+# Pass '-D "keep_going 1"' to your rpmbuild invocation if you want it to
+# keep going; we use this in nightly builds to see every broken module,
+# not just the first one.
+%if 0%{?keep_going}
+mkdir logs
+../tools/build/build_all.py --outdir=logs --summary=logs/summary.pck make
+%else
+make
+%endif
 
 %install
-scons cmake="%{cmake} %{cmake_opts}" destdir=${RPM_BUILD_ROOT} docdir=/usr/share/doc/%{name}-%{version} %{scons_opts} disabledmodules=example:scratch pretty=False color=False install
+cd build
+make DESTDIR=${RPM_BUILD_ROOT} install
 # Note that we currently don't include the documentation in the RPM, since
 #      a) it takes a long time to run doxygen
 #      b) doxygen isn't installed on all of our build systems
@@ -143,8 +154,6 @@ else
 fi
 # Bundle libTAU from build machine so users don't have to get it separately
 cp %{_libdir}/libTAU.so.1 ${RPM_BUILD_ROOT}%{_libdir}
-# Don't distribute static avro library; RPM only uses the dynamic one
-rm ${RPM_BUILD_ROOT}%{_libdir}/libavrocpp_s.a
 # Don't distribute example application, dependency, or system
 pydir=${RPM_BUILD_ROOT}%{_libdir}/python*/site-packages
 rm -rf ${RPM_BUILD_ROOT}/usr/bin/example \
@@ -160,10 +169,9 @@ rm -rf ${RPM_BUILD_ROOT}/usr/bin/example \
 %files
 %defattr(-,root,root)
 %doc /usr/share/doc/%{name}-%{version}
-/usr/share/imp
+/usr/share/IMP
 /usr/bin/*
 %{_libdir}/libimp*.so
-%{_libdir}/libavrocpp.so.*
 %{_libdir}/libTAU.so.*
 %{_libdir}/libRMF*.so
 %{_libdir}/python*/site-packages/IMP
@@ -173,12 +181,9 @@ rm -rf ${RPM_BUILD_ROOT}/usr/bin/example \
 
 %files devel
 %defattr(-,root,root)
-%{_libdir}/libavrocpp.so
 /usr/include/IMP
 /usr/include/IMP.h
 /usr/include/RMF
-/usr/include/RMF.h
-/usr/include/avro
 
 %changelog
 * Mon Mar 08 2010 Ben Webb <ben@salilab.org>   1.0-1

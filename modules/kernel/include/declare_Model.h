@@ -1,5 +1,6 @@
 /**
- *  \file IMP/declare_Model.h   \brief Storage of a model, its restraints,
+ *  \file IMP/kernel/declare_Model.h
+ *  \brief Storage of a model, its restraints,
  *                         constraints and particles.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -9,7 +10,7 @@
 #ifndef IMPKERNEL_DECLARE_MODEL_H
 #define IMPKERNEL_DECLARE_MODEL_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "ModelObject.h"
 #include "declare_ScoringFunction.h"
 #include "declare_Restraint.h"
@@ -18,13 +19,14 @@
 #include "container_macros.h"
 #include "base_types.h"
 #include "declare_Particle.h"
+#include "Undecorator.h"
 #include "internal/AttributeTable.h"
 #include "internal/attribute_tables.h"
 #include <IMP/base/Object.h>
 #include <IMP/base/Pointer.h>
 #include <IMP/base/tracking.h>
-#include <IMP/compatibility/map.h>
-#include <IMP/compatibility/set.h>
+#include <IMP/base/map.h>
+#include <IMP/base/set.h>
 #include <IMP/base/tuple_macros.h>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/filter_iterator.hpp>
@@ -33,9 +35,10 @@
 #include <limits>
 
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 class ModelObject;
+class Undecorator;
 
 #if !defined(SWIG) && !defined(IMP_DOXYGEN)
 namespace internal {
@@ -74,7 +77,7 @@ class Model;
 
     \headerfile Model.h "IMP/Model.h"
  */
-class IMPEXPORT Model:
+class IMPKERNELEXPORT Model:
 #ifdef IMP_DOXYGEN
     public base::Object
 #else
@@ -136,15 +139,20 @@ private:
                   last_value_(-1)
     {}
   };
-  mutable compatibility::map<base::Object*, Statistics> stats_data_;
+  mutable base::map<base::Object*, Statistics> stats_data_;
 
   // basic representation
-  std::map<FloatKey, FloatRange> ranges_;
+  base::map<FloatKey, FloatRange> ranges_;
   ParticleIndexes free_particles_;
   unsigned int next_particle_;
   base::IndexVector<ParticleIndexTag, base::Pointer<Particle> > particle_index_;
+  base::IndexVector<ParticleIndexTag, Undecorators > undecorators_index_;
   base::Vector<base::OwnerPointer<base::Object> > model_data_;
   bool dependencies_dirty_;
+  DependencyGraph dependency_graph_;
+  DependencyGraphVertexIndex dependency_graph_index_;
+  base::map<ModelObject*, ScoreStatesTemp> required_score_states_;
+  void compute_required_score_states();
 #if !defined(IMP_DOXYGEN) && !defined(SWIG)
   // things the evaluate template functions need, can't be bothered with friends
 public:
@@ -188,6 +196,17 @@ public:
   /** Construct an empty model */
   Model(std::string name="Model %1%");
 
+  //! Add particle to the model
+  ParticleIndex add_particle(std::string name);
+
+#ifndef IMP_DOXYGEN
+  const DependencyGraph& get_dependency_graph();
+  const DependencyGraphVertexIndex& get_dependency_graph_vertex_index();
+  const ScoreStatesTemp& get_required_score_states(ModelObject *o);
+#endif
+
+  /** Add the passed Undecorator to the particle.*/
+  void add_undecorator(ParticleIndex pi, Undecorator *d);
 
   /** @name States
 
@@ -210,10 +229,10 @@ public:
                                   << "evaluation.");
                 obj->set_model(this);
                 obj->set_was_used(true);
-                IMP_LOG(VERBOSE, "Added score state " << obj->get_name()
+                IMP_LOG_VERBOSE( "Added score state " << obj->get_name()
                         << std::endl);
                 IMP_IF_CHECK(base::USAGE) {
-                  compatibility::set<ScoreState*> in(score_states_begin(),
+                  base::set<ScoreState*> in(score_states_begin(),
                                            score_states_end());
                   IMP_USAGE_CHECK(in.size() == get_number_of_score_states(),
                                   "Score state already in model "
@@ -226,6 +245,8 @@ public:
  public:
 
 #if !defined(IMP_DOXYGEN)
+  ModelObjectsTemp get_optimized_particles() const;
+
   RestraintSet *get_root_restraint_set();
 
   bool get_has_dependencies() const;
@@ -273,10 +294,21 @@ public:
 
   IMP_OBJECT_METHODS(Model)
 
+#ifndef IMP_DOXYGEN
   /** Remove a particle from the Model. The particle will then be inactive and
       cannot be used for anything and all data stored in the particle is lost.
   */
-  void remove_particle(Particle *p);
+    void remove_particle(Particle *p);
+  /** Make sure that we don't cache the ScoringFunction so as not to create
+      a ref count loop.*/
+  virtual ScoringFunction *create_scoring_function(double weight=1.0,
+                                                   double max
+                                                   = NO_MAX) const IMP_OVERRIDE;
+#endif
+ /** Remove a particle from the Model. The particle will then be inactive and
+      cannot be used for anything and all data stored in the particle is lost.
+  */
+  void remove_particle(ParticleIndex pi);
 
   /** \name Statistics
 
@@ -303,8 +335,6 @@ public:
       All the attribute data associated with each Particle is stored in the
       Model. For each type of attribute, there are the methods detailed below
       (where, eg, TypeKey is FloatKey or StringKey)
-
-      \note At the moment, these methods cannot be called from Python.
       @{
   */
   /** \pre get_has_attribute(attribute_key, particle) is false*/
@@ -334,7 +364,41 @@ public:
   */
   void add_cache_attribute(TypeKey attribute_key, ParticleIndex particle,
                            Type value);
+
+  //! Optimized attributes are the parameters of the model
+  /** They will be modified by the samplers and optimizers.
+   */
+  void set_is_optimized(TypeKey attribute_key, ParticleIndex particle,
+                        bool true_or_false);
   /** @} */
+#endif
+
+  // kind of icky
+#ifdef SWIG
+#define IMP_MODEL_ATTRIBUTE_METHODS(Type, Value)                        \
+  void add_attribute(Type##Key attribute_key,                           \
+                     ParticleIndex particle, Value value);              \
+  void remove_attribute(Type##Key attribute_key,                        \
+                        ParticleIndex particle);                        \
+  bool get_has_attribute(Type##Key attribute_key,                       \
+                         ParticleIndex particle) const;                 \
+  void set_attribute(Type##Key attribute_key,                           \
+                     ParticleIndex particle, Value value);              \
+  Value get_attribute(Type##Key attribute_key,                         \
+                       ParticleIndex particle);                         \
+  void add_cache_attribute(Type##Key attribute_key,                     \
+                           ParticleIndex particle,                      \
+                           Value value)
+
+  IMP_MODEL_ATTRIBUTE_METHODS(Float, Float);
+  IMP_MODEL_ATTRIBUTE_METHODS(Int, Int);
+  IMP_MODEL_ATTRIBUTE_METHODS(Ints, Ints);
+  IMP_MODEL_ATTRIBUTE_METHODS(String, String);
+  IMP_MODEL_ATTRIBUTE_METHODS(ParticleIndexes, ParticleIndexes);
+  IMP_MODEL_ATTRIBUTE_METHODS(ParticleIndex, ParticleIndex);
+  IMP_MODEL_ATTRIBUTE_METHODS(Object, Object*);
+  IMP_MODEL_ATTRIBUTE_METHODS(WeakObject, Object*);
+  void set_is_optimized(FloatKey, ParticleIndex, bool);
 #endif
 
   /** \name Model Data
@@ -369,8 +433,7 @@ public:
     }
   };
   typedef boost::filter_iterator<NotNull,
-      compatibility
-      ::vector<base::Pointer<Particle> >
+    base::Vector<base::Pointer<Particle> >
       ::const_iterator> ParticleIterator;
 
 #endif
@@ -383,6 +446,6 @@ public:
   ModelObjectsTemp get_model_objects() const;
 };
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_DECLARE_MODEL_H */

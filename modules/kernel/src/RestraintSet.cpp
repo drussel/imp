@@ -6,19 +6,19 @@
  */
 
 
-#include <IMP/RestraintSet.h>
-#include <IMP/Model.h>
-#include <IMP/log.h>
-#include <IMP/internal/utility.h>
-#include <IMP/generic.h>
-#include <IMP/ScoringFunction.h>
-#include <IMP/internal/restraint_evaluation.h>
+#include <IMP/kernel/RestraintSet.h>
+#include <IMP/kernel/Model.h>
+#include <IMP/kernel/log.h>
+#include <IMP/kernel/internal/utility.h>
+#include <IMP/kernel/generic.h>
+#include <IMP/kernel/ScoringFunction.h>
+#include <IMP/kernel/internal/restraint_evaluation.h>
 #include <boost/tuple/tuple.hpp>
 #include <memory>
 #include <utility>
 #include <numeric>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 RestraintSet::RestraintSet(Model *m, double weight,
                            const std::string& name)
@@ -48,6 +48,11 @@ RestraintSet::RestraintSet(const std::string& name)
 {
 }
 
+RestraintSet::RestraintSet(ModelInitTag, const std::string& name)
+    : Restraint(ModelInitTag(), name)
+{
+}
+
 
 IMP_LIST_IMPL(RestraintSet, Restraint, restraint, Restraint*,
               Restraints);
@@ -67,7 +72,7 @@ void RestraintSet::do_add_score_and_derivatives(ScoreAccumulator sa) const {
     get_restraint(i)->add_score_and_derivatives(sa);
   }
   // for child tasks
-#pragma omp taskwait
+IMP_OMP_PRAGMA(taskwait)
 }
 
 double
@@ -159,7 +164,8 @@ Restraints RestraintSet::do_create_current_decomposition() const {
 
 ScoringFunction* RestraintSet::create_scoring_function(double weight,
                                                       double max) const {
-  return IMP::create_scoring_function(const_cast<RestraintSet*>(this), weight,
+  return IMP::kernel::create_scoring_function(const_cast<RestraintSet*>(this),
+                                              weight,
                                       max, get_name()+" scoring");
 }
 
@@ -168,4 +174,4 @@ RestraintsTemp get_restraints(const RestraintsTemp &rs) {
 }
 
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

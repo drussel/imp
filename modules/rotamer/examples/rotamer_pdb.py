@@ -1,4 +1,20 @@
-#!/usr/bin/python
+## \example rotamer/rotamer_pdb.py
+## rotamer_pdb.py is a script demonstrating the usage of RotamerCalculator and RotamerLibrary.
+## It reads a PDB file and a rotamer library file, and tries to rotate the atoms based on the most
+## probable chi angles from the rotamer library. Then it saves the rotated atoms to a specified output
+## PDB file.
+##
+## Usage:
+##
+## `python rotamer_pdb.py -i <input>.pdb -l <rotamer_library>.lib -o <output>.pdb`
+##
+## Example (the result will be saved into transformed_1z5s_A.pdb):
+##
+## `../../../tools/imppy.sh python rotamer_pdb.py -i ../../atom/test/input/1z5s_A.pdb \
+##   -l /path/to/ALL.bbdep.rotamers.lib -o transformed_1z5s_A.pdb`
+##
+
+#!/usr/bin/env python
 
 import IMP
 import IMP.core
@@ -41,6 +57,11 @@ def transform(input_pdb, input_lib, output_pdb):
     IMP.atom.write_pdb(orig_h, output_pdb)
 
 
+def quick_test():
+    rl = IMP.rotamer.RotamerLibrary()
+    rc = IMP.rotamer.RotamerCalculator(rl)
+
+
 if __name__ == '__main__':
 
     import sys
@@ -55,7 +76,12 @@ if __name__ == '__main__':
         help='output PDB file (required)')
     P.add_option('--verbose', '-v', action='store_true',
         help='show more messages')
+    P.add_option('--run_quick_test', action='store_true',
+        help='run quick test')
     opts, args = P.parse_args()
+    if opts.run_quick_test:
+        quick_test()
+        sys.exit(0)
     if not opts.input_pdb:
         print '--input_pdb is required'
         sys.exit(1)
@@ -66,7 +92,7 @@ if __name__ == '__main__':
         print '--input_lib is required'
         sys.exit(1)
     if opts.verbose:
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
     else:
-        IMP.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.base.SILENT)
     transform(opts.input_pdb, opts.input_lib, opts.output_pdb)

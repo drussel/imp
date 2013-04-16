@@ -4,14 +4,14 @@
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
-#include <IMP/internal/swig.h>
-#include <IMP/internal/pdb.h>
-#include <IMP/base/log.h>
-IMP_BEGIN_INTERNAL_NAMESPACE
+#include <IMP/kernel/internal/swig.h>
+#include <IMP/kernel/internal/pdb.h>
+#include <IMP/base//log.h>
+IMPKERNEL_BEGIN_INTERNAL_NAMESPACE
 
 
 double _ConstRestraint
-::unprotected_evaluate(IMP::DerivativeAccumulator *) const {
+::unprotected_evaluate(DerivativeAccumulator *) const {
   return v_;
 }
 void _ConstRestraint::do_show(std::ostream &out) const {
@@ -37,7 +37,7 @@ Restraints _ConstRestraint::do_create_decomposition() const {
 
 
 double _ConstSingletonScore::evaluate(Particle *,
-                                      IMP::DerivativeAccumulator *) const {
+                                      DerivativeAccumulator *) const {
   return v_;
 }
 void _ConstSingletonScore::do_show(std::ostream &out) const {
@@ -54,7 +54,7 @@ ParticlesTemp _ConstSingletonScore::get_input_particles(Particle *p) const {
 
 
 double _ConstPairScore::evaluate(const ParticlePair &,
-                                 IMP::DerivativeAccumulator *) const {
+                                 DerivativeAccumulator *) const {
   return v_;
 }
 void _ConstPairScore::do_show(std::ostream &out) const {
@@ -103,39 +103,8 @@ int _overloaded_decorator(_TrivialDerivedDecorator) {
 
 
 
-std::string _test_ifile(base::TextInput a) {
-  std::string read;
-  while (true) {
-    std::string cur;
-    a.get_stream() >> cur;
-    if (!a) break;
-    read= read+cur;
-  }
-  std::cout << read;
-  return read;
-}
-std::string _test_ofile(base::TextOutput a) {
-  static_cast<std::ostream &>(a) << "hi\n"
-                                 << " there, how are things"<< std::endl;
-  return "hi\n";
-}
 
-
-
-std::string _test_ifile_overloaded(base::TextInput a, std::string) {
-  return _test_ifile(a);
-}
-std::string _test_ofile_overloaded(base::TextOutput a, std::string) {
-  return _test_ofile(a);
-}
-std::string _test_ifile_overloaded(base::TextInput a, int) {
-  return _test_ifile(a);
-}
-std::string _test_ofile_overloaded(base::TextOutput a, int) {
-  return _test_ofile(a);
-}
-
-IMPEXPORT ModelObjectsTemp
+ModelObjectsTemp
 _pass_model_objects(const ModelObjectsTemp &p) {
   return p;
 }
@@ -200,22 +169,7 @@ FloatKeys _pass_float_keys(const FloatKeys& in) {
   }
   return in;
 }
-Floats _pass_floats(const Floats& in) {
-  for (unsigned int i=0; i< in.size(); ++i) {
-    std::cout << in[i] << " ";
-  }
-  return in;
-}
-Ints _pass_ints( Ints in) {
-  for (unsigned int i=0; i< in.size(); ++i) {
-    std::cout << in[i] << " ";
-  }
-  return in;
-}
-const Strings& _pass_strings(const Strings& in) {
-  std::cout << in << std::endl;
-  return in;
-}
+
 
 const Particles &_pass(const Particles &p) {
   std::cout << p << std::endl;
@@ -250,27 +204,6 @@ _pass_particle_index_pairs(const ParticleIndexPairs &p) {
   return p;
 }
 
-
-DerivativePair
-_pass_pair(const DerivativePair &p) {
-  std::cout << p.first << " " << p.second << std::endl;
-  return p;
-}
-IntsList _pass_ints_list(const IntsList &in) {
-  std::cout << "IntsList of length " << in.size();
-  return in;
-}
-IntsLists _pass_ints_lists(const IntsLists &in) {
-  std::cout << "IntsLists of length " << in.size();
-  return in;
-}
-std::pair<double, double>
-_pass_plain_pair(std::pair<double, double> p) {
-  std::cout << p.first << " " << p.second << std::endl;
-  return p;
-}
-
-
 int _test_overload(const Particles &) {
   return 0;
 }
@@ -279,36 +212,9 @@ int _test_overload(const Restraints &) {
   return 1;
 }
 
-int _test_intranges(const IntRanges &ips) {
-  return ips.size();
-}
 
-
-IntRange _test_intrange(const IntRange &ips) {
-  return ips;
-}
-
-IntRange _test_intrange() {
-  return IntRange(-1,-1);
-}
-
-namespace {
-  void test_log_1() {
-    IMP_FUNCTION_LOG;
-    IMP_LOG(SILENT, "Hi" << std::endl);
-  }
-  void test_log_0() {
-    IMP_FUNCTION_LOG;
-    test_log_1();
-  }
-}
-
-void _test_log() {
-  IMP_FUNCTION_LOG;
-  test_log_0();
-}
-
-IMPEXPORT ParticlesTemp _create_particles_from_pdb(std::string name, Model*m) {
+ParticlesTemp
+_create_particles_from_pdb(std::string name, Model*m) {
   return create_particles_from_pdb(name, m);
 }
 
@@ -328,11 +234,11 @@ Float _LogPairScore::evaluate(const ParticlePair &pp,
  //! Get a list of all pairs (without multiplicity)
 ParticlePairsTemp _LogPairScore::get_particle_pairs() const {
   ParticlePairsTemp ret;
-  for (compatibility::map<ParticlePair, unsigned int>::const_iterator
+  for (base::map<ParticlePair, unsigned int>::const_iterator
            it = map_.begin(); it != map_.end(); ++it) {
     ret.push_back(it->first);
   }
   return ret;
 }
 
-IMP_END_INTERNAL_NAMESPACE
+IMPKERNEL_END_INTERNAL_NAMESPACE

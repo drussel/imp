@@ -1,3 +1,7 @@
+## \example atom/charmm_forcefield.py
+## In this example, a PDB file is read in and scored using the CHARMM forcefield. For more control over the setup of the forcefield, see the 'charmm_forcefield_verbose.py' example.
+##
+
 import IMP.atom
 import IMP.container
 
@@ -56,6 +60,6 @@ ps = IMP.atom.LennardJonesPairScore(sf)
 m.add_restraint(IMP.container.PairsRestraint(ps, nbl))
 
 # it gets awfully slow with internal checks
-IMP.set_check_level(IMP.USAGE)
+IMP.base.set_check_level(IMP.base.USAGE)
 # Finally, evaluate the score of the whole system (without derivatives)
 print m.evaluate(False)

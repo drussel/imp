@@ -1,13 +1,16 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
+
 #include <RMF/FileHandle.h>
 #include <RMF/utility.h>
 #include "common.h"
 
-std::vector<std::string> inputs;
-std::string description("Combine two or more rmf files.");
-std::string output;
+namespace {
+  std::vector<std::string> inputs;
+  std::string description("Combine two or more rmf files.");
+  std::string output;
+}
 int main(int argc, char **argv) {
   try {
     positional_options.add_options()

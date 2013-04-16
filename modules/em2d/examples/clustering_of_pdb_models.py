@@ -1,3 +1,13 @@
+## \example em2d/clustering_of_pdb_models.py
+## This example clusters pdb models of an structure, chosen from a
+## selection file.
+##
+## It is assumed that all the pdb files belong to the same structure
+## and that the order of the atoms in the pdb files is the same in all files.
+##
+## After the clustering procedure, a linkage matrix is generated.
+##
+
 import IMP
 import IMP.core as core
 import IMP.atom as atom
@@ -68,7 +78,7 @@ n_models = len(fn_models)
 hierarchies=[]
 for fn in fn_models:
     fn_model=em2d.get_example_path(fn)
-    h=atom.read_pdb(fn_model,model,ssel,True,True);
+    h=atom.read_pdb(fn_model,model,ssel,True)
     hierarchies.append(h)
     xyz=core.XYZs(atom.get_leaves(h))
     coords.append( [x.get_coordinates() for x in xyz])
@@ -91,7 +101,7 @@ for i in xrange(0,n_models):
             rmsds[j][i]=rmsd
 
 # cluster
-print "Clustering (Complete linkage methond)..."
+print "Clustering (Complete linkage method)..."
 cluster_set = em2d.do_hierarchical_clustering_complete_linkage(rmsds)
 mat2=cluster_set.get_linkage_matrix()
 print "Complete Linkage Matrix"
@@ -121,11 +131,11 @@ for c in clusters:
         pdb_name="cluster-%03d-elem-%03d.pdb" % (c,i)
 
         if(i!=min_elem_id):
-            print "Writting element",i,"aligned to ",min_elem_id,":",pdb_name
+            print "Writing element",i,"aligned to ",min_elem_id,":",pdb_name
             T=core.Transform(transformations[i][min_elem_id])
             ps=atom.get_leaves(hierarchies[i])
             for p in ps:
                 T.apply(p)
         else:
-            print "Writting representative element",min_elem_id,":",pdb_name
+            print "Writing representative element",min_elem_id,":",pdb_name
         atom.write_pdb(hierarchies[i],pdb_name)

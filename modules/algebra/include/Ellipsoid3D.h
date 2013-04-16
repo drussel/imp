@@ -23,7 +23,7 @@ IMPALGEBRA_BEGIN_NAMESPACE
 class IMPALGEBRAEXPORT Ellipsoid3D: public GeometricPrimitiveD<3> {
 public:
   Ellipsoid3D(){
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_USAGE
     radii_[0]= std::numeric_limits<double>::quiet_NaN();
 #endif
   }
@@ -31,7 +31,7 @@ public:
               double radius_y, double radius_z,
               const Rotation3D &rot);
   double get_radius(unsigned int i) const {
-    IMP_USAGE_CHECK(!compatibility::isnan(radii_[0]),
+    IMP_USAGE_CHECK(!base::isnan(radii_[0]),
               "Attempt to use uninitialized ellipsoid.");
     return radii_[i];
   }

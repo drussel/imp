@@ -18,10 +18,22 @@
 #include "showable_macros.h"
 #include "VersionInfo.h"
 #include "utility_macros.h"
-#include <IMP/compatibility/hash.h>
-#include <boost/functional/hash.hpp>
+#include <IMP/base/hash.h>
+#include "hash.h"
+#include <boost/scoped_array.hpp>
 
-
+#if !defined(IMP_HAS_CHECKS)
+ #error "IMP_HAS_CHECKS not defined, something is broken"
+#endif
+#if !defined(IMP_NONE)
+ #error "IMP_NONE not defined, something is broken"
+#endif
+#if !defined(IMP_HAS_LOG)
+ #error "IMP_HAS_LOG not defined, something is broken"
+#endif
+#if !defined(IMP_SILENT)
+ #error "IMP_SILENT not defined, something is broken"
+#endif
 IMPBASE_BEGIN_NAMESPACE
 
 //! Common base class for heavy weight \imp objects.
@@ -57,13 +69,19 @@ IMPBASE_BEGIN_NAMESPACE
 class IMPBASEEXPORT Object: public RefCounted
 {
   std::string name_;
+  boost::scoped_array<char> quoted_name_;
   int compare(const Object &o) const {
     if (&o < this) return 1;
     else if (&o > this) return -1;
     else return 0;
   }
-  IMP_PROTECTED_CONSTRUCTOR(Object, (std::string name), );
   IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(Object);
+protected:
+  //! Construct an object with the given name
+  /** An instance of "%1%" in the string will be replaced by a unique
+      index.
+   */
+  Object(std::string name);
 public:
   // needed for python to make sure all wrapper objects are equivalent
   IMP_HASHABLE_INLINE(Object, return boost::hash_value(this););
@@ -84,21 +102,21 @@ public:
    */
   void set_check_level(CheckLevel l) {
     IMP_CHECK_VARIABLE(l);
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS != IMP_NONE
     check_level_=l;
 #endif
   }
 
 #ifndef IMP_DOXYGEN
   LogLevel get_log_level() const {
-#if IMP_BUILD >= IMP_FAST
+#if IMP_HAS_LOG == IMP_SILENT
       return SILENT;
 #else
       return log_level_;
 #endif
   }
   CheckLevel get_check_level() const {
-#if IMP_BUILD >= IMP_FAST
+#if IMP_HAS_CHECKS == IMP_NONE
       return NONE;
 #else
       return check_level_;
@@ -132,9 +150,12 @@ public:
   const std::string& get_name() const {
     return name_;
   }
-  void set_name(std::string name) {
-    name_=name;
+#if !defined(IMP_DOXYGEN) && !defined(SWIG)
+  const char* get_quoted_name_c_string() const {
+    return quoted_name_.get();
   }
+#endif
+  void set_name(std::string name);
   /* @} */
 
 
@@ -145,7 +166,7 @@ public:
   */
   void set_was_used(bool tf) const {
     IMP_CHECK_VARIABLE(tf);
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_USAGE
     was_owned_=tf;
 #endif
   }
@@ -153,9 +174,6 @@ public:
   IMP_SHOWABLE(Object);
 
 #ifndef IMP_DOXYGEN
-  // not used any more
-  virtual void do_show(std::ostream &) const {};
-
   void _on_destruction();
 #endif
 
@@ -165,11 +183,14 @@ public:
   virtual void clear_caches() {}
 
  private:
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   static void add_live_object(Object*o);
   static void remove_live_object(Object*o);
-
+#endif
+#if IMP_HAS_LOG != IMP_NONE
   LogLevel log_level_;
+#endif
+#if IMP_HAS_CHECKS >= IMP_USAGE
   CheckLevel check_level_;
   mutable bool was_owned_;
 #endif

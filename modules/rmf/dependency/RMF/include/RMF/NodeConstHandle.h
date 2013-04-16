@@ -2,7 +2,7 @@
  *  \file RMF/NodeConstHandle.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,20 +10,21 @@
 #define RMF_NODE_CONST_HANDLE_H
 
 #include <RMF/config.h>
-#include "HDF5Group.h"
 #include "internal/SharedData.h"
 #include "types.h"
 #include "NodeID.h"
 #include "constants.h"
 #include <boost/intrusive_ptr.hpp>
 
-#define RMF_NODE_CATCH(extra_info)                                \
-  catch (Exception &e) {                                          \
-    RMF_RETHROW(File(get_file().get_name())                       \
-                << Node(get_id())                                 \
-                << Frame(get_file().get_current_frame().get_id()) \
-                << Operation(BOOST_CURRENT_FUNCTION)              \
-                extra_info, e);                                   \
+RMF_ENABLE_WARNINGS
+
+#define RMF_NODE_CATCH(extra_info)                                      \
+  catch (Exception &e) {                                                \
+    RMF_RETHROW(File(get_file().get_name())                             \
+                << Node(get_id().get_index())                           \
+                << Frame(get_file().get_current_frame().get_id().get_index()) \
+                << Operation(BOOST_CURRENT_FUNCTION)                    \
+                extra_info, e);                                         \
   }
 
 #define RMF_NODE_CATCH_KEY(k, extra_info)                                     \
@@ -56,13 +57,11 @@
       to the current frame, as opposed to static data.*/ \
   bool get_has_frame_value(UCName##Key k) const;
 
+RMF_VECTOR_DECL(NodeConstHandle);
+
 namespace RMF {
 
 class FileConstHandle;
-class NodeConstHandle;
-// for children
-typedef vector<NodeConstHandle> NodeConstHandles;
-
 //! The types of the nodes.
 enum NodeType {
   //! The root node
@@ -79,7 +78,8 @@ enum NodeType {
   FEATURE,
   /** Store a reference to another node. This node should
       be an alias decorator node and have no other data,
-      at least for now.
+      at least for now. Aliases should be thought of as simply referencing
+      existing objects in the scene, not creating new objects.
    */
   ALIAS,
   //! Arbitrary data that is not standardized
@@ -92,6 +92,8 @@ enum NodeType {
       view of the molecule. */
   BOND,
   //! A node that is purely there for organizational purposes
+  /** This includes nodes that are just RMF::ReferenceFrame nodes.
+   */
   ORGANIZATIONAL,
 #ifndef RMF_DOXYGEN
   //! An internal link to another node
@@ -238,5 +240,7 @@ RMFEXPORT void show_hierarchy_with_decorators(NodeConstHandle root,
 
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_NODE_CONST_HANDLE_H */

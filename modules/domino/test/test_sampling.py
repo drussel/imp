@@ -4,12 +4,12 @@ import IMP.domino
 import IMP.core
 
 
-class DOMINOTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def test_global_min2(self):
         """Test sampling"""
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         ps=[]
         print 1
         for i in range(0,3):
@@ -32,7 +32,7 @@ class DOMINOTests(IMP.test.TestCase):
         print 5
         sampler= IMP.domino.DominoSampler(m, pst)
         sampler.set_use_cross_subset_filtering(True)
-        sampler.set_log_level(IMP.VERBOSE)
+        sampler.set_log_level(IMP.base.VERBOSE)
         m.set_maximum_score(.1)
         cs= sampler.get_sample()
         print 6
@@ -51,7 +51,7 @@ class DOMINOTests(IMP.test.TestCase):
     def test_global_min3(self):
         """Test sampling with edge scores"""
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         ps=[]
         for i in range(0,3):
             p= IMP.Particle(m)
@@ -65,13 +65,13 @@ class DOMINOTests(IMP.test.TestCase):
         pst= IMP.domino.ParticleStatesTable()
         for p in ps:
             pst.set_particle_states(p, particle_state)
-            m.add_restraint(IMP._ConstRestraint(1, [p]))
+            m.add_restraint(IMP.kernel._ConstRestraint(1, [p]))
         m.add_restraint(IMP.core.DistanceRestraint(IMP.core.Harmonic(1,1), ps[0], ps[1]))
         m.add_restraint(IMP.core.DistanceRestraint(IMP.core.Harmonic(1,1), ps[1], ps[2]))
 
         m.set_maximum_score(3.1)
         sampler= IMP.domino.DominoSampler(m, pst)
-        sampler.set_log_level(IMP.VERBOSE)
+        sampler.set_log_level(IMP.base.VERBOSE)
         cs= sampler.get_sample()
         self.assertGreater(cs.get_number_of_configurations(), 0)
         for i in range(0, cs.get_number_of_configurations()):

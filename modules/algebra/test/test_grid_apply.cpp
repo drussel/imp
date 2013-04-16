@@ -6,7 +6,8 @@
  */
 #include <IMP/algebra/standard_grids.h>
 #include <IMP/algebra/vector_generators.h>
-#include <IMP/compatibility/set.h>
+#include <IMP/base/set.h>
+#include <IMP/test/test_macros.h>
 #include <algorithm>
 
 using namespace IMP::algebra;
@@ -21,12 +22,12 @@ struct Accum {
                   const typename G::Vector& v) {
     sum_+=g[index];
     typename G::Vector vo=g.get_center(index);
-    assert((vo-v).get_magnitude() < .1);
+    IMP_TEST_LESS_THAN((vo-v).get_magnitude(), .1);
   }
 };
 
 struct Count {
-  IMP::compatibility::set<Grid::Index> seen_;
+  IMP::base::set<Grid::Index> seen_;
   template <class G>
   void operator()(const G &,
                   const typename G::Index& index,
@@ -43,7 +44,7 @@ int main(int, char *[]) {
     gbb+= get_random_vector_in(bb);
     Grid g(1, gbb, 0);
     unsigned int count= g.apply(Count()).get_count();
-    assert(count== g.get_number_of_voxels(0)*g.get_number_of_voxels(1)
+    IMP_TEST_EQUAL(count, g.get_number_of_voxels(0)*g.get_number_of_voxels(1)
            * g.get_number_of_voxels(2));
   }
   {
@@ -56,7 +57,7 @@ int main(int, char *[]) {
       ++g[cur];
     }
     Accum out=g.apply(Accum());
-    assert(out.sum_==5000);
+    IMP_TEST_EQUAL(out.sum_,5000);
   }
   return EXIT_SUCCESS;
 }

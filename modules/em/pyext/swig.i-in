@@ -1,6 +1,8 @@
 /* Ignore things to prevent SWIG warning about them */
-namespace IMP::em {
-  %ignore DensityMap::operator =;
+namespace IMP {
+  namespace em {
+    %ignore DensityMap::operator =;
+  }
 }
 %ignore operator<<(std::ostream&, const DensityHeader &);
 
@@ -11,6 +13,7 @@ IMP_SWIG_OBJECT(IMP::em, SurfaceShellDensityMap, SurfaceShellDensityMaps);
 IMP_SWIG_OBJECT(IMP::em, FitRestraint, FitRestraints);
 IMP_SWIG_OBJECT(IMP::em, PCAFitRestraint, PCAFitRestraints);
 IMP_SWIG_OBJECT(IMP::em, EnvelopePenetrationRestraint, EnvelopePenetrationRestraints);
+IMP_SWIG_OBJECT(IMP::em, EnvelopeFitRestraint, EnvelopeFitRestraints);
 IMP_SWIG_VALUE(IMP::em, RadiusDependentKernelParameters, RadiusDependentKernelParametersList);
 IMP_SWIG_VALUE(IMP::em, KernelParameters, KernelParametersList);
 IMP_SWIG_OBJECT(IMP::em, HighDensityEmbedding, HighDensityEmbeddings);
@@ -60,8 +63,8 @@ namespace IMP {
 
 /* Wrap our own classes */
 %include "IMP/em/def.h"
-%include "IMP/em/DensityHeader.h"
 %include "IMP/em/MapReaderWriter.h"
+%include "IMP/em/DensityHeader.h"
 %include "IMP/em/DensityMap.h"
 %include "IMP/em/masking.h"
 %include "IMP/em/EMReaderWriter.h"
@@ -85,6 +88,8 @@ namespace IMP {
 %include "IMP/em/density_map_volumetrics.h"
 %include "IMP/em/EnvelopePenetrationRestraint.h"
 %include "IMP/em/PCAFitRestraint.h"
+%include "IMP/em/EnvelopeFitRestraint.h"
+
 /* Allow runtime casting of Restraint* objects to FitRestraint* */
 namespace IMP {
   namespace em {

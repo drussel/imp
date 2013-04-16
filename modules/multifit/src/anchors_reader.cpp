@@ -1,5 +1,5 @@
 /**
- *  \file anchors_reader.h
+ *  \file anchors_reader.cpp
  *  \brief handles reading of anchors data
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -7,16 +7,18 @@
  */
 
 #include <IMP/multifit/anchors_reader.h>
+#include <IMP/atom/SecondaryStructureResidue.h>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+
 IMPMULTIFIT_BEGIN_NAMESPACE
 namespace {
 bool is_edges_line(const std::string &line) {
   typedef boost::split_iterator<std::string::iterator> string_split_iterator;
   IMP_USAGE_CHECK(line.size() > 0,"no data to parse"<<std::endl);
-  IMP_LOG(VERBOSE,"going to parse:"<<line);
+  IMP_LOG_VERBOSE("going to parse:"<<line);
   std::vector<std::string> line_split;
   boost::split(line_split, line, boost::is_any_of("|"));
   //split returns zero length entires as well
@@ -32,7 +34,7 @@ algebra::Vector3D parse_point_line(
                                    const std::string &line){
   typedef boost::split_iterator<std::string::iterator> string_split_iterator;
   IMP_USAGE_CHECK(line.size() > 0,"no data to parse"<<std::endl);
-  IMP_LOG(VERBOSE,"going to parse:"<<line);
+  IMP_LOG_VERBOSE("going to parse:"<<line);
   std::vector<std::string> line_split;
   boost::split(line_split, line, boost::is_any_of("|"));
   //split returns zero length entires as well
@@ -50,7 +52,7 @@ algebra::Vector3D parse_point_line(
 IntPair parse_edge_line(const std::string &line){
   typedef boost::split_iterator<std::string::iterator> string_split_iterator;
   IMP_USAGE_CHECK(line.size() > 0,"no data to parse"<<std::endl);
-  IMP_LOG(VERBOSE,"going to parse:"<<line);
+  IMP_LOG_VERBOSE("going to parse:"<<line);
   std::vector<std::string> line_split;
   boost::split(line_split, line, boost::is_any_of("|"));
   //split returns zero length entires as well
@@ -150,4 +152,39 @@ void write_cmm(const std::string &cmm_filename,
   out.close();
 }
 
+void AnchorsData::setup_secondary_structure(Model *mdl){
+  for (int anum=0;anum<(int)points_.size();anum++){
+    IMP_NEW(Particle,ssr_p,(mdl));
+    atom::SecondaryStructureResidue default_ssr=
+      atom::SecondaryStructureResidue::setup_particle(ssr_p);
+    secondary_structure_ps_.push_back(ssr_p);
+  }
+}
+
+void AnchorsData::set_secondary_structure_probabilities(
+                                                 const Particles &ssres_ps,
+                                                 const Ints &indices){
+
+  IMP_USAGE_CHECK(secondary_structure_ps_.size()==points_.size(),
+                  "Secondary structure has not been set up, "
+                  "run AnchorsData::setup_secondary_structure() first");
+  int anum;
+  for (int ssnum=0;ssnum<(int)ssres_ps.size();ssnum++){
+    IMP_USAGE_CHECK(atom::SecondaryStructureResidue::
+                    particle_is_instance(ssres_ps[ssnum]),
+                    "SSE Particles must be decorated as"
+                    "SecondaryStructureResidues");
+    if (indices.size()==0) anum=ssnum;
+    else anum=indices[ssnum];
+    atom::SecondaryStructureResidue(secondary_structure_ps_[anum])
+      .set_prob_helix(atom::SecondaryStructureResidue(ssres_ps[ssnum])
+                      .get_prob_helix());
+    atom::SecondaryStructureResidue(secondary_structure_ps_[anum])
+      .set_prob_strand(atom::SecondaryStructureResidue(ssres_ps[ssnum])
+                       .get_prob_strand());
+    atom::SecondaryStructureResidue(secondary_structure_ps_[anum])
+      .set_prob_coil(atom::SecondaryStructureResidue(ssres_ps[ssnum])
+                     .get_prob_coil());
+  }
+}
 IMPMULTIFIT_END_NAMESPACE

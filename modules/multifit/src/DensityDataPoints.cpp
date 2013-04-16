@@ -74,11 +74,11 @@ void DensityDataPoints::populate_data() {
             " and the minimum value is : " << min_value_<<std::endl;
   */
 
-  IMP_INTERNAL_CHECK(vecs.size()>0,
+  IMP_USAGE_CHECK(vecs.size()>0,
            "No data points were found above the input threshold ("<<
-            threshold_<<"). The maximum value is"<<max_value_<<
-            " and the minimum value is : " << min_value_<<std::endl);
-  IMP_LOG(VERBOSE,"Number of data points:"<<vecs.size()<<std::endl);
+            threshold_<<"). The maximum value is "<<max_value_<<
+            " and the minimum value is " << min_value_);
+  IMP_LOG_VERBOSE("Number of data points:"<<vecs.size()<<std::endl);
   XYZDataPoints::populate_data_points(vecs);
 }
 DensityDataPoints::DensityDataPoints(const DensGrid &dens,
@@ -91,12 +91,12 @@ DensityDataPoints::DensityDataPoints(const DensGrid &dens,
 }
 
 
-IMP::statistics::Array1DD DensityDataPoints::sample() const {
+IMP::statistics::internal::Array1DD DensityDataPoints::sample() const {
     bool found = false;
     int num_trails=0;
     int p_ind=0;
     do {
-      IMP_LOG(VERBOSE,"trail number:"<<num_trails<<std::endl);
+      IMP_LOG_VERBOSE("trail number:"<<num_trails<<std::endl);
       ++num_trails;
       p_ind = statistics::internal::random_int(data_.size());
       if ((*dens_)[dens_->get_nearest_index(

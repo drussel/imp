@@ -1,3 +1,9 @@
+## \example modeller/modeller_restraints_in_imp.py
+## This demonstrates using Modeller restraints as additional terms in the IMP
+## scoring function, so that existing Modeller restraints can be used in
+## combination with new IMP restraints and optimization protocols.
+##
+
 import modeller
 import IMP
 import IMP.modeller
@@ -23,7 +29,7 @@ atoms = IMP.atom.get_by_type(protein, IMP.atom.ATOM_TYPE)
 
 # Use the ModellerRestraints class to add all of the Modeller restraints to
 # the IMP scoring function
-m.add_restraint(IMP.modeller.ModellerRestraints(modmodel,
+m.add_restraint(IMP.modeller.ModellerRestraints(m, modmodel,
                                                 atoms))
 
 # Calculate the IMP score

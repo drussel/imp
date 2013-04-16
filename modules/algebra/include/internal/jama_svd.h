@@ -23,6 +23,8 @@
 
 
 IMPALGEBRA_BEGIN_INTERNAL_NAMESPACE
+IMP_CLANG_PRAGMA(diagnostic ignored "-Wshadow")
+
 namespace JAMA
 {
 using namespace TNT;

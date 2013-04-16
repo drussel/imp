@@ -1,3 +1,7 @@
+## \example domino/interactive.py
+## IMP::domino::DominoSampler supports an interactive mode where by each step of the sampling process is called explicitly and all intermediate results are exposed. This usage mode can be used to help understand how domino behaves as well as to distribute a domino computation to multiple cores or multiple machines. For the latter, it is useful to use the IMP::domino::get_assignments() and IMP::domino::set_assignments() functions to save the states to a file.
+##
+
 import IMP.domino
 import IMP.algebra
 import IMP.container
@@ -21,7 +25,7 @@ pst= IMP.domino.ParticleStatesTable()
 for p in ps:
     pst.set_particle_states(p, space)
 
-m.set_log_level(IMP.SILENT)
+m.set_log_level(IMP.base.SILENT)
 
 # make sure to break up the
 mt= IMP.domino.get_merge_tree([r], pst)
@@ -34,7 +38,7 @@ ds= IMP.domino.DominoSampler(m, pst)
 # use the default setup for filters
 ds.set_scoring_function([r])
 ds.set_merge_tree(mt)
-ds.set_log_level(IMP.SILENT)
+ds.set_log_level(IMP.base.SILENT)
 
 # recurse down the tree getting the assignments and printing them
 def get_assignments(vertex):

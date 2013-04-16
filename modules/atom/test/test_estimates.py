@@ -5,7 +5,7 @@ import IMP.atom
 
 
 
-class MCOptimizerTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def test_massvol(self):
         """Testing the mass and volume estimates"""
         m= IMP.atom.get_mass_from_number_of_residues(250)
@@ -28,10 +28,10 @@ class MCOptimizerTest(IMP.test.TestCase):
         bd= IMP.atom.BrownianDynamics(m)
         dt=10000
         bd.set_maximum_time_step(dt)
-        bd.set_log_level(IMP.SILENT)
-        m.set_log_level(IMP.SILENT)
+        bd.set_log_level(IMP.base.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         diffs=[]
-        for i in range(0,1000):
+        for i in range(0,3000):
             d.set_coordinates(IMP.algebra.get_zero_vector_3d())
             bd.optimize(1)
             diffs.append(d.get_coordinates())

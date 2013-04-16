@@ -5,21 +5,21 @@
  *
  */
 
-#include "IMP/Key.h"
-#include "IMP/base/exception.h"
-#include "IMP/base_types.h"
-#include "IMP/compatibility/map.h"
-#include "IMP/Particle.h"
-#include "IMP/internal/AttributeTable.h"
+#include "IMP/kernel/Key.h"
+#include "IMP/base//exception.h"
+#include "IMP/kernel/base_types.h"
+#include "IMP/base//map.h"
+#include "IMP/kernel/Particle.h"
+#include "IMP/kernel/internal/AttributeTable.h"
 
-IMP_BEGIN_INTERNAL_NAMESPACE
+IMPKERNEL_BEGIN_INTERNAL_NAMESPACE
 
 
 // keys
 static double heuristic_value=238471628;
 
 namespace {
-  struct KeyTable: public compatibility::map<unsigned int, KeyData> {
+  struct KeyTable: public base::map<unsigned int, KeyData> {
     KeyTable() {
       unsigned int fk= FloatKey::get_ID();
       operator[](fk).add_key("x");
@@ -33,7 +33,7 @@ namespace {
   };
 }
 
-IMPEXPORT KeyData& get_key_data(unsigned int index) {
+KeyData& get_key_data(unsigned int index) {
   static KeyTable key_data;
   return key_data[index];
 }
@@ -43,6 +43,9 @@ KeyData::KeyData(): heuristic_(heuristic_value){}
 
 void KeyData::assert_is_initialized() const
 {
+#if IMP_HAS_CHECKS < 2
+  IMP_UNUSED(heuristic_);
+#endif
   IMP_INTERNAL_CHECK(static_cast<int>(heuristic_)
                      == static_cast<int>(heuristic_value),
              "Uninitialized KeyData. Do not initialize Keys statically.");
@@ -56,4 +59,4 @@ void KeyData::show(std::ostream &out) const
 }
 
 
-IMP_END_INTERNAL_NAMESPACE
+IMPKERNEL_END_INTERNAL_NAMESPACE

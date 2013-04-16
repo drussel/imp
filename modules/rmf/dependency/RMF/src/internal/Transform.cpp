@@ -2,11 +2,13 @@
  *  \file RMF/Transform.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #include <RMF/internal/Transform.h>
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 namespace internal {
@@ -45,3 +47,5 @@ void Rotation::fill_matrix() {
 
 }   // namespace internal
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS

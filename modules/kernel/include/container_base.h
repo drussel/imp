@@ -1,5 +1,5 @@
 /**
- *  \file IMP/container_base.h
+ *  \file IMP/kernel/container_base.h
  *  \brief Abstract base class for containers of particles.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -9,7 +9,7 @@
 #ifndef IMPKERNEL_CONTAINER_BASE_H
 #define IMPKERNEL_CONTAINER_BASE_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "base_types.h"
 #include "ScoreState.h"
 #include "particle_index.h"
@@ -18,7 +18,7 @@
 #include <IMP/base/Object.h>
 #include <IMP/base/WeakPointer.h>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 class Particle;
 class Model;
 
@@ -46,18 +46,17 @@ class Model;
 
     \note Containers store \em sets and so are fundamentally unordered.
  */
-class IMPEXPORT Container : public ScoreState
+class IMPKERNELEXPORT Container : public ScoreState
 {
   bool changed_;
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   bool readable_;
   bool writeable_;
 #endif
-
+protected:
   //! This will be reset at the end of evaluate
-  IMP_PROTECTED_METHOD(void, set_is_changed, (bool tf),,);
-  IMP_PROTECTED_CONSTRUCTOR(Container, (Model *m,
-                                        std::string name="Container %1%"),);
+  void set_is_changed(bool tf);
+  Container (Model *m, std::string name="Container %1%");
  public:
   //! Get contained particles
   /** Get a list of all particles contained in this one,
@@ -71,7 +70,7 @@ class IMPEXPORT Container : public ScoreState
     ParticlesTemp get_all_possible_particles() const {
     IMP_DEPRECATED_FUNCTION(Use IMP::Container::get_all_possible_indexes()
                             instead);
-    return IMP::get_particles(get_model(), get_all_possible_indexes());
+    return IMP::kernel::get_particles(get_model(), get_all_possible_indexes());
   }
 
   /** Return true if the container changed since the last evaluate.*/
@@ -100,6 +99,6 @@ class IMPEXPORT Container : public ScoreState
   IMP_REF_COUNTED_DESTRUCTOR(Container);
 };
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_CONTAINER_BASE_H */

@@ -2,7 +2,7 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,6 +11,10 @@
 #include <RMF/Category.h>
 #include <RMF/FileHandle.h>
 #include <RMF/decorators.h>
+
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DEF(FrameConstHandle);
 
 namespace RMF {
 
@@ -22,9 +26,9 @@ FileConstHandle FrameConstHandle::get_file() const {
   return FileConstHandle(shared_.get());
 }
 
-vector<FrameConstHandle> FrameConstHandle::get_children() const {
+FrameConstHandles FrameConstHandle::get_children() const {
   Ints children = shared_->get_children_frame(frame_);
-  vector<FrameConstHandle> ret(children.size());
+  FrameConstHandles ret(children.size());
   for (unsigned int i = 0; i < ret.size(); ++i) {
     ret[i] = FrameConstHandle(children[i], shared_.get());
   }
@@ -71,3 +75,6 @@ std::istream &operator>>(std::istream &in,
   return in;
 }
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
+

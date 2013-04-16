@@ -73,14 +73,19 @@ IMPATOMEXPORT Hierarchy create_protein(Model *m,
     by read_pdb() which have only protein or DNA members.
 
     They return Hierarchy() if the input chain is empty.
+
+    If keep_detailed is true, then the original high resolution structure
+    particles are added as children of the simplified structure.
     @{
 */
 /** Simplify every num_res into one particle.*/
 IMPATOMEXPORT Hierarchy create_simplified_along_backbone(Hierarchy input,
-                                                         int num_res);
+                                                         int num_res,
+                                                     bool keep_detailed=false);
 /** Simplify by breaking at the boundaries provided.*/
 IMPATOMEXPORT Hierarchy create_simplified_along_backbone(Chain input,
-           const IntRanges& residue_segments);
+                                              const IntRanges& residue_segments,
+                                                      bool keep_detailed=false);
 /** @} */
 
 
@@ -166,7 +171,7 @@ IMPATOMEXPORT HierarchyTree get_hierarchy_tree(Hierarchy h);
 */
 class HierarchyGeometry: public display::SingletonGeometry {
   double res_;
-  mutable IMP::compatibility::map<Particle*, Pointer<display::Geometry> >
+  mutable IMP::base::map<Particle*, Pointer<display::Geometry> >
   components_;
 public:
   HierarchyGeometry(core::Hierarchy d, double resolution=-1):
@@ -191,7 +196,7 @@ public:
 };
 class HierarchiesGeometry: public display::SingletonsGeometry {
   double res_;
-  mutable IMP::compatibility::map<Particle*, Pointer<display::Geometry> >
+  mutable IMP::base::map<Particle*, Pointer<display::Geometry> >
   components_;
   public:
   HierarchiesGeometry(SingletonContainer* sc, double resolution=-1):

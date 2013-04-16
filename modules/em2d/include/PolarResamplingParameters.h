@@ -37,7 +37,7 @@ public:
   //! Compute the parameters for a polar resampling getting the dimensions from
   //! the matrix
   /*!
-      \params[in] matrix Matrix that is going to be resampled
+      \param[in] m Matrix that is going to be resampled
   */
   PolarResamplingParameters(const cv::Mat &m) {
     setup(m.rows,m.cols);
@@ -59,7 +59,7 @@ public:
     radius_step_ = (ending_radius_-starting_radius_)/
                                             (static_cast<double>(n_rings_));
     parameters_set_ = true;
-    IMP_LOG(VERBOSE,
+    IMP_LOG_VERBOSE(
        "PolarResamplingParameters setup. Input matrix: "
       << rows << " x " << cols
       << " Starting radius= "  <<  starting_radius_  << " Ending radius= "
@@ -160,7 +160,7 @@ public:
   //! Obtain the resampling map of type CV_32FC2 (floats, slower that those
   //! obtained with   get_resampling_maps()
   void get_resampling_map(cv::Mat &m1) const {
-  IMP_LOG(VERBOSE,"returning resampling map "
+  IMP_LOG_VERBOSE("returning resampling map "
                        << polar_map_.rows <<"x" << polar_map_.cols
                        << " depth " << polar_map_.depth()
                        << " type " << polar_map_.type() << std::endl);

@@ -25,30 +25,13 @@
  */
 #define IMP_UNUSED(variable) IMP::base::internal::eat(variable)
 
-#if IMP_BUILD != IMP_FAST
-/** Mark a variable as one that is only used in checks. This disables
-    unused variable warnings on it in fast mode.
-*/
-#define IMP_CHECK_VARIABLE(variable)
-
-/** Mark a variable as one that is only used in logging. This disables
-    unused variable warnings on it in fast mode.
-*/
-#define IMP_LOG_VARIABLE(variable)
-
-#else
-#define IMP_CHECK_VARIABLE(variable) IMP_UNUSED(variable)
-#define IMP_LOG_VARIABLE(variable) IMP_UNUSED(variable)
-
-#endif
-
 #ifndef IMP_DOXYGEN
 #ifdef __GNUC__
 #define IMP_WARN_PREPROCESS(msg) IMP_PRAGMA(message IMP_STRINGIFY(msg) )
 
 //#if __GNUC_PREREQ(4,2)
 #define IMP_GCC_DISABLE_WARNING(name)\
-  IMP_PRAGMA(GCC diagnostic ignored IMP_STRINGIFY(name) )
+  IMP_GCC_PRAGMA( diagnostic ignored IMP_STRINGIFY(name) )
 
 /*#else
 #define IMP_GCC_DISABLE_WARNING(name)

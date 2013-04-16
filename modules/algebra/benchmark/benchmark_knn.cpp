@@ -11,7 +11,6 @@ using namespace IMP;
 using namespace IMP::base;
 using namespace IMP::algebra;
 using namespace IMP::benchmark;
-using namespace IMP::compatibility;
 
 namespace {
 template <class KNN>
@@ -66,7 +65,7 @@ void test_uniform(std::string name,
 }
 
 int main(int argc, char** argv) {
-  IMP::base::setup_from_argv(argc, argv, 0);
+  IMP::base::setup_from_argv(argc, argv, "Benchmark nearest neighbor algos");
 #ifdef IMP_BENCHMARK_USE_ANN
   {
     std::string name("ann");

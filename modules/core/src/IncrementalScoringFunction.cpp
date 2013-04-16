@@ -9,7 +9,7 @@
 #include <IMP/RestraintSet.h>
 #include <IMP/Restraint.h>
 #include <IMP/dependency_graph.h>
-#include <IMP/compatibility/set.h>
+#include <IMP/base/set.h>
 #include <IMP/core/XYZ.h>
 #include <IMP/internal/container_helpers.h>
 #include <IMP/core/XYZR.h>
@@ -43,7 +43,7 @@ IncrementalScoringFunction
     weight_(weight),
     max_(max) {
   IMP_OBJECT_LOG;
-  IMP_LOG(TERSE, "Creating IncrementalScoringFunction with particles "
+  IMP_LOG_TERSE( "Creating IncrementalScoringFunction with particles "
           << ps << " and restraints " << rs << std::endl);
   all_= IMP::internal::get_index(ps);
   Pointer<ScoringFunction> suppress_error(this);
@@ -59,7 +59,7 @@ IncrementalScoringFunction
 void IncrementalScoringFunction::create_scoring_functions() {
   IMP_OBJECT_LOG;
   if (flattened_restraints_.empty()) return;
-  compatibility::map<Restraint*,int> all_set;
+  base::map<Restraint*,int> all_set;
   for (unsigned int i=0; i< flattened_restraints_.size(); ++i) {
     all_set[flattened_restraints_[i]]=i;
   }
@@ -98,26 +98,28 @@ void IncrementalScoringFunction
   // restraint sets get lost and cause warnings. Not sure how to handle them.
   flattened_restraints_=IMP::get_restraints(decomposed.begin(),
                                             decomposed.end());
-  IMP_LOG(TERSE, "Flattened restraints are " << flattened_restraints_
+  IMP_LOG_TERSE( "Flattened restraints are " << flattened_restraints_
           << std::endl);
 
 }
 void IncrementalScoringFunction::reset_moved_particles() {
-  set_moved_particles(IMP::internal::get_particle(get_model(), last_move_));
+  IMP_OBJECT_LOG;
+  IMP_LOG_TERSE("Resetting moved particles" << std::endl);
+  set_moved_particles( last_move_ );
   last_move_.clear();
 }
-void IncrementalScoringFunction::set_moved_particles(const ParticlesTemp &p) {
+void IncrementalScoringFunction::set_moved_particles(const ParticleIndexes &p) {
   IMP_OBJECT_LOG;
   IMP_IF_CHECK(USAGE) {
     for (unsigned int i=0; i< p.size(); ++i) {
-      IMP_USAGE_CHECK(std::find(all_.begin(), all_.end(), p[i]->get_index())
+      IMP_USAGE_CHECK(std::find(all_.begin(), all_.end(), p[i])
                       != all_.end(),
                       "Particle " << Showable(p[i])
                       << " was not in the list of "
                       << "particles passed to the constructor.");
     }
   }
-  last_move_= IMP::internal::get_index(p);
+  last_move_= p;
   for (unsigned int i=0; i< nbl_.size(); ++i) {
     nbl_[i]->set_moved(last_move_);
   }
@@ -161,14 +163,15 @@ void IncrementalScoringFunction::clear_close_pair_scores() {
   }
   nbl_.clear();
 }
-ParticlesTemp IncrementalScoringFunction::get_movable_particles() const {
-  return IMP::internal::get_particle(get_model(), all_);
+ParticleIndexes IncrementalScoringFunction::get_movable_particles() const {
+  return all_;
 }
 
 void
 IncrementalScoringFunction::do_non_incremental_evaluate() {
   if (!non_incremental_) {
     non_incremental_=IMP::ScoringFunctionAdaptor(flattened_restraints_);
+    non_incremental_->set_name(get_name() + "-all");
   }
   non_incremental_->evaluate(false);
   for (unsigned int i=0; i< flattened_restraints_.size(); ++i) {
@@ -179,13 +182,14 @@ IncrementalScoringFunction::do_non_incremental_evaluate() {
 
 void
 IncrementalScoringFunction::do_add_score_and_derivatives(ScoreAccumulator sa,
-                                                 const ScoreStatesTemp &ss) {
+                                                 const ScoreStatesTemp &) {
   IMP_OBJECT_LOG;
-  IMP_CHECK_VARIABLE(ss);
-  IMP_USAGE_CHECK(ss.empty(), "Where did the score states come from?");
+  // ignore score states as we handle them internally
   if (dirty_.size() > all_.size()*.1) {
+    IMP_LOG_TERSE("Doing non-incremental evaluate" << std::endl);
     do_non_incremental_evaluate();
   } else {
+    IMP_LOG_TERSE("Doing incremental evaluate: " << dirty_ << std::endl);
     while (!dirty_.empty()) {
       ScoringFunctionsMap::const_iterator it
           =scoring_functions_.find(dirty_.back());
@@ -196,7 +200,7 @@ IncrementalScoringFunction::do_add_score_and_derivatives(ScoreAccumulator sa,
         for (unsigned int i=0; i< ris.size(); ++i) {
           int index=ris[i];
           double score=flattened_restraints_[index]->get_last_score();
-          IMP_LOG(TERSE, "Updating score for "
+          IMP_LOG_TERSE( "Updating score for "
                   << Showable(flattened_restraints_[index])
                   << " to " << score << std::endl);
           flattened_restraints_scores_[index]=score;
@@ -208,10 +212,10 @@ IncrementalScoringFunction::do_add_score_and_derivatives(ScoreAccumulator sa,
       }
     }
   }
-  IMP_LOG(TERSE, "Scores are " << flattened_restraints_scores_ << std::endl);
-  double score=std::accumulate(flattened_restraints_scores_.begin(),
-                               flattened_restraints_scores_.end(),
-                               0.0)*weight_;
+  IMP_LOG_TERSE( "Scores are " << flattened_restraints_scores_ << std::endl);
+  double score = std::accumulate(flattened_restraints_scores_.begin(),
+                                 flattened_restraints_scores_.end(),
+                                 0.0)*weight_;
   // non-incremental ignores nbl terms
   IMP_IF_CHECK(USAGE_AND_INTERNAL) {
     if (non_incremental_) {
@@ -219,14 +223,15 @@ IncrementalScoringFunction::do_add_score_and_derivatives(ScoreAccumulator sa,
       IMP_CHECK_VARIABLE(niscore);
       IMP_INTERNAL_CHECK_FLOAT_EQUAL(niscore,
                                      score,
-                      "Incremental and non-incremental scores don't match");
+                      "Incremental and non-incremental scores don't match: "
+                                     << flattened_restraints_scores_);
     }
   }
   // do nbl stuff
-  for (unsigned int i=0; i< nbl_.size(); ++i) {
-    double cscore= nbl_[i]->get_score();
-    IMP_LOG(TERSE, "NBL score is " << cscore << std::endl);
-    score+=cscore;
+  for (unsigned int i = 0; i < nbl_.size(); ++i) {
+    double cscore = nbl_[i]->get_score();
+    IMP_LOG_TERSE("NBL score is " << cscore << std::endl);
+    score += cscore;
   }
   sa.add_score(score);
 }
@@ -243,20 +248,15 @@ Restraints IncrementalScoringFunction::create_restraints() const {
   return ret;
 }
 
-
-void IncrementalScoringFunction::do_show(std::ostream &) const {
-}
 IncrementalScoringFunction::Wrapper::~Wrapper(){
   for (unsigned int i=0; i< size(); ++i) {
     delete operator[](i);
   }
 }
 
-
 //! all real work is passed off to other ScoringFunctions
 ScoreStatesTemp IncrementalScoringFunction
-::get_required_score_states(const DependencyGraph &,
-                            const DependencyGraphVertexIndex&) const {
+::get_required_score_states() const {
     return ScoreStatesTemp();
   }
 IMPCORE_END_NAMESPACE

@@ -4,14 +4,14 @@
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
-#include <IMP/UnaryFunction.h>
+#include <IMP/kernel/UnaryFunction.h>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
-UnaryFunction::UnaryFunction(): Object("UnaryFunction%1%")
+UnaryFunction::UnaryFunction(std::string name): Object(name)
 {
   /* Implemented here rather than in the header so that UnaryFunction
      symbols are present in the kernel DSO */
 }
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

@@ -48,14 +48,16 @@ const double kk=10;
 const double sigma=.1;
 const double slack=6;
 const double pertub_amount=0.0*r;
-#if IMP_BUILD==IMP_FAST
+#if IMP_BUILD>=IMP_RELEASE
 const unsigned int num_x=10;
 const unsigned int num_y=num_x;
 const unsigned int num_per_chain=10;
+const unsigned int number_of_steps=1000;
 #else
 const unsigned int num_x=2;
 const unsigned int num_y=num_x;
 const unsigned int num_per_chain=5;
+const unsinged int number_of_steps=50;
 #endif
 
 #ifdef __GNUC__
@@ -230,8 +232,9 @@ void rigidify(const ParticlesTemp &ps, bool no_members) {
   Model *m=ps[0]->get_model();
   for (unsigned int i=0; i< ps.size(); ++i) {
     XYZR d(ps[i]);
-    ReferenceFrame3D rf(Transformation3D(Rotation3D(),
-                                         d.get_coordinates()));
+    ReferenceFrame3D
+      rf(Transformation3D(algebra::get_identity_rotation_3d(),
+                          d.get_coordinates()));
     RigidBody rb=RigidBody::setup_particle(ps[i], rf);
     if (!no_members) {
       IMP_NEW(Particle, op, (m));
@@ -267,22 +270,23 @@ void do_benchmark(std::string name, PS0 *link,
   }
   It it= create_restraints<PR>(link, lb, bottom, o);
   double total=0, runtime=0;
-  int ns=1000;
   IMP_TIME(
       {
-        total+=simulate(it, ns);
+        total+=simulate(it, number_of_steps);
       }, runtime);
   IMP::benchmark::report("bd", name, runtime, total);
 }
 }
 //new LowerBound(kk)
 namespace {
-IMP_DEFINE_BOOL(initialize, false, "Initialize things");
-IMP_DEFINE_BOOL(setup, false, "Setup things");
+  bool FLAGS_initialize=false, FLAGS_setup=false;
+  IMP::base::AddBoolFlag ifl("initialize", "Initialize things",
+                             &FLAGS_initialize);
+  IMP::base::AddBoolFlag sfl("setup", "Setup things", &FLAGS_setup);
 }
 
 int main(int argc , char **argv) {
-  IMP::base::setup_from_argv(argc, argv, 0);
+  IMP::base::setup_from_argv(argc, argv, "Benchmark Brownian dynamics.");
   IMP_NEW(HarmonicLowerBound, hlb, (0, kk));
   try {
     FloatKey xk=  XYZ::get_xyz_keys()[0];
@@ -348,7 +352,7 @@ int main(int argc , char **argv) {
                              new HarmonicDistancePairScore(len, kk),
                              new SoftSpherePairScore(kk),
                              new AttributeSingletonScore(hlb,
-XYZ::get_xyz_keys()[0]),
+                                                        XYZ::get_xyz_keys()[0]),
                              true, true);
         do_benchmark<1, PR >("custom",
                              new HarmonicDistancePairScore(len, kk),

@@ -4,7 +4,7 @@ import IMP.em
 import IMP.test
 import IMP.core
 
-class KernelParametersTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Class to test Gaussian kernel parameters"""
 
     def test_for_resolution_of_10(self):
@@ -39,7 +39,7 @@ class KernelParametersTest(IMP.test.TestCase):
     def setUp(self):
         """Build test model and optimizer"""
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         self.kp=IMP.em.KernelParameters(10.)
 if __name__ == '__main__':
     IMP.test.main()

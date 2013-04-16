@@ -19,21 +19,20 @@
 
 IMPCORE_BEGIN_NAMESPACE
 
-Mover::Mover(Model *m, std::string name):ModelObject(m, name) {}
-
-IMP_LIST_IMPL(MonteCarlo, Mover, mover, Mover*, Movers);
+IMP_LIST_IMPL(MonteCarlo, Mover, mover, MonteCarloMover*,
+              MonteCarloMovers);
 
 MonteCarlo::MonteCarlo(Model *m): Optimizer(m, "MonteCarlo%1%"),
                                   temp_(1),
                       max_difference_(std::numeric_limits<double>::max()),
-                                  probability_(1),
                                   stat_forward_steps_taken_(0),
                                   stat_upward_steps_taken_(0),
                                   stat_num_failures_(0),
                                   return_best_(true),
                                   rand_(0,1){}
 
-bool MonteCarlo::do_accept_or_reject_move(double score, double last) {
+bool MonteCarlo::do_accept_or_reject_move(double score, double last,
+                                          double proposal_ratio) {
   bool ok=false;
   if  (score < last) {
     ok=true;
@@ -45,9 +44,9 @@ bool MonteCarlo::do_accept_or_reject_move(double score, double last) {
     double diff= score- last;
     double e= std::exp(-diff/temp_);
     double r= rand_(random_number_generator);
-    IMP_LOG(VERBOSE, diff << " " << temp_ << " " << e << " " << r
+    IMP_LOG_VERBOSE( diff << " " << temp_ << " " << e << " " << r
             << std::endl);
-    if (e > r) {
+    if (e*proposal_ratio > r) {
       ++stat_upward_steps_taken_;
       ok=true;
     } else {
@@ -55,17 +54,20 @@ bool MonteCarlo::do_accept_or_reject_move(double score, double last) {
     }
   }
   if (ok) {
-    IMP_LOG(TERSE, "Accept: " << score
+    IMP_LOG_TERSE( "Accept: " << score
             << " previous score was " << last << std::endl);
     ++stat_forward_steps_taken_;
     last_energy_=score;
     update_states();
+    for (int i= get_number_of_movers()-1; i>=0; --i) {
+      get_mover(i)->accept();
+    }
     return true;
   } else {
-    IMP_LOG(TERSE, "Reject: " << score
+    IMP_LOG_TERSE( "Reject: " << score
             << " current score stays " << last << std::endl);
     for (int i= get_number_of_movers()-1; i>=0; --i) {
-      get_mover(i)->reset_move();
+      get_mover(i)->reject();
     }
     ++stat_num_failures_;
     if (isf_) {
@@ -75,25 +77,41 @@ bool MonteCarlo::do_accept_or_reject_move(double score, double last) {
   }
 }
 
-ParticlesTemp MonteCarlo::do_move(double probability) {
-  ParticlesTemp ret;
+MonteCarloMoverResult MonteCarlo::do_move() {
+  ParticleIndexes ret;
+  double prob = 1.0;
   for (MoverIterator it = movers_begin(); it != movers_end(); ++it) {
-    IMP_LOG(VERBOSE, "Moving using " << (*it)->get_name() << std::endl);
+    IMP_LOG_VERBOSE( "Moving using " << (*it)->get_name() << std::endl);
     IMP_CHECK_OBJECT(*it);
     {
       //IMP_LOG_CONTEXT("Mover " << (*it)->get_name());
-      ParticlesTemp cur=(*it)->propose_move(probability);
-      ret.insert(ret.end(), cur.begin(), cur.end());
+      MonteCarloMoverResult cur=(*it)->propose();
+      ret += cur.get_moved_particles();
+      prob *= cur.get_proposal_ratio();
     }
-    IMP_LOG(VERBOSE, "end\n");
+    IMP_LOG_VERBOSE( "end\n");
   }
-  return ret;
+  return MonteCarloMoverResult(ret, prob);
 }
 
 void MonteCarlo::do_step() {
-  ParticlesTemp moved=do_move(probability_);
-  double energy= do_evaluate(moved);
-  do_accept_or_reject_move(energy);
+  MonteCarloMoverResult moved=do_move();
+  double energy= do_evaluate(moved.get_moved_particles());
+  do_accept_or_reject_move(energy, moved.get_proposal_ratio());
+}
+
+ParticleIndexes MonteCarlo::get_movable_particles() const {
+  ParticleIndexes movable;
+  for (unsigned int i=0; i< get_number_of_movers(); ++i) {
+    ModelObjectsTemp t= get_mover(i)->get_outputs();
+    for (unsigned int j = 0; j < t.size(); ++j) {
+      ModelObject *mo = t[j];
+      if (dynamic_cast<Particle*>(mo)) {
+        movable.push_back(dynamic_cast<Particle*>(mo)->get_index());
+      }
+    }
+  }
+  return movable;
 }
 
 double MonteCarlo::do_optimize(unsigned int max_steps) {
@@ -104,10 +122,9 @@ double MonteCarlo::do_optimize(unsigned int max_steps) {
               << " movers isn't very useful.",
               ValueException);
   }
-  ParticlesTemp movable;
-  for (unsigned int i=0; i< get_number_of_movers(); ++i) {
-    movable+= get_mover(i)->get_output_particles();
-  }
+
+  ParticleIndexes movable = get_movable_particles();
+
   // provide a way of feeding in this value
   last_energy_ =do_evaluate(movable);
   if (return_best_) {
@@ -118,7 +135,7 @@ double MonteCarlo::do_optimize(unsigned int max_steps) {
   stat_num_failures_ = 0;
   update_states();
 
-  IMP_LOG(TERSE, "MC Initial energy is " << last_energy_ << std::endl);
+  IMP_LOG_TERSE( "MC Initial energy is " << last_energy_ << std::endl);
 
   for (unsigned int i=0; i< max_steps; ++i) {
     if (get_stop_on_good_score()
@@ -129,19 +146,15 @@ double MonteCarlo::do_optimize(unsigned int max_steps) {
     if (best_energy_ < get_score_threshold()) break;
   }
 
-  IMP_LOG(TERSE, "MC Final energy is " << last_energy_  << std::endl);
+  IMP_LOG_TERSE( "MC Final energy is " << last_energy_  << std::endl);
   if (return_best_) {
     //std::cout << "Final score is " << get_model()->evaluate(false)
     //<< std::endl;
     best_->swap_configuration();
-    IMP_LOG(TERSE, "MC Returning energy " << best_energy_ << std::endl);
+    IMP_LOG_TERSE( "MC Returning energy " << best_energy_ << std::endl);
     IMP_IF_CHECK(base::USAGE) {
-      ParticlesTemp movable;
-      for (unsigned int i=0; i< get_number_of_movers(); ++i) {
-        movable+= get_mover(i)->get_output_particles();
-      }
-      IMP_CHECK_CODE(double e= do_evaluate(movable));
-      IMP_LOG(TERSE, "MC Got " << e << std::endl);
+      IMP_LOG_TERSE( "MC Got " << do_evaluate(get_movable_particles())
+                     << std::endl);
       /*IMP_INTERNAL_CHECK((e >= std::numeric_limits<double>::max()
                           && best_energy_ >= std::numeric_limits<double>::max())
                          || std::abs(best_energy_ - e)
@@ -149,7 +162,8 @@ double MonteCarlo::do_optimize(unsigned int max_steps) {
                          "Energies do not match "
                          << best_energy_ << " vs " << e << std::endl);*/
     }
-    return get_scoring_function()->evaluate(false);
+
+    return do_evaluate(movable);
   } else {
     return last_energy_;
   }
@@ -159,8 +173,6 @@ MonteCarlo::set_incremental_scoring_function(IncrementalScoringFunction *isf) {
   isf_=isf;
   Optimizer::set_scoring_function(isf);
 }
-void MonteCarlo::do_show(std::ostream &) const {
-}
 
 
 MonteCarloWithLocalOptimization::MonteCarloWithLocalOptimization(Optimizer *opt,
@@ -169,20 +181,17 @@ MonteCarloWithLocalOptimization::MonteCarloWithLocalOptimization(Optimizer *opt,
 
 
 void MonteCarloWithLocalOptimization::do_step() {
-  ParticlesTemp moved=do_move(get_move_probability());
-  IMP_LOG(TERSE,
+  MonteCarloMoverResult moved=do_move();
+  IMP_LOG_TERSE(
           "MC Performing local optimization from "
-          << do_evaluate(moved) << std::endl);
+          << do_evaluate(moved.get_moved_particles()) << std::endl);
   // non-Mover parts of the model can be moved by the local optimizer
   // make sure they are cleaned up
   OwnerPointer<Configuration> cs= new Configuration(get_model());
   double ne =opt_->optimize(num_local_);
-  if (!do_accept_or_reject_move(ne)) {
+  if (!do_accept_or_reject_move(ne, moved.get_proposal_ratio())) {
     cs->swap_configuration();
   }
-}
-
-void MonteCarloWithLocalOptimization::do_show(std::ostream &) const {
 }
 
 
@@ -193,17 +202,14 @@ MonteCarloWithBasinHopping::MonteCarloWithBasinHopping(Optimizer *opt,
 
 
 void MonteCarloWithBasinHopping::do_step() {
-  ParticlesTemp moved=do_move(get_move_probability());
-  IMP_LOG(TERSE,
+  MonteCarloMoverResult moved=do_move();
+  IMP_LOG_TERSE(
           "MC Performing local optimization from "
-          << do_evaluate(moved) << std::endl);
+          << do_evaluate(moved.get_moved_particles()) << std::endl);
   Pointer<Configuration> cs= new Configuration(get_model());
   double ne =get_local_optimizer()->optimize(get_number_of_steps());
   cs->swap_configuration();
-  do_accept_or_reject_move(ne);
-}
-
-void MonteCarloWithBasinHopping::do_show(std::ostream &) const {
+  do_accept_or_reject_move(ne, moved.get_proposal_ratio());
 }
 
 

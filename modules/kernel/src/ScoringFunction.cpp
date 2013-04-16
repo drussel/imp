@@ -6,44 +6,39 @@
  *
  */
 
-#include "IMP/ScoringFunction.h"
-#include "IMP/Model.h"
-#include "IMP/internal/evaluate_utility.h"
-#include "IMP/internal/scoring_functions.h"
-#include "IMP/scoring_function_macros.h"
-#include "IMP/internal/utility.h"
-#include "IMP/generic.h"
-#include "IMP/utility.h"
+#include "IMP/kernel/ScoringFunction.h"
+#include "IMP/kernel/Model.h"
+#include "IMP/kernel/internal/evaluate_utility.h"
+#include "IMP/kernel/internal/scoring_functions.h"
+#include "IMP/kernel/scoring_function_macros.h"
+#include "IMP/kernel/internal/utility.h"
+#include "IMP/kernel/generic.h"
+#include "IMP/kernel/utility.h"
 
 
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 // in namespace so it can be made a friend.
 class NullScoringFunction: public ScoringFunction {
 public:
   NullScoringFunction() {}
-  IMP_SCORING_FUNCTION(NullScoringFunction);
+  void do_add_score_and_derivatives(IMP::kernel::ScoreAccumulator ,
+                                    const ScoreStatesTemp &) IMP_OVERRIDE {
+  }
+  Restraints create_restraints() const IMP_OVERRIDE {
+    return Restraints();
+  }
+  ScoreStatesTemp get_required_score_states() const IMP_OVERRIDE {
+    return ScoreStatesTemp();
+  }
+  IMP_OBJECT_METHODS(NullScoringFunction);
 };
-void
-NullScoringFunction::do_add_score_and_derivatives(ScoreAccumulator ,
-                                         const ScoreStatesTemp &) {
-}
-Restraints NullScoringFunction::create_restraints() const {
-  return Restraints();
-}
-ScoreStatesTemp
-NullScoringFunction
-::get_required_score_states(const DependencyGraph &,
-                            const DependencyGraphVertexIndex&) const {
-  return ScoreStatesTemp();
-}
-void NullScoringFunction::do_show(std::ostream &) const {
-}
 
 ScoringFunction::ScoringFunction(Model *m,
                                  std::string name): ModelObject(m, name){
 }
+
 double ScoringFunction::evaluate_if_good(bool derivatives) {
   IMP_OBJECT_LOG;
   set_was_used(true);
@@ -54,6 +49,7 @@ double ScoringFunction::evaluate_if_good(bool derivatives) {
   do_add_score_and_derivatives(sa, ss_);
   return es_.score;
 }
+
 double ScoringFunction::evaluate(bool derivatives) {
   IMP_OBJECT_LOG;
   set_was_used(true);
@@ -64,6 +60,7 @@ double ScoringFunction::evaluate(bool derivatives) {
   do_add_score_and_derivatives(sa, ss_);
   return es_.score;
 }
+
 double ScoringFunction::evaluate_if_below(bool derivatives, double max) {
   IMP_OBJECT_LOG;
   set_was_used(true);
@@ -76,24 +73,19 @@ double ScoringFunction::evaluate_if_below(bool derivatives, double max) {
   return es_.score;
 }
 void
-ScoringFunction::do_update_dependencies(const DependencyGraph &dg,
-                                     const DependencyGraphVertexIndex &index) {
+ScoringFunction::do_update_dependencies() {
+  IMP_OBJECT_LOG;
   // can't check here as create_restraints can cause a loop
   // but we must make sure they are ordered
-  ss_= get_update_order(get_required_score_states(dg, index));
+  ScoreStatesTemp ret= get_required_score_states();
+
+  ModelObjectsTemp ops= get_model()->get_optimized_particles();
+  for (unsigned int i=0; i< ops.size(); ++i) {
+    ret+=get_model()->get_required_score_states(ops[i]);
+  }
+  ss_= get_update_order(ret);
 }
 
-ScoreStatesTemp
-ScoringFunction::get_required_score_states(const DependencyGraph &dg,
-                                           const DependencyGraphVertexIndex &i)
-    const {
-  Restraints rs= create_restraints();
-  IMP_INTERNAL_CHECK(!get_model() || get_model()->get_has_dependencies(),
-                     "ScoringFunctions where create_restraints() creates "
-                     << "new restraints must implement their own"
-                     << " get_required_score_states()");
-  return IMP::get_required_score_states(rs, dg, i);
-}
 
 void
 ScoringFunction::clear_caches() {
@@ -134,11 +126,11 @@ namespace {
 
 void show_restraint_hierarchy(ScoringFunctionAdaptor r, std::ostream &out) {
   Restraints cur= r->create_restraints();
-  for (unsigned int i=0; i< cur.size(); ++i) {
-      Restraint*r= cur[i];
-      RestraintSet *rs=dynamic_cast<RestraintSet*>(r);
+  for (unsigned int ii=0; ii< cur.size(); ++ii) {
+      Restraint*curr= cur[ii];
+      RestraintSet *rs=dynamic_cast<RestraintSet*>(curr);
        if (!rs) {
-         IMP_PRINT_TREE(out, Restraint*, r, 0,
+         IMP_PRINT_TREE(out, Restraint*, curr, 0,
                         dynamic_cast<RestraintSet*>(n)->get_restraint,
                         out << Showable(n)
                         << " " << n->get_maximum_score() << " "
@@ -188,4 +180,4 @@ ScoringFunctions create_decomposition(ScoringFunction *sf) {
   ret= create_decomposition_into_scoring_functions(sf->create_restraints());
   return ret;
 }
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

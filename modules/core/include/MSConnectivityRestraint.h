@@ -45,7 +45,7 @@ IMPCORE_BEGIN_NAMESPACE
 /** The restraint implements ambiguous connectivity. That is, it takes
     several particles including multiple copies and ensures that they remain
     connected, but allows how they are connected to change. If you wish
-    to restraint the connectivity of sets of
+    to restrain the connectivity of sets of
     particles (i.e. each protein is represented using a set of balls)
     use an appropriate PairScore which calls a Refiner (such
     as ClosePairsPairScore).
@@ -99,7 +99,11 @@ public:
 
   Restraints do_create_current_decomposition() const;
 
-  IMP_RESTRAINT(MSConnectivityRestraint);
+  double unprotected_evaluate(IMP::kernel::DerivativeAccumulator *accum) const;
+
+  ModelObjectsTemp do_get_inputs() const;
+
+  IMP_OBJECT_METHODS(MSConnectivityRestraint);
 
 #ifdef IMPCORE_FRIEND_IS_OK
   private:

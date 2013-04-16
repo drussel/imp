@@ -3,15 +3,16 @@ import IMP.test
 import IMP.core as core
 import IMP.atom as atom
 import IMP.algebra as alg
+import math
 
-class DistanceTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def test_placement_score(self):
         """Test placement score"""
         m = IMP.Model()
         # read PDB
-        mp= atom.read_pdb(self.open_input_file("input.pdb"),
+        mp= atom.read_pdb(self.open_input_file("mini.pdb"),
                               m, atom.NonWaterPDBSelector())
-        mp1= atom.read_pdb(self.open_input_file("input.pdb"),
+        mp1= atom.read_pdb(self.open_input_file("mini.pdb"),
                               m, atom.NonWaterPDBSelector())
         xyz=core.XYZs(atom.get_leaves(mp))
         xyz1=core.XYZs(atom.get_leaves(mp1))
@@ -25,42 +26,12 @@ class DistanceTest(IMP.test.TestCase):
         self.assertAlmostEqual(da[0],d, 2)
         self.assertAlmostEqual(da[1],a, 2)
 
-
-    def test_component_placement_score(self):
-        """Testing that component placement score returns the same transformation if called twice"""
-        m = IMP.Model()
-        # read PDB
-        mp1_ref= atom.read_pdb(self.open_input_file("1z5s_A.pdb"),
-                              m, atom.NonWaterPDBSelector())
-        mp1_mdl= atom.read_pdb(self.open_input_file("1z5s_A.pdb"),
-                              m, atom.NonWaterPDBSelector())
-        mp2_ref= atom.read_pdb(self.open_input_file("1z5s_C.pdb"),
-                              m, atom.NonWaterPDBSelector())
-        mp2_mdl= atom.read_pdb(self.open_input_file("1z5s_C.pdb"),
-                              m, atom.NonWaterPDBSelector())
-        xyz1_ref=core.XYZs(atom.get_leaves(mp1_ref))
-        xyz1_mdl=core.XYZs(atom.get_leaves(mp1_mdl))
-        xyz2_ref=core.XYZs(atom.get_leaves(mp2_ref))
-        xyz2_mdl=core.XYZs(atom.get_leaves(mp2_mdl))
-
-        #create a random transformation
-        t=IMP.algebra.Transformation3D(IMP.algebra.get_random_rotation_3d(),
-                                       IMP.algebra.get_random_vector_in(IMP.algebra.get_unit_bounding_box_3d()))
-        for d in xyz1_mdl: core.transform(d,t)
-        t=IMP.algebra.Transformation3D(IMP.algebra.get_random_rotation_3d(),
-                                       IMP.algebra.get_random_vector_in(IMP.algebra.get_unit_bounding_box_3d()))
-        #core.get_transformed(xyz2_mdl,t)
-        for d in xyz2_mdl: core.transform(d, t)
-        da1=atom.get_component_placement_score(xyz1_ref,xyz2_ref,xyz1_mdl,xyz2_mdl)
-        da2=atom.get_component_placement_score(xyz1_ref,xyz2_ref,xyz1_mdl,xyz2_mdl)
-        self.assertAlmostEqual(da1[1],da2[1])
-
     def test_drms(self):
         """ Test drms measure """
         m = IMP.Model()
         sel = atom.CAlphaPDBSelector()
-        prot1 = atom.read_pdb(self.open_input_file("1DQK.pdb"), m, sel)
-        prot2 = atom.read_pdb(self.open_input_file("1DQK.pdb"), m, sel)
+        prot1 = atom.read_pdb(self.open_input_file("mini.pdb"), m, sel)
+        prot2 = atom.read_pdb(self.open_input_file("mini.pdb"), m, sel)
         xyzs1 = core.XYZs(atom.get_leaves(prot1))
         xyzs2 = core.XYZs(atom.get_leaves(prot2))
         drms = atom.get_drms(xyzs1, xyzs2)
@@ -86,8 +57,8 @@ class DistanceTest(IMP.test.TestCase):
         """ Test drms measure taking into account rigid bodies"""
         m = IMP.Model()
         sel = atom.CAlphaPDBSelector()
-        prot1 = atom.read_pdb(self.open_input_file("1DQK.pdb"), m, sel)
-        prot2 = atom.read_pdb(self.open_input_file("1DQK.pdb"), m, sel)
+        prot1 = atom.read_pdb(self.open_input_file("mini.pdb"), m, sel)
+        prot2 = atom.read_pdb(self.open_input_file("mini.pdb"), m, sel)
 
         hchains1 = atom.get_by_type(prot1, atom.CHAIN_TYPE)
         hchains2 = atom.get_by_type(prot2, atom.CHAIN_TYPE)
@@ -115,6 +86,43 @@ class DistanceTest(IMP.test.TestCase):
         drms = atom.get_drms(xyzs1, xyzs2)
         rb_drms = atom.get_rigid_bodies_drms(xyzs1, xyzs2, ranges)
         self.assertAlmostEqual(drms, rb_drms, delta=0.3, msg="rb_drms != drms")
+
+    def test__rigid_bodies_drmsd(self):
+        """ Test drmsd measure"""
+        m = IMP.Model()
+        sel = atom.CAlphaPDBSelector()
+        prot1 = atom.read_pdb(self.open_input_file("mini.pdb"), m, sel)
+        prot2 = atom.read_pdb(self.open_input_file("mini.pdb"), m, sel)
+
+        xyzs1 = core.XYZs(atom.get_leaves(prot1))
+        xyzs2 = core.XYZs(atom.get_leaves(prot2))
+        drmsd = atom.get_drmsd(xyzs1, xyzs2)
+        # Molecule with itself
+        self.assertAlmostEqual(drmsd, 0)
+        R = IMP.algebra.get_random_rotation_3d()
+        v = IMP.algebra.get_random_vector_in(IMP.algebra.get_unit_bounding_box_3d())
+        T = IMP.algebra.Transformation3D(R,v)
+        for x in xyzs2:
+            core.transform(x, T)
+        drmsd = atom.get_drmsd(xyzs1, xyzs2)
+        # Same thing after transformation
+        self.assertAlmostEqual(drmsd, 0)
+        #
+        for x in xyzs2:
+            R = IMP.algebra.get_random_rotation_3d()
+            T = IMP.algebra.Transformation3D(R,v)
+            core.transform(x, T)
+        #test that the function is correctly implemented
+        drmsd=0.; npairs=0.;
+        for i in range(0,len(xyzs1)-1):
+            for j in range(i+1,len(xyzs2)):
+                dist0=IMP.core.get_distance(xyzs1[i],xyzs1[j])
+                dist1=IMP.core.get_distance(xyzs2[i],xyzs2[j])
+                drmsd+=(dist0-dist1)**2
+                npairs+=1.
+        drmsd1=math.sqrt(drmsd/npairs)
+        drmsd2= atom.get_drmsd(xyzs1, xyzs2)
+        self.assertAlmostEqual(drmsd1, drmsd2)
 
 if __name__ == '__main__':
     IMP.test.main()

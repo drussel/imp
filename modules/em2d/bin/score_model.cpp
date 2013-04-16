@@ -37,6 +37,8 @@
 #include <iostream>
 #include <cmath>
 
+namespace {
+
 namespace po = boost::program_options;
 namespace em = IMP::em;
 namespace em2d = IMP::em2d;
@@ -127,6 +129,7 @@ bool check_parameters(const po::variables_map &vm,const str required_params,
   }
   return false;
 }
+}
 
 int main(int argc, char **argv) {
 
@@ -185,7 +188,7 @@ int main(int argc, char **argv) {
 
  // Read images and get the sizes from the first image
   fn_subjs = vm["subjs"].as<str>();
-  IMP_LOG(TERSE,"Reading EM subject images from "
+  IMP_LOG_TERSE("Reading EM subject images from "
               << fn_subjs << std::endl);
   subjs_names= em2d::read_selection_file(fn_subjs);
   subjects = em2d::read_images(subjs_names,srw);
@@ -214,7 +217,7 @@ int main(int argc, char **argv) {
       std::exit(0);
     }
     n_projections= vm["np"].as<unsigned long>();
-    IMP_LOG(TERSE,"Generating " << n_projections
+    IMP_LOG_TERSE("Generating " << n_projections
         << " projections using model " << fn_model << std::endl);
 
     // Generate evenly distributed projections
@@ -228,7 +231,7 @@ int main(int argc, char **argv) {
       projections[i]->set_name(oss.str());
     }
     if(save_images) {
-      IMP_LOG(TERSE,"Saving "
+      IMP_LOG_TERSE("Saving "
               << n_projections << " projections " <<  std::endl);
       projs_names = em2d::create_filenames(n_projections,"proj","spi");
       em2d::save_images(projections,projs_names,srw);
@@ -236,7 +239,7 @@ int main(int argc, char **argv) {
   } else if(opt[0]=="read") {
     // Read the projections selection file
     fn_projs = opt[1];
-    IMP_LOG(TERSE,"Reading projections from: " << fn_projs << std::endl);
+    IMP_LOG_TERSE("Reading projections from: " << fn_projs << std::endl);
     projs_names = em2d::read_selection_file(fn_projs);
     projections = em2d::read_images(projs_names,srw);
   }

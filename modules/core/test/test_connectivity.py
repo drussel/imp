@@ -3,7 +3,7 @@ import IMP
 import IMP.test
 import IMP.core
 
-class ConnectivityTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Class to test connectivity restraints"""
 
     def test_connectivity(self):
@@ -11,7 +11,7 @@ class ConnectivityTests(IMP.test.TestCase):
            All particles in a single protein should be connected, and all
            proteins should be connected, either directly or indirectly
            through other proteins."""
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         m = IMP.Model()
 
         ps= self.create_particles_in_box(m,4)

@@ -2,7 +2,7 @@
  *  \file RMF/CoordinateTransformer.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -13,6 +13,11 @@
 #include "internal/Transform.h"
 #include "infrastructure_macros.h"
 
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DECL(CoordinateTransformer);
+
+RMF_ENABLE_WARNINGS
 namespace RMF {
 class ReferenceFrameConst;
 /** Transform coordinates into the global reference frame from
@@ -34,10 +39,19 @@ public:
   Floats get_global_coordinates(const Floats& internal) const {
     return transform_.get_transformed(internal);
   }
+
+  /** Return the translational component of the transformation.*/
+  Floats get_translation() const {
+    return transform_.get_translation();
+  }
+  /** Return the rotational component of the transformation as a quaternion.*/
+  Floats get_rotation() const {
+    return transform_.get_rotation();
+  }
 };
 
-typedef vector<CoordinateTransformer> CoordinateTransformers;
-
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_COORDINATE_TRANSFORMER_H */

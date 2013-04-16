@@ -26,7 +26,7 @@
 IMPATOM_BEGIN_NAMESPACE
 
 IMP_DECLARE_CONTROLLED_KEY_TYPE(AtomType, IMP_ATOM_TYPE_INDEX);
-/** \typedef IMP::atom::AtomType
+/** \class IMP::atom::AtomType
     \brief The type of an atom.
 
     The standard Atom names in %IMP are derived from the PDB names as follows:
@@ -240,8 +240,16 @@ public:
     return Hierarchy::get_particle();
   }
 
-  /** Create a decorator with the passed type and coordinates.*/
-  static Atom setup_particle(Particle *p, AtomType t);
+  /** Create a decorator with the passed type.*/
+  static Atom setup_particle(Model *m,
+                             ParticleIndex pi,
+                             AtomType t);
+
+  /** Create a decorator with the passed type.*/
+  static Atom setup_particle(Particle *p, AtomType t) {
+    return setup_particle(p->get_model(),
+                          p->get_index(), t);
+  }
 
   /** Create a decorator by copying from o.*/
   static Atom setup_particle(Particle *p, Atom o);

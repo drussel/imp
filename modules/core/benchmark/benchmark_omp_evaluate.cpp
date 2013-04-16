@@ -10,6 +10,7 @@
 #include <IMP/base/flags.h>
 #include <IMP/base/thread_macros.h>
 
+IMP_COMPILER_ENABLE_WARNINGS
 
 namespace {
   std::string get_module_name() {
@@ -55,21 +56,26 @@ namespace {
   }
 
   void benchmark_omp(IMP::core::RestraintsScoringFunction *sf) {
-    IMP_THREADS((),
+    std::ostringstream oss;
+    oss << IMP::base::get_number_of_threads();
+
+    IMP_THREADS((oss),
                 {
                   double timet; double score=0.0;
                   IMP_WALLTIME({
                       score=sf->evaluate(false);
                     }, timet);
-                  IMP::benchmark::report("omp evaluate no deriv", timet, score);
+                  IMP::benchmark::report(std::string("omp evaluate no deriv ")
+                                         +oss.str(), timet, score);
                 });
-    IMP_THREADS((),
+    IMP_THREADS((oss),
                 {
                   double time; double score=0.0;
                   IMP_WALLTIME({
                       score=sf->evaluate(true);
                     }, time);
-                  IMP::benchmark::report("omp evaluate deriv", time, score);
+                  IMP::benchmark::report(std::string("omp evaluate deriv ")
+                                         +oss.str(), time, score);
                 });
   }
 
@@ -93,7 +99,7 @@ namespace {
 }
 
 int main(int argc, char **argv) {
-  IMP::base::setup_from_argv(argc, argv, 0);
+  IMP::base::setup_from_argv(argc, argv, "Benchmark OpenMP evaluations");
   IMP::algebra::BoundingBox3D bb= IMP::algebra::get_unit_bounding_box_d<3>();
   IMP_NEW(IMP::Model, m, ());
   IMP::Restraints rs;
@@ -108,6 +114,8 @@ int main(int argc, char **argv) {
     rs.push_back(er);
   }
   IMP_NEW(IMP::core::RestraintsScoringFunction, sf, (rs));
+  // to update dependency graph and all
+  sf->evaluate(false);
   benchmark_omp(sf);
   benchmark_serial(sf);
   return IMP::benchmark::get_return_value();

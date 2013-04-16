@@ -14,12 +14,12 @@ from IMP.isd import Scale,TALOSRestraint
 #unit testing framework
 import IMP.test
 
-class TestTALOSRestraint(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     "simple test cases to check if TALOSRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         #setup dihedral angle of pi/2
         self.p0 = IMP.core.XYZ.setup_particle(IMP.Particle(self.m),

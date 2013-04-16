@@ -5,7 +5,7 @@ import IMP.gsl
 class WoodsFunc(IMP.Restraint):
     """Woods function for four input values, defined as an IMP restraint"""
     def __init__(self, model, particles):
-        IMP.Restraint.__init__(self)
+        IMP.Restraint.__init__(self, model)
         self.particles= particles
         self.index= IMP.FloatKey("x")
     def do_show(self, junk):
@@ -37,7 +37,7 @@ class WoodsFunc(IMP.Restraint):
         return []
 
 
-class CGOptimizerTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def test_cg_woods_func(self):
         """Check that we can optimize the Woods function with CG"""
         self._test_starting_conditions((-3.0, -1.0, -3.0, -1.0))

@@ -1,38 +1,30 @@
 Elaborate documentation and an installation guide can be found at
-http://salilab.org/imp/doc.html (stable, well-tested release)
-http://salilab.org/imp/nightly/doc/html (unstable, nightly build)
+http://salilab.org/imp/nightly/doc/html/
 
-Common build options:
+Building IMP:
 =====================
 
-* To build and install IMP to a specified folder do:
+To build IMP source found in `imp-source` and install it in `path_to_install` do:
 
-  scons prefix=path_to_install install
+      1. `cmake path/to/imp-source -DCMAKE_INSTALL_PREFIX=path_to_install`
+      2. `make -j 8`
 
-* Build IMP within the ./build folder
+Run `ccmake` to see more variables that can be used to customize your build and
+install.
 
-  scons all
+To run IMP without installing, build imp and then use `setup_environment.sh` to
+set the required environment variables. For example, to run `ligand_score`, do
+`./setup_environment.sh ligand_score arguments...`, or
+`./setup_environment.sh $SHELL` and then `ligand_score arguments...` in the
+new shell.
 
-* Build IMP in fast mode (no internal checks, less meaninfgul error messages,
-  but fastest runs)
-
-  scons all build='fast'
-
-* Build a specific module (e.g., em2d):
-
-  scons <module name>
-
-* To build the documentation to IMP.
-
-    scons doc
-
-   You can access the documentation by opening doc/html/index.html
-
+See https://github.com/salilab/imp/wiki/Cmake for more information on building
+with cmake.
 
 Copyright and License information
 =================================
 
-IMP is Copyright 2007-2012 IMP Inventors. The IMP Inventors are
+IMP is Copyright 2007-2013 IMP Inventors. The IMP Inventors are
 Andrej Sali, Ben Webb, Daniel Russel, Keren Lasker, Dina Schneidman,
 Javier Velazquez-Muriel, Friedrich Foerster, Elina Tjioe, Hao Fan,
 Seung Joong Kim.
@@ -44,11 +36,6 @@ http://salilab.org/imp/doc.html for more detail.
 
 Files and folders structure:
 ============================
-
-Files under the build directory (even pure Python modules) are built from sources
-elsewhere within IMP. Do not edit them there - any changes you make will be
-overwritten! You should also not add any files to these directories, as they
-will be deleted.
 
 The lib directory contains Python modules (both pure Python, in the IMP
 subdirectory, and C++ extensions, as _IMP_foo.so in the top-level directory)

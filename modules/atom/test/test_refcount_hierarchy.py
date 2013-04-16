@@ -3,7 +3,7 @@ import IMP.test
 import IMP.core
 import IMP.atom
 
-class DecoratorTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def _test_simple(self):
         """Check that hierarchies don't have circular ref counts """
         # make sure internal things are created
@@ -42,7 +42,7 @@ class DecoratorTests(IMP.test.TestCase):
         h= IMP.atom.read_pdb(self.get_input_file_name("mini.pdb"), m)
         del m
         del h
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         refcnt = IMP.test.RefCountChecker(self)
         m= IMP.Model()
         print "reading"

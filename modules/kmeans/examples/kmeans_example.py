@@ -1,3 +1,6 @@
+## \example kmeans/kmeans_example.py
+## Create a set and points and cluster it, printing the resulting cluster centers
+
 import IMP
 from IMP.kmeans import KMeans
 

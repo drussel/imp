@@ -27,14 +27,14 @@
 
 IMPEXAMPLE_BEGIN_NAMESPACE
 
-core::Mover* create_serial_mover(const ParticlesTemp &ps) {
-  core::Movers movers;
+core::MonteCarloMover* create_serial_mover(const ParticlesTemp &ps) {
+  core::MonteCarloMovers movers;
   for (unsigned int i=0; i< ps.size(); ++i) {
     double scale= core::XYZR(ps[i]).get_radius();
     movers.push_back(new core::BallMover(ParticlesTemp(1, ps[i]),
                                          scale*2));
   }
-  IMP_NEW(core::SerialMover, sm, (get_as<core::MoversTemp>(movers)));
+  IMP_NEW(core::SerialMover, sm, (get_as<core::MonteCarloMoversTemp>(movers)));
   return sm.release();
 }
 
@@ -87,7 +87,7 @@ void optimize_balls(const ParticlesTemp &ps,
     // make pointer vector
   }
 
-  IMP_LOG(PROGRESS, "Performing initial optimization" << std::endl);
+  IMP_LOG_PROGRESS( "Performing initial optimization" << std::endl);
   {
     boost::ptr_vector<ScopedSetFloatAttribute> attrs;
     for (unsigned int j=0; j< attrs.size(); ++j) {
@@ -101,7 +101,7 @@ void optimize_balls(const ParticlesTemp &ps,
   for (int i=0; i< 11; ++i) {
     boost::ptr_vector<ScopedSetFloatAttribute> attrs;
     double factor=.1*i;
-    IMP_LOG(PROGRESS, "Optimizing with radii at " << factor << " of full"
+    IMP_LOG_PROGRESS( "Optimizing with radii at " << factor << " of full"
             << std::endl);
     for (unsigned int j=0; j< ps.size(); ++j) {
       attrs.push_back( new ScopedSetFloatAttribute(ps[j],
@@ -115,7 +115,7 @@ void optimize_balls(const ParticlesTemp &ps,
       mc->set_kt(100.0/(3*j+1));
       mc->optimize(ps.size()*(j+1)*100);
       double e=cg->optimize(10);
-      IMP_LOG(PROGRESS, "Energy is " << e << std::endl);
+      IMP_LOG_PROGRESS( "Energy is " << e << std::endl);
       if (e < .000001) break;
     }
   }

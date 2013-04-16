@@ -1,7 +1,10 @@
+## \example em/fit_restraint.py
+## A simple example showing how to set up a fit restraint. The number of spheres and resolution are randomly chosen and so should not be considered significant.
+
 import IMP.em
 import IMP.core
 import IMP.atom
-IMP.set_log_level(IMP.SILENT)
+IMP.base.set_log_level(IMP.base.SILENT)
 m= IMP.Model()
 #1. setup the input protein
 ##1.1 select a selector.

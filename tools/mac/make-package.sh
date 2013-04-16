@@ -51,7 +51,7 @@ fi
 
 # Make sure that DESTDIR/PREFIX points to an IMP installation
 # (libraries and binaries)
-if [ ! -f ${DESTDIR}/${PREFIX}/lib/libimp.dylib ]; then
+if [ ! -f ${DESTDIR}/${PREFIX}/lib/libimp_kernel.dylib ]; then
   echo "Could not find IMP libraries in ${DESTDIR}/${PREFIX}/lib/"
   exit 1
 fi
@@ -61,19 +61,20 @@ if [ ! -f ${DESTDIR}/${PREFIX}/bin/foxs ]; then
   exit 1
 fi
 
-# Remove example/scratch module and example application/system/dependency
+# Remove scratch module and example application/system/dependency
 # (if installed)
 pydir=${DESTDIR}/${PREFIX}/lib/IMP-python
 rm -rf ${DESTDIR}/${PREFIX}/bin/example \
-       ${DESTDIR}/${PREFIX}/lib/libimp_example.* \
        ${DESTDIR}/${PREFIX}/lib/libimp_example_system* \
        ${DESTDIR}/${PREFIX}/lib/libimp_scratch.* \
        ${DESTDIR}/${PREFIX}/lib/libexample* \
        ${DESTDIR}/${PREFIX}/include/example* \
        ${pydir}/IMP/scratch ${pydir}/_IMP_scratch.so \
-       ${pydir}/IMP/example ${pydir}/_IMP_example.so \
        ${pydir}/IMP/example_system_local \
        ${pydir}/_IMP_example_system_local.so
+
+# Remove any .svn directories
+rm -rf `find ${DESTDIR} -name .svn`
 
 echo "Making IMP.pth to add IMP Python modules to the Python path..."
 for PYTHON in ${PYTHONS}; do
@@ -82,7 +83,7 @@ for PYTHON in ${PYTHONS}; do
 done
 
 # Determine current library install name path
-LIBNAMEPATH=$( dirname `otool -L ${DESTDIR}/${PREFIX}/lib/libimp.dylib |grep libimp_compat|cut -d\( -f 1` )
+LIBNAMEPATH=$( dirname `otool -L ${DESTDIR}/${PREFIX}/lib/libimp_kernel.dylib |grep libimp_base|cut -d\( -f 1` )
 
 echo "Setting library name paths and IDs..."
 cd ${DESTDIR}/${PREFIX}/lib
@@ -142,9 +143,9 @@ if [ "${TARGET_OSX_VER}" = "10.6" ]; then
                 /usr/local/lib/libopencv_imgproc.2.4.dylib \
                 /usr/local/lib/libjpeg.8.dylib \
                 /usr/local/lib/libtiff.5.dylib \
-                /usr/local/lib/libprotobuf.7.dylib \
+                /usr/local/lib/libprotobuf.8.dylib \
                 /usr/local/lib/libTAU.1.dylib \
-                /usr/local/lib/libavrocpp.1.7.2.0.dylib \
+                /usr/local/lib/libavrocpp.1.7.3.0.dylib \
                 /usr/local/lib/libCGAL.9.dylib \
                 /usr/local/lib/libgmp.10.dylib \
                 /usr/local/lib/libgmpxx.4.dylib \

@@ -12,7 +12,7 @@ def _make_test_decorator(m):
     return IMP.atom.LennardJones.setup_particle(p, 0.5)
 
 
-class LennardJonesDecoratorTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test the LennardJones decorator"""
 
     def test_create(self):
@@ -26,8 +26,8 @@ class LennardJonesDecoratorTests(IMP.test.TestCase):
         IMP.core.XYZR.setup_particle(p, s)
         IMP.atom.LennardJones.setup_particle(p, 0.5)
         p = IMP.Particle(m)
-        if IMP.get_check_level() != IMP.NONE:
-            self.assertRaises(IMP.UsageException,
+        if IMP.base.get_check_level() != IMP.base.NONE:
+            self.assertRaises(IMP.base.UsageException,
                               IMP.atom.LennardJones.setup_particle, p, 0.5)
 
     def test_get_set(self):

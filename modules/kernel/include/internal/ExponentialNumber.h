@@ -17,7 +17,7 @@
 #include <iomanip>
 #include <limits>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 namespace internal
 {
@@ -44,7 +44,7 @@ class ExponentialNumber
   void copy_from(ExponentialNumber<OEXP> o) {
     const int diff = OEXP-EXP;
     v_=o.v_;
-    float factor= std::pow(10.0, static_cast<double>(diff));
+    double factor= std::pow(10.0, static_cast<double>(diff));
     v_*=factor;
   }
   bool is_default() const {
@@ -129,6 +129,6 @@ inline std::ostream &operator<<(std::ostream &out, ExponentialNumber<E> o)
 
 } // namespace internal
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_EXPONENTIAL_NUMBER_H */

@@ -6,8 +6,8 @@ import IMP.algebra
 import random
 
 class LogRestraint(IMP.Restraint):
-    def __init__(self, ps):
-        IMP.Restraint.__init__(self)
+    def __init__(self, m, ps):
+        IMP.Restraint.__init__(self, m)
         self.count=0
         self.ps=ps
     def unprotected_evaluate(self, da):
@@ -23,13 +23,13 @@ class LogRestraint(IMP.Restraint):
         return
 
 
-class DOMINOTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def test_global_min1(self):
         """Test caching of restraint scores"""
         m= IMP.Model()
         p= IMP.Particle(m)
         IMP.core.XYZ.setup_particle(p)
-        lr= LogRestraint([p])
+        lr= LogRestraint(m, [p])
         lr.set_maximum_score(0)
         m.add_restraint(lr)
         pst= IMP.domino.ParticleStatesTable()
@@ -37,7 +37,7 @@ class DOMINOTests(IMP.test.TestCase):
         pst.set_particle_states(p, s)
         rft= IMP.domino.RestraintScoreSubsetFilterTable(m, pst)
         f= rft.get_subset_filter(IMP.domino.Subset([p]),[])
-        IMP.set_check_level(IMP.NONE)
+        IMP.base.set_check_level(IMP.base.NONE)
         lr.reset()
         f.get_is_ok(IMP.domino.Assignment([0]))
         self.assertEqual(lr.count, 1)
@@ -49,7 +49,7 @@ class DOMINOTests(IMP.test.TestCase):
         m= IMP.Model()
         p= IMP.Particle(m)
         IMP.core.XYZ.setup_particle(p)
-        lr= LogRestraint([p])
+        lr= LogRestraint(m, [p])
         lr.set_maximum_score(0)
         m.add_restraint(lr)
         pst= IMP.domino.ParticleStatesTable()
@@ -69,7 +69,7 @@ class DOMINOTests(IMP.test.TestCase):
         m= IMP.Model()
         p= IMP.Particle(m)
         IMP.core.XYZ.setup_particle(p)
-        lr= LogRestraint([p])
+        lr= LogRestraint(m, [p])
         lr.set_maximum_score(0)
         m.add_restraint(lr)
         pst= IMP.domino.ParticleStatesTable()
@@ -80,10 +80,10 @@ class DOMINOTests(IMP.test.TestCase):
         rc.add_restraints([m])
         rft= IMP.domino.RestraintScoreSubsetFilterTable(rc)
         f= rft.get_subset_filter(IMP.domino.Subset([p]),[])
-        f.set_log_level(IMP.VERBOSE)
-        IMP.set_log_level(IMP.VERBOSE)
+        f.set_log_level(IMP.base.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         # turn off checks to avoid restraint re-evals
-        IMP.set_check_level(IMP.NONE)
+        IMP.base.set_check_level(IMP.base.NONE)
         lr.reset()
         f.get_is_ok(IMP.domino.Assignment([0]))
         f.get_is_ok(IMP.domino.Assignment([0]))

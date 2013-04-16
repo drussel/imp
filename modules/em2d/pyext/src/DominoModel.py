@@ -143,7 +143,6 @@ class DominoModel:
             @param weight Weight of the restraint
             @param stddev Standard deviation used to approximate the
                 HarmonicUpperBound function to a Gaussian
-            @param restraint_name
             @param max_score See help for add_restraint(). If none is given,
             the maximum score is set to allow a maximum distance of 10 Angstrom
             greater than the parameter "distance".
@@ -521,7 +520,7 @@ class DominoModel:
                               "to setup the sampler")
         log.info("Domino sampler")
         self.sampler = domino.DominoSampler(self.model, self.rb_states_table)
-        self.sampler.set_log_level(IMP.TERSE)
+        self.sampler.set_log_level(IMP.base.TERSE)
         self.sampler.set_merge_tree(self.merge_tree)
         self.add_exclusion_filter_table()
         self.add_restraint_score_filter_table()
@@ -658,8 +657,8 @@ class DominoModel:
             @param rname Name for the restraint
             @param weight Weight for the restraint
             @param max_score Maximum score for the restraint
-            @param n Number of pairs of particles used in the KClosePairScore
-                        of the connecitivity restraint
+            @param n_pairs Number of pairs of particles used in the
+                        KClosePairScore of the connecitivity restraint
             @param stddev Standard deviation used to approximate the
                                 HarmonicUpperBound function to a Gaussian
         """
@@ -686,7 +685,7 @@ class DominoModel:
             @param pixel_size - pixel size in the images
             @param resolution - resolution used to downsample the projections
                     of the model when projecting
-            @param weight. Weight of the restraint
+            @param weight Weight of the restraint
             @param max_score - Maximum value tolerated for the restraint
             @param n_projections - Number of projections to generate
                     when projecting the model to do the coarse alignments
@@ -1057,7 +1056,6 @@ def measure_model(assembly, native_assembly, rbs, native_rbs):
 def get_coordinates(rigid_bodies):
     """
         Return a list of the coordinates of all the members of the rigid bodies
-        @param
     """
     if len(rigid_bodies) == 0:
         raise ValueError("get_coordinates: There are not rigid bodies to get coordinates from")

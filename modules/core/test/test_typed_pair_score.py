@@ -5,7 +5,7 @@ import StringIO
 
 typekey = IMP.IntKey('mytype')
 
-class TypedPairScoreTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Class to test TypedPairScore"""
 
     def _make_particles(self, m, types):
@@ -18,7 +18,7 @@ class TypedPairScoreTests(IMP.test.TestCase):
     def test_evaluate(self):
         """Check TypedPairScore::evaluate()"""
         ps = IMP.core.TypedPairScore(typekey)
-        cps = IMP._ConstPairScore(5)
+        cps = IMP.kernel._ConstPairScore(5)
         ps.set_pair_score(cps, 0, 1)
         # Keep Python reference to the model so that the particles
         # aren't destroyed

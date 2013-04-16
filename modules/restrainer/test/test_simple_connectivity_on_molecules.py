@@ -4,7 +4,7 @@ import IMP.test
 import IMP.core
 import IMP.restrainer
 
-class SimpleConnectivityTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Class to test simple connectivity restraint on molecules"""
 
     def setUp(self):
@@ -30,7 +30,7 @@ class SimpleConnectivityTests(IMP.test.TestCase):
            All particles in a single protein should be connected, and all
            proteins should be connected, either directly or indirectly
            through other proteins."""
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         # add connectivity restraints
 
         sc= IMP.restrainer.create_simple_connectivity_on_molecules(self.mhs)

@@ -8,14 +8,14 @@
 #ifndef IMPKERNEL_INTERNAL_GRAPH_UTILITY_H
 #define IMPKERNEL_INTERNAL_GRAPH_UTILITY_H
 
-#include "../kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "../Particle.h"
 #include "../Decorator.h"
 #include <IMP/base/internal/graph_utility.h>
 
-IMP_BEGIN_INTERNAL_NAMESPACE
+IMPKERNEL_BEGIN_INTERNAL_NAMESPACE
 
-struct IMPEXPORT AncestorException{
+struct IMPKERNELEXPORT AncestorException{
   base::Object *o;
   AncestorException(base::Object *oi): o(oi){};
   virtual ~AncestorException();
@@ -64,12 +64,12 @@ inline bool get_has_ancestor(const G &g,
     boost::depth_first_visit(rg, v, av, color);
     return false;
   } catch (AncestorException e) {
-    /*IMP_LOG(VERBOSE, "Vertex has ancestor \"" << e.o->get_name()
+    /*IMP_LOG_VERBOSE( "Vertex has ancestor \"" << e.o->get_name()
       << "\"" << std::endl);*/
     return true;
   }
 }
 
-IMP_END_INTERNAL_NAMESPACE
+IMPKERNEL_END_INTERNAL_NAMESPACE
 
 #endif  /* IMPKERNEL_INTERNAL_GRAPH_UTILITY_H */

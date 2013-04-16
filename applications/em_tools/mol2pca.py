@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import IMP.em
 
 def main():
-    IMP.set_log_level(IMP.SILENT)
+    IMP.base.set_log_level(IMP.base.SILENT)
     usage = """%prog [options] <in_protein> <out_pca.cmm>
 
 Calculates the protein principal components and writes them in cmm format.

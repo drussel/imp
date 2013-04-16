@@ -359,7 +359,7 @@ void apply_diffusion_filter(const cv::Mat &m,
 void do_segmentation(const cv::Mat &m,
                      cv::Mat &result,
                      const SegmentationParameters &params) {
-  IMP_LOG(VERBOSE,"Segmenting image" << std::endl);
+  IMP_LOG_VERBOSE("Segmenting image" << std::endl);
   cv::Mat temp1,temp2; // to store doubles
   cv::Mat aux,aux2; // to store floats
   m.copyTo(temp1);
@@ -449,7 +449,7 @@ double get_mean(const cv::Mat &mat, const cvIntMat &mask) {
     }
   }
   mean /= pixels;
-  IMP_LOG(TERSE, "Mean within mask " << mean);
+  IMP_LOG_TERSE( "Mean within mask " << mean);
 
   return mean;
 }
@@ -492,14 +492,14 @@ void apply_variance_filter(const cv::Mat &input,
 //  cv::boxFilter(input, filtered,input.depth(),
 //                ksize,anchor,true,cv::BORDER_WRAP);
   // Get the squared means
- IMP_LOG(VERBOSE,"Getting squared means" << std::endl);
+ IMP_LOG_VERBOSE("Getting squared means" << std::endl);
 
   cv::Mat means;
   cv::boxFilter(input, means,input.depth(),ksize,anchor,true);
   cv::Mat squared_means = means.mul(means);
 
   // Get the the means of squares
-  IMP_LOG(VERBOSE,"Getting means of the squares" << std::endl );
+  IMP_LOG_VERBOSE("Getting means of the squares" << std::endl );
 
   cv::Mat squares = input.mul(input);
   // make filtered contain the means of the squares
@@ -507,7 +507,7 @@ void apply_variance_filter(const cv::Mat &input,
   // Variance
   filtered = filtered - squared_means;
 
-  IMP_LOG(VERBOSE,
+  IMP_LOG_VERBOSE(
           "Adjusting variance for numerical instability " << std::endl);
   for (cvDoubleMatIterator it=filtered.begin<double>();
                                     it!=filtered.end<double>();++it) {
@@ -515,11 +515,12 @@ void apply_variance_filter(const cv::Mat &input,
   }
 }
 
-IMP_GCC_DISABLE_WARNING("-Wuninitialized")
+IMP_GCC_PUSH_POP(diagnostic push)
+IMP_GCC_PRAGMA(diagnostic ignored "-Wuninitialized")
 void add_noise(cv::Mat &v,
                double op1,double op2, const String &mode, double /*df*/)
 {
-  IMP_LOG(TERSE, "Adding noise: mean " << op1
+  IMP_LOG_TERSE( "Adding noise: mean " << op1
           << " Stddev " << op2 << std::endl);
   // Generator
   typedef boost::mt19937 base_generator_type;
@@ -551,6 +552,7 @@ void add_noise(cv::Mat &v,
     IMP_THROW("Add_noise: Mode " + mode + " not supported.",ValueException);
   }
 }
+IMP_GCC_PUSH_POP(diagnostic pop)
 
 
 void do_resample_polar(const cv::Mat &input, cv::Mat &resampled,
@@ -575,17 +577,27 @@ void do_resample_polar(const cv::Mat &input, cv::Mat &resampled,
 }
 
 
-
-
 void do_normalize(cv::Mat &m) {
   cv::Scalar mean,stddev;
-  cv::meanStdDev(m,mean,stddev);
-  IMP_LOG(VERBOSE, "Matrix of mean: " << mean[0] << " stddev "
+  my_meanStdDev(m,mean,stddev); //cv::meanStdDev(m,mean,stddev);
+  IMP_LOG_VERBOSE( "Matrix of mean: " << mean[0] << " stddev "
                   << stddev[0] << " normalized. " << std::endl);
   m = m - mean[0];
   m = m / stddev[0];
 }
 
+void my_meanStdDev(const cv::Mat &m,cv::Scalar &mean,cv::Scalar &stddev) {
+//#if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 4
+//  cv::meanStdDev(m,mean,stddev);
+//#endif
+//#if CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION > 3
+  mean = cv::mean(m);
+  cv::Mat square;
+  cv::pow(m - mean[0],2,square);
+  cv::Scalar sum = cv::sum(square);
+  stddev[0] = std::sqrt(sum[0]/(m.rows*m.cols));
+// #endif
+}
 
 //! Transform a matrix (the translation is interpreted as cols,rows)
 void get_transformed(const cv::Mat &input,cv::Mat &transformed,
@@ -596,7 +608,7 @@ void get_transformed(const cv::Mat &input,cv::Mat &transformed,
   // Careful here. OpenCV convention interprets a translation as col,row
   rot_mat.at<double>(0,2) += T.get_translation()[0];
   rot_mat.at<double>(1,2) += T.get_translation()[1];
-  cv::Size dsize(input.rows,input.cols);
+  cv::Size dsize(input.cols,input.rows);
   // WarpAffine calls remap, that does not work with doubles (CV_64FC1).
   // Use floats CV_32FC1
   cv::Mat temp,temp2;
@@ -735,11 +747,11 @@ MatchTemplateResults get_best_template_matches(const cv::Mat &m,
   std::list<cvPixel>::const_iterator itp = locations.begin();
   std::list<float>::const_iterator itv = max_values.begin();
   MatchTemplateResults best_locations;
-  IMP_LOG(VERBOSE,"Best template locations" << std::endl);
+  IMP_LOG_VERBOSE("Best template locations" << std::endl);
 
   // int l = 0;
   for (; itp != locations.end(); ++itp, ++itv) {
-    IMP_LOG(VERBOSE, "pixel (" << itp->y << "," << itp->x
+    IMP_LOG_VERBOSE( "pixel (" << itp->y << "," << itp->x
                                         << ") = " << *itv << std::endl);
     MatchTemplateResult info( IntPair(itp->y, itp->x), *itv);
     best_locations.push_back( info  );

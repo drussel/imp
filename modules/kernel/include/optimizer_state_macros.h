@@ -1,5 +1,5 @@
 /**
- *  \file IMP/optimizer_state_macros.h
+ *  \file IMP/kernel/optimizer_state_macros.h
  *  \brief Various general useful macros for IMP.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -8,7 +8,7 @@
 
 #ifndef IMPKERNEL_OPTIMIZER_STATE_MACROS_H
 #define IMPKERNEL_OPTIMIZER_STATE_MACROS_H
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include <IMP/base/value_macros.h>
 #include <IMP/base/utility_macros.h>
 #include "internal/utility.h"
@@ -60,15 +60,14 @@ public:                                                                 \
   }                                                                     \
   IMP_OBJECT(Name);                                                     \
   private:                                                              \
-  ::IMP::internal::Counter skip_, call_number_, update_number_          \
+  ::IMP::kernel::internal::Counter skip_, call_number_, update_number_  \
 
 
 
 
 //! Define a pair of classes to handle saving the model
-/** This macro defines two classes:
+/** This macro defines a class:
  - NameOptimizerState
- - NameFailureHandler
  to handling saving the model in the specified way during
  optimization and on failures, respectively.
  \param[in] Name The name to prefix the class names
@@ -80,13 +79,11 @@ public:                                                                 \
             go in the class bodies.
  \param[in] save_action The action to take to perform the save. The
             name to save to is know as file_name
-
- The headers "IMP/OptimizerState.h", "IMP/FailureHandler.h", "boost/format.hpp"
- and "IMP/internal/utility.h" must be included.
  */
 #define IMP_MODEL_SAVE(Name, args, vars, constr, functs, save_action)   \
   class Name##OptimizerState: public OptimizerState {                   \
-    ::IMP::internal::Counter skip_steps_, call_number_, update_number_; \
+    ::IMP::kernel::internal::Counter skip_steps_, call_number_,         \
+        update_number_;                                                 \
     std::string file_name_;                                             \
     vars                                                                \
     IMP_IMPLEMENT_INLINE(virtual void update(), {                       \
@@ -130,26 +127,7 @@ void write(std::string file_name, unsigned int call=0,                  \
 IMP_IMPLEMENT(void do_update(unsigned int call_number));                \
 IMP_OBJECT_METHODS(Name##OptimizerState);                               \
   };                                                                    \
-IMP_OBJECTS(Name##OptimizerState, Name##OptimizerStates);               \
-/** Write to a file when a failure occurs.*/                            \
-class Name##FailureHandler: public base::FailureHandler {               \
-  std::string file_name_;                                               \
-  vars                                                                  \
-  public:                                                               \
-  Name##FailureHandler args :                                           \
-  base::FailureHandler(std::string("Writer to ")+file_name),            \
-    file_name_(file_name) {                                             \
-    constr}                                                             \
-  functs                                                                \
-  IMP_IMPLEMENT_INLINE(void handle_failure(), {                         \
-    const std::string file_name=file_name_;                             \
-    bool append=false; unsigned int call=0;                             \
-    IMP_UNUSED(append); IMP_UNUSED(call);                               \
-    save_action                                                         \
-      });                                                               \
-  IMP_OBJECT_METHODS(Name##FailureHandler);                             \
-};                                                                      \
-IMP_OBJECTS(Name##FailureHandler, Name##FailureHandlers);
+IMP_OBJECTS(Name##OptimizerState, Name##OptimizerStates);
 
 
 #endif  /* IMPKERNEL_OPTIMIZER_STATE_MACROS_H */

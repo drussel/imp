@@ -3,14 +3,14 @@ import IMP
 import IMP.test
 import IMP.multifit
 import IMP.algebra
-class RadiusOfGyrationTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Class to test radius of gyration restraint """
 
     def test_connectivity(self):
         """Test radius of gyration restraint
            All particles should be at most radius apart"""
 
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         m = IMP.Model()
         #create particles in a box
         bb = IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(-5,-5,-5),

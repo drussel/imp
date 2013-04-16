@@ -3,22 +3,15 @@ import IMP
 import IMP.test
 import IMP.atom
 
-class ForceSwitchTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test ForceSwitch"""
 
     def test_create(self):
         """Check ForceSwitch creation"""
         s = IMP.atom.ForceSwitch(5.0, 6.0)
-        if IMP.get_check_level() != IMP.NONE:
-            self.assertRaises(IMP.UsageException, IMP.atom.ForceSwitch,
+        if IMP.base.get_check_level() != IMP.base.NONE:
+            self.assertRaises(IMP.base.UsageException, IMP.atom.ForceSwitch,
                               6.0, 5.0)
-
-    def test_methods(self):
-        """Check ForceSwitch methods"""
-        s = IMP.atom.ForceSwitch(5.0, 6.0)
-        out = StringIO.StringIO()
-        s.show(out)
-        self.assertIn('ForceSwitch', out.getvalue())
 
     def test_value(self):
         """Check value of ForceSwitch"""

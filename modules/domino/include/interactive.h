@@ -23,7 +23,7 @@
 #include <IMP/statistics/metric_clustering.h>
 
 #ifdef IMP_DOMINO_USE_IMP_RMF
-#include <RMF/HDF5Group.h>
+#include <RMF/HDF5/Group.h>
 #endif
 
 
@@ -38,7 +38,6 @@ IMPDOMINOEXPORT void load_leaf_assignments(const Subset& subset,
   //! Fill in assignments for an internal node
   /** The passed assignments, the ordering for the children is that of
       the node indexes for the children.
-      \unstable{load_merged_assignments}
   */
 IMPDOMINOEXPORT void load_merged_assignments(const Subset &first_subset,
                                              AssignmentContainer* first,
@@ -46,13 +45,28 @@ IMPDOMINOEXPORT void load_merged_assignments(const Subset &first_subset,
                                              AssignmentContainer* second,
                                              const SubsetFilterTablesTemp
                                              &filters,
-                                             AssignmentContainer* ret,
-                                             double max_error=0,
-                                             ParticleStatesTable *pst=nullptr,
-                                             const statistics::Metrics &metrics
-                                             = statistics::Metrics(),
-                                             unsigned int max_states
-                                             =std::numeric_limits<int>::max());
+                                             AssignmentContainer* ret);
+
+ //! Sample from the merged assignments.
+  /** The passed assignments, the ordering for the children is that of
+      the node indexes for the children.
+
+      It will try maximum_tries times to merge an assignment from the first
+      set with a randomly chosen assignment from the second. Note that duplicate
+      solutions may be present in the output and the output will never be
+      guaranteed to be complete.
+
+      \unstable{load_sampled_merged_assignments}
+  */
+IMPDOMINOEXPORT void
+load_merged_assignments_random_order(const Subset &first_subset,
+                                     AssignmentContainer* first,
+                                     const Subset &second_subset,
+                                     AssignmentContainer* second,
+                                     const SubsetFilterTablesTemp
+                                     &filters,
+                                     unsigned int maximum_tries,
+                                     AssignmentContainer* ret);
 
 
 IMPDOMINO_END_NAMESPACE

@@ -22,14 +22,14 @@
 #include <IMP/statistics/metric_clustering.h>
 
 #ifdef IMP_DOMINO_USE_IMP_RMF
-#include <RMF/HDF5Group.h>
+#include <RMF/HDF5/Group.h>
 #endif
 
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 class Model;
 class Particle;
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 IMPDOMINO_BEGIN_NAMESPACE
 
@@ -144,13 +144,13 @@ inline double get_distance_if_smaller_than(const Subset &s,
     }
     d+= cur;
     if (d > square(max)) {
-      IMP_LOG(VERBOSE, "Returning " << std::sqrt(d) << " > " << max
+      IMP_LOG_VERBOSE( "Returning " << std::sqrt(d) << " > " << max
               << " for " << a << " and " << b
               << std::endl);
       return std::sqrt(d);
     }
   }
-  IMP_LOG(VERBOSE, "Distance between " << a << " and "
+  IMP_LOG_VERBOSE( "Distance between " << a << " and "
           << b << " is " << std::sqrt(d) << std::endl);
   return std::sqrt(d);
 }

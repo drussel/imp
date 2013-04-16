@@ -1,5 +1,5 @@
 /**
- *  \file IMP/declare_Particle.h
+ *  \file IMP/kernel/declare_Particle.h
  *  \brief Classes to handle individual model particles.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -9,7 +9,7 @@
 #ifndef IMPKERNEL_DECLARE_PARTICLE_H
 #define IMPKERNEL_DECLARE_PARTICLE_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "base_types.h"
 #include <IMP/base/Object.h>
 #include <IMP/base/utility.h>
@@ -66,7 +66,7 @@
 
 
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 class Model;
 class Changed;
@@ -76,7 +76,7 @@ class SaveOptimizeds;
 /** At this point a Particle should only be considered as a placeholder for the
     ParticleIndex, accessed through the get_index() method.
 */
-class IMPEXPORT Particle : public ModelObject
+class IMPKERNELEXPORT Particle : public ModelObject
 {
  private:
   // doxygen produces funny docs for these things
@@ -126,12 +126,12 @@ class IMPEXPORT Particle : public ModelObject
   /** \name Particle attributes
       @{
   */
-  void add_attribute(ParticleKey k, Particle *v);
-  bool has_attribute(ParticleKey k);
-  void set_value(ParticleKey k, Particle *v);
-  Particle *get_value(ParticleKey k) const;
-  void remove_attribute(ParticleKey k);
-  ParticleKeys get_particle_keys() const;
+  void add_attribute(ParticleIndexKey k, Particle *v);
+  bool has_attribute(ParticleIndexKey k);
+  void set_value(ParticleIndexKey k, Particle *v);
+  Particle *get_value(ParticleIndexKey k) const;
+  void remove_attribute(ParticleIndexKey k);
+  ParticleIndexKeys get_particle_keys() const;
   /** @} */
 
   //! Get whether the particle is active.
@@ -152,21 +152,19 @@ class IMPEXPORT Particle : public ModelObject
 
   ParticleIndex get_index() const;
 
-  virtual ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE {
-    return ModelObjectsTemp();
-  }
-  virtual ModelObjectsTemp do_get_outputs() const IMP_OVERRIDE {
-    return ModelObjectsTemp();
-  }
-  virtual void
-    do_update_dependencies(const DependencyGraph &,
-                           const DependencyGraphVertexIndex &) IMP_OVERRIDE {
-  }
 #if !defined(IMP_DOXYGEN)
   void clear_caches();
 #endif
+ protected:
+  virtual ModelObjectsTemp do_get_inputs() const IMP_OVERRIDE IMP_FINAL {
+    return ModelObjectsTemp();
+  }
+  virtual ModelObjectsTemp do_get_outputs() const IMP_OVERRIDE IMP_FINAL {
+    return ModelObjectsTemp();
+  }
+  virtual void do_update_dependencies() IMP_OVERRIDE IMP_FINAL {}
 };
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_DECLARE_PARTICLE_H */

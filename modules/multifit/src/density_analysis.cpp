@@ -43,6 +43,7 @@ public:
   //! the edge betweenness centrality (via brandes_betweenness_centrality)
   //! and removes the edge with the maximum betweenness centrality.
   IntsList calculate_communities(int num_clusters);
+#if 0
   algebra::Vector3Ds get_centers() {
     algebra::Vector3Ds centers;
     DGVertex v;
@@ -56,6 +57,7 @@ public:
     }
     return centers;
   }
+#endif
   IntsList calculate_connected_components();
  protected:
   Pointer<em::DensityMap> dmap_;
@@ -66,7 +68,7 @@ public:
   boost::property_map<DensityGraph, boost::vertex_index_t>::type node_index_;
   typedef boost::disjoint_sets<int*, int*> DS;
   /*The function object that indicates termination of the algorithm.
-    It must be a ternary function object thats accepts the maximum centrality,
+    It must be a ternary function object that accepts the maximum centrality,
     the descriptor of the edge that will be removed, and the graph g.
   */
   struct Done {
@@ -149,9 +151,9 @@ void calc_local_bounding_box(
 
 void DensitySegmentationByCommunities::build_density_graph(float edge_threshold)
 {
-  typedef compatibility::map<long, DGVertex> NMAP;
+  typedef base::map<long, DGVertex> NMAP;
   NMAP voxel2node;
-  typedef compatibility::map<DGVertex,long> NMAP2;
+  typedef base::map<DGVertex,long> NMAP2;
   NMAP2 node2voxel;
   int nx=dmap_->get_header()->get_nx();
   int ny=dmap_->get_header()->get_ny();
@@ -219,9 +221,9 @@ void DensitySegmentationByCommunities::build_density_graph(float edge_threshold)
             }
           }}}
   }
-  IMP_LOG(TERSE,"Graph with "<<boost::num_vertices(g_)
+  IMP_LOG_TERSE("Graph with "<<boost::num_vertices(g_)
           <<" vertices and " << boost::num_edges(g_)<<" edges"<< std::endl);
-  IMP_LOG(TERSE,"dens t:"<<dens_t_<<std::endl);
+  IMP_LOG_TERSE("dens t:"<<dens_t_<<std::endl);
 }
 
 class clustering_threshold : public boost::bc_clustering_threshold<double>
@@ -236,7 +238,7 @@ class clustering_threshold : public boost::bc_clustering_threshold<double>
   bool operator()(double max_centrality, DGEdge e,
                   const DensityGraph& g)
   {
-    IMP_LOG(TERSE,"Iter: " << iter << " Max Centrality: "
+    IMP_LOG_TERSE("Iter: " << iter << " Max Centrality: "
             << (max_centrality / dividend) << std::endl);
     ++iter;
     return inherited::operator()(max_centrality, e, g);
@@ -252,7 +254,7 @@ IntsList
   std::vector<int> component(num_vertices(g_));
   int num = boost::connected_components(g_, &component[0]);
   //get the largest connected components
-  compatibility::map<int,int> max_comp_list;
+  base::map<int,int> max_comp_list;
   for(int i=0;i<num;i++){
     max_comp_list[i]=0;}
   for(int i=0;i<num;i++){
@@ -266,7 +268,7 @@ IntsList
   for(int i=0;i<(int)component.size();i++) {
     if (component[i] != max_comp) not_first_comp_indexes.push_back(i);
   }
-  IMP_LOG(VERBOSE,"removing vertices, starting with "
+  IMP_LOG_VERBOSE("removing vertices, starting with "
           <<boost::num_vertices(g_)<<std::endl);
   boost::graph_traits<DensityGraph>::vertex_iterator vi, vi_end, next;
   boost::tie(vi, vi_end) = boost::vertices(g_);
@@ -283,7 +285,7 @@ IntsList
       boost::remove_edge(ei.first,g_);
     }
   }
-  IMP_LOG(VERBOSE,"rank0 nodes:"<<rank0_nodes
+  IMP_LOG_VERBOSE("rank0 nodes:"<<rank0_nodes
           <<" not in first cc:"<<not_first_comp_indexes.size()<<std::endl);
   boost::property_map<DensityGraph, boost::edge_centrality_t>::type m
     = boost::get(boost::edge_centrality, g_);
@@ -291,19 +293,19 @@ IntsList
   boost::betweenness_centrality_clustering(
                  g_, Done(num_clusters+rank0_nodes, n),
                  m);//we add all the new rank0 nodes
-  IMP_LOG(TERSE,"preparing output"<<std::endl);
+  IMP_LOG_TERSE("preparing output"<<std::endl);
   std::vector<int> rank(n), parent(n);
   DS ds(&rank[0], &parent[0]);
   boost::initialize_incremental_components(g_, ds);
   boost::incremental_components(g_, ds);
-  compatibility::map<int, Ints> sets;
-  //voxel indexes correspoding to node indexes for each cluster
+  base::map<int, Ints> sets;
+  //voxel indexes corresponding to node indexes for each cluster
   for (unsigned int i=0; i< boost::num_vertices(g_); ++i) {
     int s= ds.find_set(i);
     sets[s].push_back(node2voxel_ind_[node_index_[i]]);
   }
   IntsList clusters;
-  for (compatibility::map<int, Ints>::const_iterator it
+  for (base::map<int, Ints>::const_iterator it
          = sets.begin(); it != sets.end(); ++it) {
     clusters.push_back(it->second);
   }

@@ -2,7 +2,7 @@
  *  \file RMF/FrameHandle.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,13 +10,12 @@
 #define RMF_FRAME_HANDLE_H
 
 #include <RMF/config.h>
-#include "HDF5Group.h"
 #include "internal/SharedData.h"
 #include "types.h"
 #include "FrameID.h"
 #include "FrameConstHandle.h"
 
-
+RMF_ENABLE_WARNINGS
 
 #define RMF_HDF5_FRAME_KEY_TYPE_METHODS(lcname, UCName, PassValue, ReturnValue, \
                                         PassValues, ReturnValues)               \
@@ -27,11 +26,10 @@
     get_shared_data()->set_value_frame(get_frame_id(), \
                                        k, v);          \
   }
-namespace RMF {
 
-class FrameHandle;
-// for children
-typedef vector<FrameHandle> FrameHandles;
+RMF_VECTOR_DECL(FrameHandle);
+
+namespace RMF {
 
 class FileHandle;
 
@@ -74,5 +72,7 @@ public:
   FileHandle get_file() const;
 };
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_FRAME_HANDLE_H */

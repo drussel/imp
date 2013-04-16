@@ -2,7 +2,7 @@
  *  \file RMF/Decorator.h
  *  \brief Helper functions for manipulating RMF files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,6 +11,9 @@
 
 #include <RMF/config.h>
 #include "infrastructure_macros.h"
+
+RMF_ENABLE_WARNINGS
+
 namespace RMF {
 
 /** Decorators in RMF provide high level routines to manipulate attributes
@@ -55,5 +58,7 @@ public:
 };
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_DECORATOR_H */

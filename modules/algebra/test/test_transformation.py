@@ -3,7 +3,7 @@ import IMP.test
 import IMP.algebra
 import math,random
 
-class ConeTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def test_cone_construction(self):
         """Check difference between two transformations"""
@@ -23,8 +23,6 @@ class ConeTests(IMP.test.TestCase):
         ax.show()
         self.assertLess((ax-dbx).get_squared_magnitude(), .1)
 
-
-class Transformation2DTests(IMP.test.TestCase):
 
     def test_transformation_from_point_sets(self):
         """Check building a Transformation2D from point sets"""
@@ -88,8 +86,6 @@ class Transformation2DTests(IMP.test.TestCase):
         self.assertAlmostEqual(dist,0.0, delta=0.001)
         dist=IMP.algebra.get_distance(first_to_second.get_translation(),second_to_first.get_inverse().get_translation())
         self.assertAlmostEqual(dist,0.0, delta=0.001)
-
-class Transformation3DTests(IMP.test.TestCase):
 
     def test_build_from2D(self):
         """Check building a Transformation3D from Transformation2D"""

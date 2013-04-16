@@ -2,7 +2,7 @@
  *  \file RMF/FrameConstHandle.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,14 +10,13 @@
 #define RMF_FRAME_CONST_HANDLE_H
 
 #include <RMF/config.h>
-#include "HDF5Group.h"
 #include "internal/SharedData.h"
 #include "types.h"
 #include "FrameID.h"
 #include "constants.h"
 #include <boost/intrusive_ptr.hpp>
 
-
+RMF_ENABLE_WARNINGS
 
 #define RMF_HDF5_FRAME_CONST_KEY_TYPE_METHODS(lcname, UCName, PassValue, \
                                               ReturnValue,               \
@@ -46,12 +45,12 @@
     if (k == UCName##Key()) return false;                             \
     return !UCName##Traits::get_is_null_value(get_value_always(k));   \
   }
+
+RMF_VECTOR_DECL(FrameConstHandle);
+
 namespace RMF {
 
 class FileConstHandle;
-class FrameConstHandle;
-// for children
-typedef vector<FrameConstHandle> FrameConstHandles;
 
 //! The types of the frames.
 enum FrameType {
@@ -122,7 +121,7 @@ public:
   FrameConstHandle(): frame_(-2) {
   }
 
-  //! Return the number of child frames
+  //! Return the name of the frame
   std::string get_name() const {
     return shared_->get_frame_name(frame_);
   }
@@ -155,5 +154,7 @@ public:
 };
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_FRAME_CONST_HANDLE_H */

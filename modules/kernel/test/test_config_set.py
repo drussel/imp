@@ -10,11 +10,11 @@ ik2= IMP.IntKey("i2");
 sk0= IMP.StringKey("s0");
 sk1= IMP.StringKey("s1");
 sk2= IMP.StringKey("s2");
-pk0= IMP.ParticleKey("p0");
-pk1= IMP.ParticleKey("p1");
-pk2= IMP.ParticleKey("p2");
+pk0= IMP.ParticleIndexKey("p0");
+pk1= IMP.ParticleIndexKey("p1");
+pk2= IMP.ParticleIndexKey("p2");
 
-class ConfigSetTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test particles"""
     def _force_set(self, p, k, v):
         if p.has_attribute(k):
@@ -83,7 +83,7 @@ class ConfigSetTests(IMP.test.TestCase):
         self._force_remove(p, pk1)
         self._force_set(p, pk2, p)
     def _make_things(self):
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         print "starting"
         m= IMP.Model("config set")
         print "adding"

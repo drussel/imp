@@ -2,7 +2,7 @@
  *  \file RMF/FrameID.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -13,6 +13,10 @@
 #include "infrastructure_macros.h"
 #include <vector>
 #include <iostream>
+
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DECL(FrameID);
 
 namespace RMF {
 
@@ -41,12 +45,9 @@ public:
   RMF_COMPARISONS(FrameID);
   RMF_HASHABLE(FrameID, return i_);
 };
-#ifndef RMF_DOXYGEN
-typedef vector<FrameID> FrameIDs;
-#endif
-
-
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_FRAME_ID_H */

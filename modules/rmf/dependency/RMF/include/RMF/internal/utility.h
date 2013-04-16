@@ -2,13 +2,15 @@
  *  \file compatibility/hash.h
  *  \brief Make sure that we avoid errors in specialization of boost hash
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef RMF_INTERNAL_UTILITY_H
 #define RMF_INTERNAL_UTILITY_H
 
 #include <RMF/config.h>
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 class AliasFactory;
@@ -29,5 +31,6 @@ RMFEXPORT NodeHandle add_child_alias(AliasFactory    af,
 }
 }
 
+RMF_DISABLE_WARNINGS
 
 #endif  /* RMF_INTERNAL_UTILITY_H */

@@ -12,7 +12,7 @@
 
 IMPATOM_BEGIN_NAMESPACE
 
-IMPATOMEXPORT std::pair<double,double> get_placement_score(
+std::pair<double,double> get_placement_score(
   const core::XYZs& from ,const core::XYZs& to) {
   //calculate the best fit bewteen the two placements
   algebra::Vector3Ds from_v,to_v;
@@ -172,7 +172,7 @@ void set_rotation_matrix(const algebra::Rotation3D &r,
   m[2][2]=a*a-b*b-c*c+d*d;
 }
 }
-float RMSDCalculator::get_squared_rmsd(const algebra::Transformation3D &t1,
+double RMSDCalculator::get_squared_rmsd(const algebra::Transformation3D &t1,
                                        const algebra::Transformation3D &t2){
   algebra::Rotation3D r1=t1.get_rotation();
   algebra::Rotation3D r2=t2.get_rotation();

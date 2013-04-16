@@ -2,7 +2,7 @@
  *  \file RMF/FileConstHandle.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -17,12 +17,14 @@
 #include <boost/functional/hash.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#define RMF_FILE_CATCH(extra_info)                     \
-  catch (Exception &e) {                               \
-    RMF_RETHROW(File(get_path())                       \
-                << Frame(get_current_frame().get_id()) \
-                << Operation(BOOST_CURRENT_FUNCTION)   \
-                extra_info, e);                        \
+RMF_ENABLE_WARNINGS
+
+#define RMF_FILE_CATCH(extra_info)                                      \
+  catch (Exception &e) {                                                \
+    RMF_RETHROW(File(get_path())                                        \
+                << Frame(get_current_frame().get_id().get_index())      \
+                << Operation(BOOST_CURRENT_FUNCTION)                    \
+                extra_info, e);                                         \
   }
 
 #define RMF_HDF5_ROOT_CONST_KEY_TYPE_METHODS(lcname, UCName, \
@@ -51,15 +53,11 @@
   }
 
 
+RMF_VECTOR_DECL(FileConstHandle);
 
 namespace RMF {
 
 class NodeConstHandle;
-
-#ifndef RMF_DOXYGEN
-typedef std::pair<NodeConstHandle, NodeConstHandle> BondPair;
-typedef vector<BondPair> BondPairs;
-#endif
 
 //! A handle for a read-only RMF file
 /** Use this handle to perform operations relevant to the
@@ -69,7 +67,7 @@ typedef vector<BondPair> BondPairs;
  */
 class RMFEXPORT FileConstHandle {
   void gather_ids(NodeConstHandle n, Ints &ids,
-                  vector<std::string> &paths,
+                  std::vector<std::string> &paths,
                   std::string path) const;
   friend class NodeConstHandle;
   friend class internal::SharedData;
@@ -112,7 +110,7 @@ public:
     try {
       RMF_INDEX_CHECK(i, get_number_of_frames());
       return FrameConstHandle(i, shared_.get());
-    } RMF_FILE_CATCH(<< Frame(FrameID(i)));
+    } RMF_FILE_CATCH(<< Frame(i));
   }
 
   std::string get_name() const {
@@ -143,10 +141,10 @@ public:
                      << Key(name));
   }
   template <class TypeT>
-  vector<Key<TypeT> > get_keys(Category      category_id,
+      std::vector<Key<TypeT> > get_keys(Category      category_id,
                                const Strings & names) const {
     try {
-      vector<Key<TypeT> > ret(names.size());
+      std::vector<Key<TypeT> > ret(names.size());
       for (unsigned int i = 0; i < names.size(); ++i) {
         ret[i] = get_key<TypeT>(category_id, names[i]);
         if (ret[i] == Key<TypeT>()) {
@@ -160,9 +158,9 @@ public:
   /** Get a list of all keys of the given type,
    */
   template <class TypeT>
-  vector<Key<TypeT> > get_keys(Category category) {
+      std::vector<Key<TypeT> > get_keys(Category category) {
     try {
-      if (category == Category()) return vector<Key<TypeT> >();
+      if (category == Category()) return std::vector<Key<TypeT> >();
       return internal::GenericSharedData<TypeT>
              ::get_keys(shared_.get(), category);
     } RMF_FILE_CATCH(<< Category(get_name(category)));
@@ -183,7 +181,7 @@ public:
   void set_current_frame(int frame) {
     try {
       shared_->set_current_frame(frame);
-    } RMF_FILE_CATCH(<< Frame(FrameID(frame)));
+    } RMF_FILE_CATCH(<< Frame(frame));
   }
 #endif
   /* @} */
@@ -304,8 +302,6 @@ public:
   void reload();
 };
 
-typedef vector<FileConstHandle> FileConstHandles;
-
 
 /**
    Open an RMF from a file system path in read-only mode.
@@ -343,5 +339,7 @@ RMFEXPORT Floats get_values(const NodeConstHandles            &nodes,
 
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_FILE_CONST_HANDLE_H */

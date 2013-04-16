@@ -25,7 +25,7 @@ ComponentHeader *parse_component_line(
   try {
   typedef boost::split_iterator<std::string::iterator> string_split_iterator;
   IMP_USAGE_CHECK(line.size() > 0,"no data to parse"<<std::endl);
-  IMP_LOG(VERBOSE,"going to parse:"<<line);
+  IMP_LOG_VERBOSE("going to parse:"<<line);
   std::vector<std::string> line_split;
   boost::split(line_split, line, boost::is_any_of("|"));
   IMP_USAGE_CHECK(line_split.size() == 10,
@@ -60,7 +60,7 @@ ComponentHeader *parse_component_line(
   }
   return comp.release();
   }
-  catch (IMP::base::Exception &e) {
+  catch (IMP::base::Exception &) {
     IMP_THROW("can not parse line:"<<line,IOException);
   }
 }
@@ -68,7 +68,7 @@ AssemblyHeader *parse_assembly_line(
    const std::string & config,const std::string &line) {
   typedef boost::split_iterator<std::string::iterator> string_split_iterator;
   IMP_USAGE_CHECK(line.size() > 0,"no data to parse"<<std::endl);
-  IMP_LOG(VERBOSE,"going to parse:"<<line);
+  IMP_LOG_VERBOSE("going to parse:"<<line);
   std::vector<std::string> line_split;
   boost::split(line_split, line, boost::is_any_of("|"));
   IMP_USAGE_CHECK(line_split.size() == 12,
@@ -133,18 +133,18 @@ SettingsData *read_settings(const char *filename) {
     std::vector<std::string> line_split;
     boost::split(line_split, line, boost::is_any_of("|"));
     if ((line_split.size() == 10) && (status == 0)) {//protein  line
-      IMP_LOG(VERBOSE,"parsing component line:"<<line<<std::endl);
+      IMP_LOG_VERBOSE("parsing component line:"<<line<<std::endl);
       header->add_component_header(parse_component_line(filename, line));
     }
     else if (status==0) {//map header line
       status=1;
     }
     else if (status==1){ //map line
-      IMP_LOG(VERBOSE,"parsing EM line:"<<line<<std::endl);
+      IMP_LOG_VERBOSE("parsing EM line:"<<line<<std::endl);
       header->set_assembly_header(parse_assembly_line(filename, line));
       status=2;
     }
-    else {//(status == 2)
+    else if (line.length() > 0) { // don't warn about empty lines
       IMP_WARN("the line was not parsed:"<<line
                <<"| with status:"<<status<<std::endl);
     }

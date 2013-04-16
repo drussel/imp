@@ -17,8 +17,8 @@ class TestLognormalRestraintSimple3(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = Scale.setup_particle(IMP.Particle(self.m), 2.0)
         self.mu = Nuisance.setup_particle(IMP.Particle(self.m), 1.0)
@@ -124,21 +124,21 @@ class TestLognormalRestraintSimple3(IMP.test.TestCase):
 
     def testFail(self):
         "Test failures of LognormalRestraint(3)"
-        if IMP.get_check_level() >= IMP.USAGE:
+        if IMP.base.get_check_level() >= IMP.base.USAGE:
             dummy=IMP.Particle(self.m)
-            self.assertRaises(IMP.UsageException, LognormalRestraint, dummy,
+            self.assertRaises(IMP.base.UsageException, LognormalRestraint, dummy,
                               self.all[1], self.all[2])
-            self.assertRaises(IMP.UsageException, LognormalRestraint,
+            self.assertRaises(IMP.base.UsageException, LognormalRestraint,
                               self.all[0], dummy, self.all[2])
-            self.assertRaises(IMP.UsageException, LognormalRestraint,
+            self.assertRaises(IMP.base.UsageException, LognormalRestraint,
                               self.all[0], self.all[1], dummy)
 
 class TestLognormalRestraintSimple21(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = 2.0
         self.mu = Nuisance.setup_particle(IMP.Particle(self.m), 1.0)
@@ -235,8 +235,8 @@ class TestLognormalRestraintSimple22(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = Scale.setup_particle(IMP.Particle(self.m), 2.0)
         self.mu = 1.0
@@ -334,8 +334,8 @@ class TestLognormalRestraintSimple23(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = Scale.setup_particle(IMP.Particle(self.m), 2.0)
         self.mu = Nuisance.setup_particle(IMP.Particle(self.m), 1.0)
@@ -433,8 +433,8 @@ class TestLognormalRestraintSimple11(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = Scale.setup_particle(IMP.Particle(self.m), 2.0)
         self.mu = 1.0
@@ -522,8 +522,8 @@ class TestLognormalRestraintSimple12(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = 2.0
         self.mu = Nuisance.setup_particle(IMP.Particle(self.m), 1.0)
@@ -602,8 +602,8 @@ class TestLognormalRestraintSimple13(IMP.test.TestCase):
     "simple test cases to check if LognormalRestraint works"
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.sigma = 2.0
         self.mu = 1.0

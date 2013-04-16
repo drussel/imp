@@ -4,7 +4,7 @@ import IMP.core
 import IMP.atom
 import IMP.algebra
 
-class CHARMMAtomTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test the CHARMMAtom decorator"""
 
     def test_create(self):
@@ -15,8 +15,8 @@ class CHARMMAtomTests(IMP.test.TestCase):
 
         IMP.atom.CHARMMAtom.setup_particle(p, 'CT1')
         p = IMP.Particle(m)
-        if IMP.get_check_level() != IMP.NONE:
-            self.assertRaises(IMP.UsageException,
+        if IMP.base.get_check_level() != IMP.base.NONE:
+            self.assertRaises(IMP.base.UsageException,
                               IMP.atom.CHARMMAtom.setup_particle, p, 'CT1')
 
     def test_get_set(self):

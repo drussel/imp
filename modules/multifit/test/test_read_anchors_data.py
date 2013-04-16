@@ -7,11 +7,11 @@ import IMP.restrainer
 import os
 import time
 
-class ReadProteomicsTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for a domino run on a single mapping"""
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.TERSE)
+        IMP.base.set_log_level(IMP.base.TERSE)
         self.data_file = self.get_input_file_name("anchors.input")
     def test_run(self):
         """Check correct reading of anchors data file"""

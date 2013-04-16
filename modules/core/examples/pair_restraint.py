@@ -1,3 +1,7 @@
+## \example core/pair_restraint.py
+## Restrain the distance between a pair of particles.
+##
+
 import IMP.example
 (m,c)=IMP.example.create_model_and_particles()
 

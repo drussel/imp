@@ -6,26 +6,26 @@
  *
  */
 
-#include "IMP/Model.h"
-#include "IMP/Particle.h"
+#include "IMP/kernel/Model.h"
+#include "IMP/kernel/Particle.h"
 #include <IMP/base/log.h>
-#include "IMP/Restraint.h"
-#include "IMP/DerivativeAccumulator.h"
-#include "IMP/ScoreState.h"
-#include "IMP/generic.h"
-#include "IMP/internal/input_output_exception.h"
-#include "IMP/ScoringFunction.h"
-#include "IMP/internal/evaluate_utility.h"
+#include "IMP/kernel/Restraint.h"
+#include "IMP/kernel/DerivativeAccumulator.h"
+#include "IMP/kernel/ScoreState.h"
+#include "IMP/kernel/generic.h"
+#include "IMP/kernel/internal/input_output_exception.h"
+#include "IMP/kernel/ScoringFunction.h"
+#include "IMP/kernel/internal/evaluate_utility.h"
 #include <IMP/base/CreateLogContext.h>
 #include <IMP/base/thread_macros.h>
 #include <boost/timer.hpp>
-#include "IMP/compatibility/set.h"
+#include "IMP/base//set.h"
 #include <IMP/base/internal/static.h>
 #include <numeric>
 
 
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 namespace {
 void check_order(const ScoreStatesTemp &ss) {
@@ -39,7 +39,7 @@ void check_order(const ScoreStatesTemp &ss) {
 }
 
 
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
 
 #define IMP_SF_SET_ONLY_2(mask, inputs1, inputs2)                         \
   {                                                                     \
@@ -56,13 +56,13 @@ void Model::before_evaluate(const ScoreStatesTemp &states) {
                   "Model must have dependencies before calling "
                   << "before_evaluate()");
   check_order(states);
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   base::internal::check_live_objects();
 #endif
   IMP_USAGE_CHECK(cur_stage_== internal::NOT_EVALUATING,
                   "Can only call Model::before_evaluate() when not evaluating");
   base::CreateLogContext clc("update_score_states");
-    internal::SFSetIt<IMP::internal::Stage>
+    internal::SFSetIt<IMP::kernel::internal::Stage>
       reset(&cur_stage_, internal::BEFORE_EVALUATING);
     unsigned int cur_begin=0;
     while (cur_begin < states.size()) {
@@ -74,11 +74,11 @@ void Model::before_evaluate(const ScoreStatesTemp &states) {
       for (unsigned int i=cur_begin; i< cur_end; ++i) {
       ScoreState *ss= states[i];
       IMP_CHECK_OBJECT(ss);
-        IMP_LOG(TERSE, "Updating \""
+        IMP_LOG_TERSE( "Updating \""
                 << ss->get_name() << "\"" << std::endl);
       if ( first_call_) {
           try {
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
             internal::SFResetBitset rbr(Masks::read_mask_, true);
             internal::SFResetBitset rbw(Masks::write_mask_, true);
             internal::SFResetBitset rbar(Masks::add_remove_mask_, true);
@@ -98,13 +98,14 @@ void Model::before_evaluate(const ScoreStatesTemp &states) {
             IMP_FAILURE(d.get_message(ss));
           }
         } else {
-        IMP_TASK((ss),  ss->before_evaluate());
+        IMP_TASK((ss),  ss->before_evaluate(),
+                 "before evaluate");
         }
       }
-#pragma omp taskwait
-#pragma omp flush
+IMP_OMP_PRAGMA(taskwait)
+IMP_OMP_PRAGMA(flush)
       cur_begin=cur_end;
-      //IMP_LOG(VERBOSE, "." << std::flush);
+      //IMP_LOG_VERBOSE( "." << std::flush);
     }
   }
 
@@ -114,7 +115,7 @@ void Model::after_evaluate(const ScoreStatesTemp &istates,
   check_order(istates);
   base::CreateLogContext clc("update_derivatives");
   DerivativeAccumulator accum;
-  internal::SFSetIt<IMP::internal::Stage>
+  internal::SFSetIt<IMP::kernel::internal::Stage>
     reset(&cur_stage_, internal::AFTER_EVALUATING);
   unsigned int cur_begin=0;
   ScoreStatesTemp states=istates;
@@ -130,7 +131,7 @@ void Model::after_evaluate(const ScoreStatesTemp &istates,
     IMP_CHECK_OBJECT(ss);
       if ( first_call_) {
         try {
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
           internal::SFResetBitset rbr(Masks::read_mask_, true);
           internal::SFResetBitset rbw(Masks::write_mask_, true);
           internal::SFResetBitset rbar(Masks::add_remove_mask_, true);
@@ -150,17 +151,18 @@ void Model::after_evaluate(const ScoreStatesTemp &istates,
         }
       } else {
         IMP_TASK((ss, accum),
-                 ss->after_evaluate(calc_derivs? &accum:nullptr));
+                 ss->after_evaluate(calc_derivs? &accum:nullptr),
+                 "after evaluate");
       }
     }
-#pragma omp taskwait
-#pragma omp flush
+IMP_OMP_PRAGMA(taskwait)
+IMP_OMP_PRAGMA(flush)
     cur_begin=cur_end;
     }
   }
 
 ScoringFunction* Model::create_model_scoring_function() {
-  return IMP::create_scoring_function(dynamic_cast<RestraintSet*>(this),
+  return IMP::kernel::create_scoring_function(dynamic_cast<RestraintSet*>(this),
                                       1.0, NO_MAX,
                                       "ModelScoringFunction%1%");
 }
@@ -182,6 +184,6 @@ double Model::evaluate(bool tf, bool warn) {
     warned=true;
   }
   update();
-  return RestraintSet::evaluate(tf);
+  return Restraint::evaluate(tf);
 }
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

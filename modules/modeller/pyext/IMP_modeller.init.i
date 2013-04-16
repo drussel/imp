@@ -88,9 +88,10 @@ class ModellerRestraints(IMP.Restraint):
        This is useful if you want to use Modeller restraints with an IMP
        optimizer, or in combination with IMP restraints.
 
+       @param model The IMP Model object.
        @param modeller_model The Modeller model object.
        @param particles A list of the IMP atoms (as Particle objects),
-                        same order as the Modeller atoms.
+                        in the same order as the Modeller atoms.
        @note since Modeller, unlike IMP, is sensitive to the ordering
              of atoms, it usually makes sense to create the model in
              Modeller and then use ModelLoader to load it into IMP,
@@ -100,8 +101,8 @@ class ModellerRestraints(IMP.Restraint):
              uses any other attribute (e.g. charge) will not react if
              this attribute is changed by IMP.
     """
-    def __init__(self, modeller_model, particles):
-        IMP.Restraint.__init__(self)
+    def __init__(self, model, modeller_model, particles):
+        IMP.Restraint.__init__(self, model)
         self._modeller_model = modeller_model
         self._particles = particles
 

@@ -1,3 +1,7 @@
+## \example atom/structure_from_sequence.py
+## An atomic protein structure is created from primary (amino-acid) sequence.
+##
+
 import IMP.atom
 
 # Use the CHARMM all-atom (i.e. including hydrogens) topology and parameters
@@ -22,6 +26,9 @@ h = topology.create_hierarchy(m)
 # coordinates.
 topology.add_atom_types(h)
 topology.add_coordinates(h)
+
+# Hierarchies in IMP must have radii
+IMP.atom.add_radii(h)
 
 # Write out the final structure to a PDB file
 IMP.atom.write_pdb(h, 'structure.pdb')

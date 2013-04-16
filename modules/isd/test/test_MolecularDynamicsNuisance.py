@@ -65,13 +65,13 @@ class WriteTrajState(IMP.OptimizerState):
                            p.get_value(zkey), p.get_value(vxkey)))
         self.traj.append(step)
 
-class MolecularDynamicsTestsNuisance(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test molecular dynamics optimizer on nuisances"""
 
     def setUp(self):
         """Set up particles and optimizer"""
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(0)
+        IMP.base.set_log_level(0)
         self.model = IMP.Model()
         self.particles = []
         self.particles.append(IMP.isd.Nuisance.setup_particle(

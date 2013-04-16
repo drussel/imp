@@ -7,11 +7,11 @@
  *
  */
 
-#include "IMP/ConfigurationSet.h"
-#include "IMP/internal/utility.h"
-#include "IMP/io.h"
+#include "IMP/kernel/ConfigurationSet.h"
+#include "IMP/kernel/internal/utility.h"
+#include "IMP/kernel/io.h"
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 ConfigurationSet::ConfigurationSet(Model *m,
                                    std::string nm):
@@ -23,8 +23,8 @@ ConfigurationSet::ConfigurationSet(Model *m,
 void ConfigurationSet::save_configuration() {
   IMP_OBJECT_LOG;
   set_was_used(true);
-  IMP_LOG(TERSE, "Adding configuration to set " << get_name() << std::endl);
-  configurations_.push_back(new Configuration(model_));
+  IMP_LOG_TERSE( "Adding configuration to set " << get_name() << std::endl);
+  configurations_.push_back(new Configuration(model_, base_));
 }
 
 void ConfigurationSet::remove_configuration(unsigned int i) {
@@ -51,10 +51,4 @@ void ConfigurationSet::load_configuration(int i) const {
   }
 }
 
-
-void ConfigurationSet::do_show(std::ostream &out) const {
-  out <<  get_number_of_configurations()
-      << " configurations." << std::endl;
-}
-
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

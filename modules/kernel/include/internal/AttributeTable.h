@@ -18,14 +18,14 @@
 
 #include <limits>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 class Particle;
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 
-IMP_BEGIN_INTERNAL_NAMESPACE
+IMPKERNEL_BEGIN_INTERNAL_NAMESPACE
 
 template <class T, class K >
 struct DefaultTraits
@@ -78,7 +78,7 @@ struct FloatAttributeTableTraits: public DefaultTraits<double, FloatKey>
   }
   static bool get_is_valid(double f) {
     /*if (std::numeric_limits<float>::has_quiet_NaN) {
-      return !compatibility::isnan(f);
+      return !base::isnan(f);
       } else*/
     return f< std::numeric_limits<double>::max();
   }
@@ -86,7 +86,7 @@ struct FloatAttributeTableTraits: public DefaultTraits<double, FloatKey>
 
 
 struct ParticleAttributeTableTraits:
-  public DefaultTraits<ParticleIndex, ParticleKey>
+  public DefaultTraits<ParticleIndex, ParticleIndexKey>
 {
   static Value get_invalid() {
     return base::get_invalid_index<ParticleIndexTag>();
@@ -97,7 +97,7 @@ struct ParticleAttributeTableTraits:
 };
 
 struct ParticlesAttributeTableTraits:
-    public ArrayTraits<ParticleIndex, ParticlesKey>
+    public ArrayTraits<ParticleIndex, ParticleIndexesKey>
 {
 };
 
@@ -243,6 +243,6 @@ namespace {
 #endif
 }
 
-IMP_END_INTERNAL_NAMESPACE
+IMPKERNEL_END_INTERNAL_NAMESPACE
 
 #endif  /* IMPKERNEL_ATTRIBUTE_TABLE_H */

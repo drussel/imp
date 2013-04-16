@@ -1,5 +1,6 @@
 /**
- *  \file IMP/scoped.h    \brief Various general useful functions for IMP.
+ *  \file IMP/kernel/scoped.h
+ *  \brief Various general useful functions for IMP.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
@@ -8,10 +9,9 @@
 #ifndef IMPKERNEL_SCOPED_H
 #define IMPKERNEL_SCOPED_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "RestraintSet.h"
 #include "ScoreState.h"
-#include "FailureHandler.h"
 #include "Model.h"
 #include <IMP/base/RAII.h>
 #include <IMP/base/deprecation.h>
@@ -21,7 +21,7 @@
 #include <IMP/base/check_macros.h>
 #include <IMP/base/log_macros.h>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 
 //! Removes the ScoreState when the RAII object is destroyed
@@ -104,7 +104,7 @@ class GenericScopedRemoveRestraint: public base::RAII {
   base::Pointer<RestraintSet> rs_;
   void cleanup() {
     if (rs_ && rs_->get_is_part_of_model()) {
-        IMP_LOG(VERBOSE, "Restoring restraint "
+        IMP_LOG_VERBOSE( "Restoring restraint "
                 << ss_->get_name() << " to "
                 << rs_->get_name() << std::endl);
         IMP_CHECK_OBJECT(ss_);
@@ -113,7 +113,7 @@ class GenericScopedRemoveRestraint: public base::RAII {
         ss_=nullptr;
         rs_=nullptr;
       } else if (ss_) {
-        IMP_LOG(VERBOSE, "Not restoring restraint "
+        IMP_LOG_VERBOSE( "Not restoring restraint "
                 << ss_->get_name() << std::endl);
       }
   }
@@ -121,7 +121,7 @@ class GenericScopedRemoveRestraint: public base::RAII {
     ss_=ss;
     rs_=rs;
     rs_->remove_restraint(ss);
-    IMP_LOG(VERBOSE, "Removing restraint "
+    IMP_LOG_VERBOSE( "Removing restraint "
             << ss_->get_name() << " from "
             << rs_->get_name() << std::endl);
   }
@@ -155,7 +155,7 @@ class GenericScopedRemoveScoreState: public base::RAII {
   base::Pointer<Model> rs_;
   void cleanup() {
     if (rs_) {
-        IMP_LOG(VERBOSE, "Restoring restraint "
+        IMP_LOG_VERBOSE( "Restoring restraint "
                 << ss_->get_name() << " to "
                 << rs_->get_name() << std::endl);
         IMP_CHECK_OBJECT(ss_);
@@ -169,7 +169,7 @@ class GenericScopedRemoveScoreState: public base::RAII {
     ss_=ss;
     rs_=rs;
     rs_->remove_score_state(ss);
-    IMP_LOG(VERBOSE, "Removing restraint "
+    IMP_LOG_VERBOSE( "Removing restraint "
             << ss_->get_name() << " from "
             << rs_->get_name() << std::endl);
   }
@@ -199,30 +199,6 @@ typedef GenericScopedRestraint<Restraint> ScopedRestraint;
 typedef GenericScopedRemoveRestraint<Restraint> ScopedRemoveRestraint;
 //! Remove a score state until the object goes out of scope
 typedef GenericScopedRemoveScoreState<ScoreState> ScopedRemoveScoreState;
-
-
-
-
-//! Control a scope-dependent failure handler
-/** The failure handler is added on construction and removed
-    on destruction.
-*/
-class ScopedFailureHandler: public base::RAII {
-  FailureHandler* fh_;
-public:
-  IMP_RAII(ScopedFailureHandler, (FailureHandler *fh),
-           {fh_=nullptr;},
-           {
-             fh_=fh;
-             if (fh_) add_failure_handler(fh_);
-           },
-           {
-             if (fh_) remove_failure_handler(fh_);
-             fh_=nullptr;
-           },
-           );
-};
-
 
 /** Add a cache attribute to a particle and then remove it
     when this goes out of scope.
@@ -280,6 +256,6 @@ public:
 typedef ScopedSetAttribute<FloatKey, Float> ScopedSetFloatAttribute;
 
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_SCOPED_H */

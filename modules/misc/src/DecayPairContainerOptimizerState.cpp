@@ -11,16 +11,18 @@
 #include <IMP/container/ListPairContainer.h>
 
 IMPMISC_BEGIN_NAMESPACE
+
 DecayPairContainerOptimizerState::
 DecayPairContainerOptimizerState(PairPredicate *pred,
                                  const ParticlePairsTemp &initial_list,
                                  std::string name):
-  OptimizerState(name), pred_(pred),
+  PeriodicOptimizerState(name), pred_(pred),
   input_(new container::ListPairContainer(initial_list, "decay input")) {
   output_= new IMP::internal::InternalDynamicListPairContainer(input_,
                                                                name+" output");
   output_->set(IMP::get_indexes(input_->get_particle_pairs()));
 }
+
 void DecayPairContainerOptimizerState::do_update(unsigned int) {
   IMP_OBJECT_LOG;
   ParticleIndexPairs to_remove;
@@ -31,7 +33,7 @@ void DecayPairContainerOptimizerState::do_update(unsigned int) {
       }
     });
   if (!to_remove.empty()) {
-    IMP_LOG(TERSE, "Removing " << to_remove << std::endl);
+    IMP_LOG_TERSE( "Removing " << to_remove << std::endl);
     ParticleIndexPairs old= output_->get_indexes();
     std::sort(old.begin(), old.end());
     std::sort(to_remove.begin(), to_remove.end());
@@ -40,12 +42,9 @@ void DecayPairContainerOptimizerState::do_update(unsigned int) {
                         to_remove.begin(), to_remove.end(),
                         std::back_inserter(out));
     output_->set(out);
-    IMP_LOG(VERBOSE, "Remaining "
+    IMP_LOG_VERBOSE( "Remaining "
             << output_->get_particle_pairs() << " ");
   }
 }
 
-void DecayPairContainerOptimizerState::do_show(std::ostream &) const {
-
-}
 IMPMISC_END_NAMESPACE

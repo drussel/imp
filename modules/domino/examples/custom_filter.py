@@ -1,3 +1,6 @@
+## \example domino/custom_filter.py
+## This example looks like the six particle optimization example except a filter is used instead of a restraint to remove the flip degree of freedom. The filter is written is python, which makes for quick prototyping, but slow run times.
+
 import IMP
 import IMP.domino
 import IMP.core
@@ -81,7 +84,7 @@ class MyFilterTable(IMP.domino.SubsetFilterTable):
 
 def create_sampler(m, ps, rs, pst):
     s=IMP.domino.DominoSampler(m, pst)
-    #s.set_log_level(IMP.VERBOSE)
+    #s.set_log_level(IMP.base.VERBOSE)
     # the following lines recreate the defaults and so are optional
     filters=[]
     # do not allow particles with the same ParticleStates object
@@ -91,19 +94,19 @@ def create_sampler(m, ps, rs, pst):
     rc.add_restraints(rs)
     # filter states that score worse than the cutoffs in the Model
     filters.append(IMP.domino.RestraintScoreSubsetFilterTable(rc))
-    filters[-1].set_log_level(IMP.SILENT)
+    filters[-1].set_log_level(IMP.base.SILENT)
     mf=MyFilterTable(ps[1], 0)
     # try with and without this line
     filters.append(mf)
     states= IMP.domino.BranchAndBoundAssignmentsTable(pst, filters)
-    #states.set_log_level(IMP.SILENT);
+    #states.set_log_level(IMP.base.SILENT);
     s.set_assignments_table(states)
     s.set_subset_filter_tables(filters)
     return s
 
-IMP.set_log_level(IMP.TERSE)
+IMP.base.set_log_level(IMP.base.TERSE)
 m=IMP.Model()
-m.set_log_level(IMP.SILENT)
+m.set_log_level(IMP.base.SILENT)
 
 print "creating representation"
 ps=create_representation(m)
@@ -115,7 +118,7 @@ rs=create_scoring(m, ps)
 print "creating sampler"
 s=create_sampler(m, ps, rs, pst)
 
-#s.set_log_level(IMP.SILENT)
+#s.set_log_level(IMP.base.SILENT)
 print "sampling"
 cs=s.get_sample()
 

@@ -34,11 +34,11 @@ class XTransRestraint(IMP.Restraint):
     def get_input_containers(self):
         return []
 
-class TestNuisanceRangeModifier(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(0)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.rs = XTransRestraint()
         self.m.add_restraint(self.rs)

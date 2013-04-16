@@ -4,38 +4,23 @@ project(RMF)
 # needs to be in main CMakeLists.txt
 enable_testing()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
 
-include(FindAvroCPP)
+set(RMF_INCLUDE_PATH "" CACHE INTERNAL "" FORCE)
 
-if ((${AvroCPP_LIBRARY} MATCHES "AvroCPP_LIBRARY-NOTFOUND")
-    OR (${avrogencpp_PROGRAM} MATCHES "avrogencpp_PROGRAM-NOTFOUND"))
-  if ((NOT ${AvroCPP_LIBRARY} MATCHES "AvroCPP_LIBRARY-NOTFOUND")
-    OR (NOT ${avrogencpp_PROGRAM} MATCHES "avrogencpp_PROGRAM-NOTFOUND"))
-    message(SEND_ERROR "A partial avro install exists on the system, this is a bad thing: "
-     ${AvroCPP_LIBRARY} " " ${avrogencpp_PROGRAM} " " ${AvroCPP_HEADER})
-  endif()
-  message(STATUS "Using internal Avro")
-  add_subdirectory(AvroCpp)
-  set(avrogencpp_PROGRAM "${PROJECT_BINARY_DIR}/AvroCpp/avrogencpp")
-  set(avrogen_DEPENDENCY "${PROJECT_BINARY_DIR}/AvroCpp/avrogencpp")
-  include_directories("${PROJECT_SOURCE_DIR}/AvroCpp")
-  set(AvroCPP_LIBRARY avrocpp)
-else()
-  message(STATUS "Using external Avro at " ${AvroCPP_LIBRARY})
-  include_directories(${AvroCPP_INCLUDE_DIR})
-  link_directories(${AvroCPP_LIBRARY_DIR})
-endif()
+if(POLICY CMP0017)
+cmake_policy(SET CMP0017 NEW)
+endif(POLICY CMP0017)
 
 include(FindLog4CXX)
 
 if (${Log4CXX_LIBRARY} MATCHES "Log4CXX_LIBRARY-NOTFOUND")
-  set(RMF_USE_LOG4CXX, "0")
+  set(RMF_HAS_LOG4CXX "0" CACHE BOOL "Whether to use Log4CXX")
   message(STATUS "Logging disabled")
   set(Log4CXX_LIBRARY "")
 else()
   message(STATUS "Logging enabled")
-  set(RMF_USE_LOG4CXX, "1")
+  set(RMF_HAS_LOG4CXX "1" CACHE BOOL "Whether to use Log4CXX")
   include_directories(${Log4CXX_INCLUDE_DIR})
   link_directories(${Log4CXX_LIBRARY_DIR})
 endif()
@@ -49,15 +34,19 @@ include(GNUInstallDirs)
 include(FindHDF5)
 find_package(HDF5 REQUIRED)
 
+include_directories(${HDF5_INCLUDE_DIRS})
+set(RMF_INCLUDE_PATH ${RMF_INCLUDE_PATH} ${HDF5_INCLUDE_DIRS}
+    CACHE INTERNAL "" FORCE)
+
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
-set (RMF_VERSION_MAJOR 0)
-set (RMF_VERSION_MINOR 9)
+set (RMF_VERSION_MAJOR 1)
+set (RMF_VERSION_MINOR 1)
 
-set (RMF_USE_DEBUG_VECTOR 0 CACHE BOOL "Whether to use a bounds checked vector")
+set(RMF_HAS_DEBUG_VECTOR 0 CACHE BOOL "Whether to use a bounds checked vector")
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -67,8 +56,7 @@ configure_file (
   )
 
 include_directories("${PROJECT_BINARY_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/include"
-  ${HDF5_INCLUDE_DIRS})
+  "${PROJECT_SOURCE_DIR}/include")
 
 include(data/CMakeLists.txt)
 include(include/CMakeLists.txt)
@@ -96,3 +84,6 @@ include(test/CMakeLists.txt)
 include(examples/CMakeLists.txt)
 include(benchmark/CMakeLists.txt)
 include(doc/CMakeLists.txt)
+
+add_custom_target(RMF_all DEPENDS RMF_benchmarks RMF_bins RMF_wrapper RMF_tests)
+add_custom_target(RMF_build DEPENDS RMF_bins RMF_wrapper)

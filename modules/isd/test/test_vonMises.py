@@ -13,12 +13,12 @@ from IMP.isd import vonMises
 #unit testing framework
 import IMP.test
 
-class TestvonMises(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
 
     def testEvaluate(self):
         "tests vonMises.evaluate"

@@ -4,13 +4,13 @@ import IMP.core
 
 rk = IMP.FloatKey("radius")
 
-class Test(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for bond refiner"""
 
 
     def test_rops(self):
         """Checking refine pairs pair score"""
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         m= IMP.Model()
         pp= IMP.Particle(m)
         hpp= IMP.core.Hierarchy.setup_particle(pp)
@@ -21,7 +21,7 @@ class Test(IMP.test.TestCase):
             hpp.add_child(hp)
             c.append(p)
         pr= IMP.core.ChildrenRefiner(IMP.core.Hierarchy.get_default_traits())
-        cps= IMP._ConstPairScore(1)
+        cps= IMP.kernel._ConstPairScore(1)
         rps= IMP.core.RefinedPairsPairScore(pr, cps)
         ppp=(pp, pp)
         print type(rps)

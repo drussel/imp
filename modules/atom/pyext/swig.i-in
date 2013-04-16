@@ -28,6 +28,7 @@ IMP_SWIG_DECORATOR(IMP::atom, Mass, Masses);
 IMP_SWIG_DECORATOR(IMP::atom, Molecule, Molecules);
 IMP_SWIG_DECORATOR(IMP::atom, Residue, Residues);
 IMP_SWIG_DECORATOR(IMP::atom, Copy, Copies);
+IMP_SWIG_DECORATOR(IMP::atom, SecondaryStructureResidue, SecondaryStructureResidues);
 IMP_SWIG_BASE_OBJECT(IMP::atom, Simulator, Simulators);
 IMP_SWIG_DIRECTOR(IMP::atom, PDBSelector);
 IMP_SWIG_OBJECT(IMP::atom, ATOMPDBSelector, ATOMPDBSelectors);
@@ -75,7 +76,6 @@ IMP_SWIG_OBJECT(IMP::atom, SmoothingFunction, SmoothingFunctions);
 IMP_SWIG_OBJECT(IMP::atom, StereochemistryPairFilter, StereochemistryPairFilters);
 IMP_SWIG_OBJECT(IMP::atom, VelocityScalingOptimizerState, VelocityScalingOptimizerStates);
 IMP_SWIG_OBJECT(IMP::atom, WaterPDBSelector,WaterPDBSelectors);
-IMP_SWIG_OBJECT(IMP::atom, WritePDBFailureHandler, WritePDBFailureHandlers);
 IMP_SWIG_OBJECT(IMP::atom, WritePDBOptimizerState, WritePDBOptimizerStates);
 IMP_SWIG_VALUE_INSTANCE(IMP::atom, AtomType, AtomType, AtomTypes);
 IMP_SWIG_VALUE(IMP::atom, CHARMMAtomTopology, CHARMMAtomTopologies);
@@ -126,6 +126,7 @@ IMP_SWIG_VALUE_INSTANCE(IMP::atom, CHARMMAngle, CHARMMConnection, CHARMMAngles);
                domain=None,
                particle_type=None,
                particle_types=None,
+               hierarchy_types=None,
                copy_index=-1,
                copy_indexes=None):
       if hierarchy:
@@ -170,6 +171,8 @@ IMP_SWIG_VALUE_INSTANCE(IMP::atom, CHARMMAngle, CHARMMConnection, CHARMMAngles);
          particle_types=[]
       if particle_type:
          particle_types.append(particle_type)
+      if not hierarchy_types:
+         hierarchy_types=[]
       presidue_indexes=[]
       for ri in residue_indexes:
          if type(ri) == type(()):
@@ -185,6 +188,7 @@ IMP_SWIG_VALUE_INSTANCE(IMP::atom, CHARMMAngle, CHARMMConnection, CHARMMAngles);
       self.set_target_radius(target_radius);
       self.set_copy_indexes(copy_indexes)
       self.set_particle_types(particle_types)
+      self.set_hierarchy_types(hierarchy_types)
 %}
 }
 
@@ -199,7 +203,6 @@ IMP_SWIG_VALUE_INSTANCE(IMP::atom, CHARMMAngle, CHARMMConnection, CHARMMAngles);
 
 /* Wrap our own classes */
 %include "IMP/atom/angle_decorators.h"
-%include "IMP/atom/distance.h"
 %include "IMP/atom/smoothing_functions.h"
 %include "IMP/atom/AngleSingletonScore.h"
 %include "IMP/atom/BondEndpointsRefiner.h"
@@ -224,9 +227,14 @@ IMP_SWIG_VALUE_INSTANCE(IMP::atom, CHARMMAngle, CHARMMConnection, CHARMMAngles);
 %include "IMP/atom/Mass.h"
 %include "IMP/atom/BondedPairFilter.h"
 %include "IMP/atom/mol2.h"
+%include "IMP/atom/SecondaryStructureResidue.h"
+%include "IMP/atom/secondary_structure_reader.h"
 
+%template(_ADopeBase) IMP::score_functor::DistancePairScore<IMP::score_functor::Dope>;
+%template(_BDopeBase) IMP::score_functor::DistancePairScore< IMP::score_functor::Statistical< IMP::atom::DopeType,false,true,false > >;
 namespace IMP {
   namespace atom {
+   %template(_SPSFTB) ::IMP::score_functor::DistancePairScore<score_functor::Statistical< IMP::atom::ProteinLigandType, true, false> >;
    %template(_SPSTF) ::IMP::core::StatisticalPairScore< IMP::atom::ProteinLigandType, true, false>;
    %template(_SPSFT) ::IMP::core::StatisticalPairScore< IMP::atom::DopeType, false, true>;
   }
@@ -246,6 +254,8 @@ namespace IMP {
 %include "IMP/atom/dihedrals.h"
 %include "IMP/atom/Molecule.h"
 %include "IMP/atom/Copy.h"
+%include "IMP/atom/Selection.h"
+%include "IMP/atom/distance.h"
 %include "IMP/atom/ForceFieldParameters.h"
 %include "IMP/atom/charmm_topology.h"
 %include "IMP/atom/CHARMMAtom.h"
@@ -254,14 +264,13 @@ namespace IMP {
 %include "IMP/atom/CHARMMStereochemistryRestraint.h"
 %include "IMP/atom/force_fields.h"
 %include "IMP/atom/estimates.h"
-%include "IMP/atom/pdb.h"
 %include "IMP/atom/hierarchy_tools.h"
 %include "IMP/atom/DopePairScore.h"
 %include "IMP/atom/SameResiduePairFilter.h"
 %include "IMP/atom/RemoveRigidMotionOptimizerState.h"
 %include "IMP/atom/BerendsenThermostatOptimizerState.h"
 %include "IMP/atom/LangevinThermostatOptimizerState.h"
-%include "IMP/atom/Selection.h"
+%include "IMP/atom/pdb.h"
 %include "IMP/atom/constants.h"
 
 namespace IMP {
@@ -271,6 +280,7 @@ namespace IMP {
    %template(CHARMMAngle) CHARMMConnection<3>;
    %template(_get_rmsd_cpp) get_rmsd<IMP::base::Vector<algebra::VectorD<3> >, IMP::base::Vector<algebra::VectorD<3> > >;
    %template(_get_native_overlap_cpp) get_native_overlap<IMP::base::Vector<algebra::VectorD<3> >, IMP::base::Vector<algebra::VectorD<3> > >;
+   %template(_get_drmsd_cpp) get_drmsd<IMP::base::Vector<algebra::VectorD<3> >, IMP::base::Vector<algebra::VectorD<3> > >;      
    %template(_get_drms_cpp) get_drms<IMP::base::Vector<algebra::VectorD<3> >, IMP::base::Vector<algebra::VectorD<3> > >;
    %template(_get_rigid_bodies_drms_cpp) get_rigid_bodies_drms<IMP::base::Vector<algebra::VectorD<3> >, IMP::base::Vector<algebra::VectorD<3> > >;
 
@@ -286,6 +296,11 @@ def get_native_overlap(a, b, d):
    va= [IMP.algebra.get_vector(x) for x in a]
    vb= [IMP.algebra.get_vector(x) for x in b]
    return _get_native_overlap_cpp(va, vb, d)
+
+def get_drmsd(a, b):
+   va= [IMP.algebra.get_vector(x) for x in a]
+   vb= [IMP.algebra.get_vector(x) for x in b]
+   return _get_drmsd_cpp(va, vb)
 
 def get_drms(a, b):
    va= [IMP.algebra.get_vector(x) for x in a]

@@ -1,20 +1,21 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
+
 #include <RMF/FileHandle.h>
 #include <RMF/NodeConstHandle.h>
 #include "common.h"
-
+namespace {
 std::string description("Show an rmf file as text.");
-int frame = 0;
+}
 int main(int argc, char **argv) {
   try {
     options.add_options()
       ("decorators,d", "Show what decorators recognize each node.");
     RMF_ADD_INPUT_FILE("rmf");
     int frame = 0;
-    options.add_options() ("frame,f",                                    \
-                           boost::program_options::value< int >(&frame), \
+    options.add_options() ("frame,f",
+                           boost::program_options::value< int >(&frame),
                            "Frame to use, if -1 show static data");
 
     boost::program_options::variables_map vm(process_options(argc, argv));

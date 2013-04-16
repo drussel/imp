@@ -2,7 +2,7 @@
  *  \file RMF/SetCurrentFrame.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,6 +11,8 @@
 
 #include <RMF/config.h>
 #include "FileConstHandle.h"
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 
@@ -34,9 +36,10 @@ public:
   RMF_SHOWABLE(SetCurrentFrame, "To: " << old_frame_);
 };
 
-#ifndef RMF_DOXYGEN
-typedef vector<SetCurrentFrame> SetCurrentFrames;
-#endif
 } /* namespace RMF */
+
+RMF_VECTOR_DECL(SetCurrentFrame);
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_SET_CURRENT_FRAME_H */

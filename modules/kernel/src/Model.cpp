@@ -6,17 +6,17 @@
  *
  */
 
-#include "IMP/Model.h"
-#include "IMP/Particle.h"
-#include "IMP/internal/scoring_functions.h"
-#include "IMP/compatibility/set.h"
+#include "IMP/kernel/Model.h"
+#include "IMP/kernel/Particle.h"
+#include "IMP/kernel/internal/scoring_functions.h"
+#include "IMP/base//set.h"
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 
 //! Constructor
 Model::Model(std::string name):
-  RestraintSet(name)
+    RestraintSet(Restraint::ModelInitTag(), name)
 {
   cur_stage_=internal::NOT_EVALUATING;
   gather_statistics_=false;
@@ -25,7 +25,7 @@ Model::Model(std::string name):
   first_call_=true;
   next_particle_=0;
   dependencies_dirty_=false;
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   internal::FloatAttributeTable::set_masks(&this->Masks::read_mask_,
                                            &this->Masks::write_mask_,
                                            &this->Masks::add_remove_mask_,
@@ -124,7 +124,7 @@ void Model::add_particle_internal(Particle *p, bool set_name) {
         % id;
       p->set_name(oss.str());
     }
-#if IMP_BUILD < IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
     //xstd::cout << "Resizing to " << particle_index_.size() << std::endl;
     Masks::read_mask_.resize(particle_index_.size(), true);
     Masks::write_mask_.resize(particle_index_.size(), true);
@@ -156,9 +156,18 @@ void Model::show_it(std::ostream& out) const
 }
 
 void Model::remove_particle(Particle *p) {
-  ParticleIndex pi= p->get_index();
+  remove_particle(p->get_index());
+}
+
+void Model::remove_particle(ParticleIndex pi) {
+  if (undecorators_index_.size() > static_cast<size_t>(pi.get_index())) {
+    for (unsigned int i = 0; i < undecorators_index_[pi].size(); ++i) {
+      undecorators_index_[pi][i]->teardown(pi);
+    }
+    undecorators_index_[pi].clear();
+  }
+  particle_index_[pi]->set_tracker(particle_index_[pi], nullptr);
   free_particles_.push_back(pi);
-  p->set_tracker(p, nullptr);
   particle_index_[pi]=nullptr;
   internal::FloatAttributeTable::clear_attributes(pi);
   internal::StringAttributeTable::clear_attributes(pi);
@@ -176,17 +185,17 @@ void Model::remove_particle(Particle *p) {
       for (unsigned int j=0; j < internal::ParticleAttributeTable::size(i);
            ++j) {
         if (internal::ParticleAttributeTable
-            ::get_has_attribute(ParticleKey(i),
+            ::get_has_attribute(ParticleIndexKey(i),
                                 ParticleIndex(j))) {
           ParticleIndex pc= internal::ParticleAttributeTable
-            ::get_attribute(ParticleKey(i),
+            ::get_attribute(ParticleIndexKey(i),
                             ParticleIndex(j),
                             false);
           IMP_USAGE_CHECK(pc != pi,
                           "There is still a reference to removed particle "
                           << Showable(p) << " in particle "
                           << Showable(get_particle(ParticleIndex(j)))
-                          << " attribute " << ParticleKey(i));
+                          << " attribute " << ParticleIndexKey(i));
         }
       }
     }
@@ -195,10 +204,10 @@ void Model::remove_particle(Particle *p) {
       for (unsigned int j=0; j < internal::ParticlesAttributeTable::size(i);
            ++j) {
         if (internal::ParticlesAttributeTable
-            ::get_has_attribute(ParticlesKey(i),
+            ::get_has_attribute(ParticleIndexesKey(i),
                                 ParticleIndex(j))) {
           ParticleIndexes pcs= internal::ParticlesAttributeTable
-            ::get_attribute(ParticlesKey(i),
+            ::get_attribute(ParticleIndexesKey(i),
                             ParticleIndex(j),
                             false);
           for (unsigned int k=0; k < pcs.size(); ++k) {
@@ -207,7 +216,7 @@ void Model::remove_particle(Particle *p) {
                             "There is still a reference to removed particle "
                             << Showable(p) << " in particle "
                             << Showable(get_particle(ParticleIndex(j)))
-                            << " attribute " << ParticlesKey(i));
+                            << " attribute " << ParticleIndexesKey(i));
           }
         }
       }
@@ -251,4 +260,27 @@ ModelObjectsTemp Model::get_model_objects() const {
                           ModelObjectTracker::tracked_end());
 }
 
-IMP_END_NAMESPACE
+ParticleIndex Model::add_particle(std::string name) {
+  IMP_NEW(Particle, p, (this, name));
+  return p->get_index();
+}
+
+void Model::add_undecorator(ParticleIndex pi, Undecorator *d) {
+  undecorators_index_.resize(std::max<size_t>(pi.get_index() + 1,
+                                              undecorators_index_.size()));
+  undecorators_index_[pi].push_back(d);
+}
+
+ScoringFunction *Model::create_scoring_function(double weight,
+                                                double max) const {
+  // make sure we don't keep the model alive via the tracking support
+  const Restraint *rthis = this;
+  Restraint* ncthis= const_cast<Restraint*>(rthis);
+  IMP_NEW(internal::GenericRestraintsScoringFunction<RestraintsTemp>, ret,
+          (RestraintsTemp(1, ncthis),
+           weight, max,
+           get_name()+" scoring"));
+  return ret.release();
+}
+
+IMPKERNEL_END_NAMESPACE

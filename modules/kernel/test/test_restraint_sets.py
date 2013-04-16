@@ -1,18 +1,18 @@
 import IMP
 import IMP.test
 
-class RestraintSetTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test RestraintSets"""
 
     def _make_stuff(self):
         m= IMP.Model("restraint sets")
         rs= IMP.RestraintSet(.5)
-        r0= IMP._ConstRestraint(1)
+        r0= IMP.kernel._ConstRestraint(1)
         rs.add_restraint(r0)
         m.add_restraint(rs)
-        r1= IMP._ConstRestraint(1)
+        r1= IMP.kernel._ConstRestraint(1)
         rs.add_restraint(r1)
-        r2= IMP._ConstRestraint(1)
+        r2= IMP.kernel._ConstRestraint(1)
         m.add_restraint(r2)
         return (m, rs, r0, r1, r2)
 

@@ -6,12 +6,12 @@ import IMP.core
 import IMP.atom
 import IMP.multifit
 
-class SettingsDataTest(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Class to test correct reading of system data"""
     def setUp(self):
         """Build test model and optimizer"""
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
     def test_read_data(self):
         """test correct reading of settings data"""
         header = IMP.multifit.read_settings(self.get_input_file_name("assembly.input"))

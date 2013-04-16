@@ -1,3 +1,6 @@
+## \example domino/restraint_cache.py
+## Caching restraint scores so that restraints are not evaluated repeatedly for the same configuration is an important part of domino. Without caching, sub assignments that are shared between subsets will be rescored. The IMP::domino::RestraintCache provides a centralized place for this. To use it, one creates one and then adds the restraints you want to use for filtering and scoring to it. You can then pass the cache to the IMP::domino::RestraintScoreFilterTable and it will filter based on those restraints. You can also extract scores from the table directly, using it to manage the loading of particle states.
+
 import IMP.domino
 import IMP.algebra
 import IMP.container
@@ -7,9 +10,9 @@ import RMF
 
 resolution=.5
 
+sls=IMP.base.SetLogState(IMP.base.SILENT)
+
 m= IMP.Model()
-# suppress messages about restraint evaluations
-m.set_log_level(IMP.SILENT)
 
 # create some particles and a restraint that scores based on the
 # length of the chain
@@ -51,10 +54,11 @@ for p in ps:
 # now create a restraint cache
 # cache the most recently used one million scores
 rc= IMP.domino.RestraintCache(pst, 1000000)
+r.set_log_level(IMP.base.SILENT)
 rc.add_restraints([r])
 
 s=IMP.domino.DominoSampler(m, pst)
-s.set_check_level(IMP.NONE)
+s.set_check_level(IMP.base.NONE)
 ef=IMP.domino.ExclusionSubsetFilterTable(pst)
 # pass the cache to the restraint score based filter
 # it will use all the restraints in the cache
@@ -69,8 +73,6 @@ alls= IMP.domino.Subset(ps)
 # get all the assignments that fit
 sts= s.get_sample_assignments(alls)
 
-sls=IMP.base.SetLogState(IMP.base.SILENT)
-
 # create a temporary file to write things to
 rmf= RMF.create_rmf_file(IMP.create_temporary_file_name("cache", ".rmf"))
 print "saving configurations to", rmf.get_name()
@@ -81,6 +83,10 @@ IMP.rmf.add_hierarchy(rmf, h)
 # for use with domino. So we want to get back the processed restraints before
 # looking at them further
 domino_restraints= rc.get_restraints()
+
+for r in domino_restraints:
+    IMP.show_restraint_hierarchy(r)
+
 IMP.rmf.add_restraints(rmf, domino_restraints)
 # for each assignment load it, and add the configuration to an rmf file
 print "found assignments", sts

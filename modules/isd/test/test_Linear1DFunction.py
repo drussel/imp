@@ -29,13 +29,13 @@ class MockFunc:
             self.__update()
         return self.__eval(self.__evalargs)
 
-class TestLinear1DFunction(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """ test of a*x + b function """
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.alpha = Nuisance.setup_particle(IMP.Particle(self.m), 1.0)
         self.beta = Nuisance.setup_particle(IMP.Particle(self.m),  1.0)

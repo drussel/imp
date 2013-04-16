@@ -7,22 +7,22 @@
 
 #include <cmath>
 
-#include "IMP/Particle.h"
-#include "IMP/Model.h"
-#include "IMP/log.h"
-#include "IMP/Restraint.h"
-#include "IMP/container_base.h"
-#include "IMP/ScoringFunction.h"
-#include "IMP/internal/utility.h"
-#include "IMP/base/warning_macros.h"
-#include <IMP/base/thread_macros.h>
-#include "IMP/input_output.h"
-#include "IMP/internal/RestraintsScoringFunction.h"
-#include "IMP/base/Pointer.h"
-#include <IMP/base/check_macros.h>
+#include "IMP/kernel/Particle.h"
+#include "IMP/kernel/Model.h"
+#include "IMP/kernel/log.h"
+#include "IMP/kernel/Restraint.h"
+#include "IMP/kernel/container_base.h"
+#include "IMP/kernel/ScoringFunction.h"
+#include "IMP/kernel/internal/utility.h"
+#include "IMP/base//warning_macros.h"
+#include <IMP/base//thread_macros.h>
+#include "IMP/kernel/input_output.h"
+#include "IMP/kernel/internal/RestraintsScoringFunction.h"
+#include "IMP/base//Pointer.h"
+#include <IMP/base//check_macros.h>
 #include <numeric>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 const double NO_MAX=std::numeric_limits<double>::max();
 const double BAD_SCORE=NO_MAX;
 
@@ -37,24 +37,33 @@ Restraint::Restraint(std::string name):
   ModelObject(name), weight_(1), max_(NO_MAX),
   last_score_(BAD_SCORE)
 {
+  IMP_WARN("You should pass the model to the Restraint constructor. "
+           << "Constructing " << name << std::endl);
+}
+
+// for model
+Restraint::Restraint(ModelInitTag, std::string name):
+  ModelObject(name), weight_(1), max_(NO_MAX),
+  last_score_(BAD_SCORE)
+{
 }
 
 double Restraint::evaluate(bool calc_derivs) const {
   IMP_OBJECT_LOG;
-  base::Pointer<ScoringFunction> sf= create_scoring_function();
+  Pointer<ScoringFunction> sf = create_internal_scoring_function();
   return sf->evaluate(calc_derivs);
 }
 
 
 double Restraint::evaluate_if_good(bool calc_derivs) const {
   IMP_OBJECT_LOG;
-  base::Pointer<ScoringFunction> sf= create_scoring_function();
+  Pointer<ScoringFunction> sf = create_internal_scoring_function();
   return sf->evaluate_if_good(calc_derivs);
 }
 
 double Restraint::evaluate_if_below(bool calc_derivs, double max) const {
   IMP_OBJECT_LOG;
-  base::Pointer<ScoringFunction> sf= create_scoring_function(1.0, max);
+  Pointer<ScoringFunction> sf = create_internal_scoring_function();
   return sf->evaluate_if_below(calc_derivs, max);
 }
 
@@ -62,7 +71,8 @@ double Restraint::unprotected_evaluate(DerivativeAccumulator *da) const{
   IMP_USAGE_CHECK(!da,
                   "Do not call unprotected evaluate directly if you"
                   << " want derivatives.");
-  EvaluationState es(0, NO_MAX);
+  IMP_CHECK_VARIABLE(da);
+  EvaluationState es(0,true);
   ScoreAccumulator sa(&es, 1, false, NO_MAX, NO_MAX, false);
   do_add_score_and_derivatives(sa);
   return es.score;
@@ -165,19 +175,17 @@ Restraint* Restraint::create_current_decomposition() const {
   IMP_OBJECT_LOG;
   set_was_used(true);
   Restraints rs=do_create_current_decomposition();
-  IMP_IF_CHECK(USAGE_AND_INTERNAL) {
-    for (unsigned int i=0; i< rs.size(); ++i) {
-      double old_score= rs[i]->get_last_score();
-      IMP_LOG_VARIABLE(old_score);
-      double new_score= rs[i]->unprotected_evaluate(nullptr);
-      IMP_LOG_VARIABLE(new_score);
-      IMP_INTERNAL_CHECK(new_score != 0,
-                         "The score of the current decomposition term is 0."
-                         << " This is unacceptable.");
-      IMP_INTERNAL_CHECK_FLOAT_EQUAL(old_score, new_score,
-                                     "Old and new scores don't match");
-    }
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
+  for (unsigned int i=0; i< rs.size(); ++i) {
+    double old_score= rs[i]->get_last_score();
+    double new_score= rs[i]->unprotected_evaluate(nullptr);
+    IMP_INTERNAL_CHECK(new_score != 0,
+                       "The score of the current decomposition term is 0."
+                       << " This is unacceptable.");
+    IMP_INTERNAL_CHECK_FLOAT_EQUAL(old_score, new_score,
+                                   "Old and new scores don't match");
   }
+#endif
   // need pointer to make sure destruction of rs doesn't free anything
   base::Pointer<Restraint> ret= create_decomp_helper(this,
                                                      rs);
@@ -193,6 +201,18 @@ ScoringFunction *Restraint::create_scoring_function(double weight,
            weight, max,
            get_name()+" scoring"));
   return ret.release();
+}
+
+ScoringFunction *Restraint::create_internal_scoring_function() const {
+    if (!cached_internal_scoring_function_) {
+      Restraint* ncthis= const_cast<Restraint*>(this);
+      IMP_NEW(internal::GenericRestraintsScoringFunction<RestraintsTemp>, ret,
+              (RestraintsTemp(1, ncthis),
+               1.0, NO_MAX,
+               get_name()+" scoring"));
+      cached_internal_scoring_function_= ret;
+    }
+    return cached_internal_scoring_function_;
 }
 
 Restraints create_decomposition(const RestraintsTemp &rs) {
@@ -219,30 +239,35 @@ void Restraint::do_add_score_and_derivatives(ScoreAccumulator sa) const {
     } else {
       score= unprotected_evaluate(sa.get_derivative_accumulator());
     }
-    IMP_LOG(TERSE, "Adding " << score << " from restraint " << get_name()
+    IMP_LOG_TERSE( "Adding " << score << " from restraint " << get_name()
             << std::endl);
     sa.add_score(score);
     set_last_score(score);
   }
 }
 
+double Restraint::get_score() const {
+  return evaluate(false);
+}
+
 void Restraint::add_score_and_derivatives(ScoreAccumulator sa) const {
   // implement these in macros to avoid extra virtual function call
   ScoreAccumulator nsa(sa, this);
-  IMP_TASK((nsa), do_add_score_and_derivatives(nsa));
+  IMP_TASK((nsa), do_add_score_and_derivatives(nsa),
+           "add score and derivatives");
   set_was_used(true);
 }
 
-#ifdef IMP_USE_DEPRECATED
+#if IMP_HAS_DEPRECATED
 ParticlesTemp Restraint::get_input_particles() const {
   IMP_DEPRECATED_FUNCTION(get_inputs());
-  return IMP::get_input_particles(get_inputs());
+  return IMP::kernel::get_input_particles(get_inputs());
 }
 ContainersTemp Restraint::get_input_containers() const {
   IMP_DEPRECATED_FUNCTION(get_inputs());
-  return IMP::get_input_containers(get_inputs());
+  return IMP::kernel::get_input_containers(get_inputs());
 }
 #endif
 
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

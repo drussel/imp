@@ -15,7 +15,7 @@ import IMP.isd
 import IMP.gsl
 import IMP.saxs
 
-IMP.set_log_level(0)
+IMP.base.set_log_level(0)
 #fitno=0
 
 def subsample(idx, data, npoints):
@@ -77,7 +77,18 @@ class SAXSProfile:
             #keep the ones that have data
             stuff = filter(lambda a: (len(a)>=self.nflags)
                                       and not a[0].startswith('#'), stuff)
+            #drop offset, and first 3 columns must be of float type and not nan
             stuff = map(lambda a:a[:self.nflags+offset], stuff)
+            s2=[]
+            for s in stuff:
+                try:
+                    map(float,s[:3])
+                except ValueError:
+                    continue
+                if 'nan' in s[:3]:
+                    continue
+                s2.append(s)
+            stuff=s2
         elif isinstance(input, list) or isinstance(input, tuple):
             for i in input:
                 if len(i) != self.nflags + offset:
@@ -369,14 +380,14 @@ class SAXSProfile:
         else:
             self.particles['G'].set_nuisance_is_optimized(True)
             self.particles['Rg'].set_nuisance_is_optimized(True)
-            if self.mean == 'Generalized':
-                self.particles['d'].set_nuisance_is_optimized(True)
-            else:
+            if self.mean == 'Simple':
                 self.particles['d'].set_nuisance_is_optimized(False)
-            if self.mean == 'Full':
-                self.particles['s'].set_nuisance_is_optimized(True)
             else:
-                self.particles['s'].set_nuisance_is_optimized(False)
+                self.particles['d'].set_nuisance_is_optimized(True)
+                if self.mean == 'Generalized':
+                    self.particles['s'].set_nuisance_is_optimized(False)
+                else:
+                    self.particles['s'].set_nuisance_is_optimized(True)
         self.particles['tau'].set_nuisance_is_optimized(True)
         self.particles['lambda'].set_nuisance_is_optimized(True)
         self.particles['sigma2'].set_nuisance_is_optimized(True)
@@ -686,8 +697,8 @@ Merging
                               " of zero are discarded as well")
     parser.add_option_group(group)
 
-    group.add_option('--aalpha', help='type I error (default 1e-7)',
-                     type="float", default=1e-7, metavar='ALPHA')
+    group.add_option('--aalpha', help='type I error (default 1e-4)',
+                     type="float", default=1e-4, metavar='ALPHA')
     group.add_option('--acutoff', help='when a value after CUT is discarded,'
             ' the rest of the curve is discarded as well (default is 0.1)',
             type="float", default=0.1, metavar='CUT')
@@ -700,17 +711,17 @@ Merging
                      type="float", default=4., metavar='D')
     group.add_option('--bs', help='Initial value for s (default 0)',
                      type="float", default=0., metavar='S')
-    group.add_option('--boptimize', help='Which mean parameters are optimized.'
+    group.add_option('--bmean', help='Defines the most complex mean '
+            'function that will be tried during model comparison.'
             " One of Flat (the offset parameter A is optimized), "
-            "Simple (default, optimizes A, G and Rg), "
+            "Simple (optimizes A, G and Rg), "
             "Generalized (optimizes G, Rg and d), "
-            "Full (optimizes G, Rg, d and s)",
-            type="choice", default="Simple",
+            "Full (default, optimizes G, Rg, d and s) "
+            "If --bnocomp is given, will try to fit only with this model",
+            type="choice", default="Full",
             choices=['Flat','Simple','Generalized','Full'])
-    group.add_option('--bcomp', help='Perform model comparison, which allows to'
-            ' choose a mean function that does not overfit the data. If --bcomp'
-            ' is given, --boptimize is taken to be the most complex model. '
-            "Default: don't perform it.",
+    group.add_option('--bnocomp', help='Don\'t perform model comparison. '
+            "Default: perform it.",
             action='store_true', default=False)
     group.add_option('--baverage', help='Average over all possible parameters '
             'instead of just taking the most probable set of parameters. '
@@ -722,10 +733,9 @@ Merging
             ' NUM. If NUM=-1 (default), all points will be used.')
     group.add_option('--blimit_hessian', metavar='NUM', default=-1, type='int',
             help='To save resources, set the maximum number of points used in'
-            ' the Hessian calculation (options --baverage, --bcomp and --berror'
-            '). '
-            'Dataset will be subsampled if it is bigger than NUM. If NUM=-1 '
-            '(default), all points will be used.')
+            ' the Hessian calculation (model comparison, options --baverage, '
+            'and --berror ). Dataset will be subsampled if it is bigger than'
+            'NUM. If NUM=-1 (default), all points will be used.')
     group.add_option('--berror', action='store_true', default=False,
             help="Compute error bars on all parameters even in case where "
             "model comparison was disabled. Involves the computation of a "
@@ -739,10 +749,10 @@ Merging
             "input curve the other curves will be rescaled to. Options are "
             "first or last (default is last)", type="choice",
             choices=['first','last'])
-    group.add_option('--cmodel', default='normal-offset',
+    group.add_option('--cmodel', default='normal',
             help="Which rescaling model to use to calculate gamma. "
-            "'normal-offset' (default) for a normal "
-            "model with offset, 'normal' for a normal model with zero offset "
+            "'normal-offset' for a normal model with offset, "
+            "'normal' (default) for a normal model with zero offset "
             "and 'lognormal' for a lognormal model.",
             choices=['normal','normal-offset','lognormal'], type='choice')
     group.add_option('--cnpoints', type="int", default=200, metavar="NUM",
@@ -766,13 +776,13 @@ Merging
             "angle).", type="int", default=0)
     group.add_option('--enoextrapolate', action='store_true', default=False,
             help="Don't extrapolate at all, even at low angle (default False)")
-    group.add_option('--eoptimize', help='Which mean parameters are optimized.'
-            ' See --boptimize. Default is Generalized', type="choice",
-            default="Generalized",
-            choices=['Simple','Generalized','Full','Flat'])
-    group.add_option('--ecomp', help='Perform model comparison, see --bcomp.'
-            ' Default is not to perform it.', action='store_true',
-            default=False)
+    group.add_option('--emean', help='Which most complex mean function '
+            'to try for model comparison.'
+            ' See --bmean. Default is Full', type="choice",
+            default="Full", choices=['Simple','Generalized','Full','Flat'])
+    group.add_option('--enocomp', help='Don\'t perform model comparison, '
+            'see --bnocomp. Default is not to perform it.',
+            action='store_true', default=False)
     group.add_option('--eaverage', help="Average over all possible parameters "
             "instead of just taking the most probable set of parameters. "
             "Default is not to perform the averaging.",
@@ -783,10 +793,9 @@ Merging
             ' NUM. If NUM=-1 (default), all points will be used.')
     group.add_option('--elimit_hessian', metavar='NUM', default=-1, type='int',
             help='To save resources, set the maximum number of points used in'
-            ' the Hessian calculation (options --eaverage, --ecomp and --eerror'
-            '). '
-            'Dataset will be subsampled if it is bigger than NUM. If NUM=-1 '
-            '(default), all points will be used.')
+            ' the Hessian calculation (model comparison, options --eaverage, '
+            'and --eerror ). Dataset will be subsampled if it is bigger than'
+            'NUM. If NUM=-1 (default), all points will be used.')
     group.add_option('--eerror', action='store_true', default=False,
             help="Compute error bars on all parameters even in case where "
             "model comparison was disabled. Involves the computation of a "
@@ -933,9 +942,9 @@ def do_quasinewton(model,nsteps):
     #    if print_steps >0 and i % print_steps == 0 :
     #        print i,
     #        sys.stdout.flush()
-    #    IMP.set_log_level(IMP.TERSE)
+    #    IMP.base.set_log_level(IMP.base.TERSE)
     #    qn.optimize(1)
-    #    IMP.set_log_level(0)
+    #    IMP.base.set_log_level(0)
     #    write_params(fl,model,a,b,tau,lam,sigma)
     qn.optimize(nsteps)
 
@@ -965,14 +974,9 @@ def get_initial_Rg(data):
 
 def set_defaults_mean(data, particles, mean_function):
     #set initial value for G to be a rough estimate of I(0)
-    if max(data['q']) > 1:
-        #units are nm
-        Ivals = [data['I'][i] for i in xrange(len(data['q']))
-                if data['q'][i] < 1][:50]
-    else:
-        #units are angstrom
-        Ivals = [data['I'][i] for i in xrange(len(data['q']))
-                if data['q'][i] < 0.1][:50]
+    #take first 10 pc or 20 points at least
+    npoints=min(len(data['q'])/10,50)
+    Ivals = [data['I'][i] for i in xrange(len(data['q']))][:npoints]
     particles['G'].set_nuisance(mean(Ivals))
     particles['G'].set_lower(min(Ivals))
     particles['G'].set_upper(2*max(Ivals))
@@ -990,14 +994,14 @@ def set_defaults_mean(data, particles, mean_function):
         particles['G'].set_nuisance_is_optimized(True)
         particles['Rg'].set_nuisance_is_optimized(True)
         particles['Rg'].set_nuisance(get_initial_Rg(data))
-        if mean_function == 'Generalized':
-            particles['d'].set_nuisance_is_optimized(True)
-        else:
+        if mean_function == 'Simple':
             particles['d'].set_nuisance_is_optimized(False)
-        if mean_function == 'Full':
-            particles['s'].set_nuisance_is_optimized(True)
         else:
-            particles['s'].set_nuisance_is_optimized(False)
+            particles['d'].set_nuisance_is_optimized(True)
+            if mean_function == 'Generalized':
+                particles['s'].set_nuisance_is_optimized(False)
+            else:
+                particles['s'].set_nuisance_is_optimized(True)
     particles['tau'].set_nuisance_is_optimized(False)
     particles['lambda'].set_nuisance_is_optimized(False)
     particles['sigma2'].set_nuisance_is_optimized(False)
@@ -1005,7 +1009,7 @@ def set_defaults_mean(data, particles, mean_function):
 def find_fit_mean(data, initvals, verbose, mean_function):
     model, particles, functions, gp = \
             setup_process(data, initvals, 1)
-    IMP.set_log_level(IMP.TERSE)
+    IMP.base.set_log_level(IMP.base.TERSE)
     gpr = IMP.isd.GaussianProcessInterpolationRestraint(gp)
     model.add_restraint(gpr)
     set_defaults_mean(data, particles, mean_function)
@@ -1022,7 +1026,7 @@ def find_fit_mean(data, initvals, verbose, mean_function):
     #particles['d'].set_nuisance(2.92)
     #for q in linspace(0.001,0.3):
     #    print "cmp",q,gp.get_posterior_mean([q])
-    #IMP.set_log_level(IMP.TERSE)
+    #IMP.base.set_log_level(IMP.base.TERSE)
     #for q in linspace(0.001,0.3):
     #    print "cmp",q,gp.get_posterior_mean([q])
     #sys.exit()
@@ -1379,14 +1383,14 @@ def bayes_factor(data, initvals, verbose, mean_func, maxpoints):
     else:
         particles['G'].set_nuisance_is_optimized(True)
         particles['Rg'].set_nuisance_is_optimized(True)
-        if mean_func == 'Generalized':
-            particles['d'].set_nuisance_is_optimized(True)
-        else:
+        if mean_func == 'Simple':
             particles['d'].set_nuisance_is_optimized(False)
-        if mean_func == 'Full':
-            particles['s'].set_nuisance_is_optimized(True)
         else:
-            particles['s'].set_nuisance_is_optimized(False)
+            particles['d'].set_nuisance_is_optimized(True)
+            if mean_func == 'Generalized':
+                particles['s'].set_nuisance_is_optimized(False)
+            else:
+                particles['s'].set_nuisance_is_optimized(True)
     particles['tau'].set_nuisance_is_optimized(True)
     particles['lambda'].set_nuisance_is_optimized(True)
     particles['sigma2'].set_nuisance_is_optimized(True)
@@ -1395,12 +1399,26 @@ def bayes_factor(data, initvals, verbose, mean_func, maxpoints):
     Np = H.shape[0]
     MP = model.evaluate(False)
     ML = gpr.unprotected_evaluate(None)
-    retval = linalg.slogdet(H)
-    if retval[0] == 0 and retval[1] == -inf:
-        print "Warning: skipping model %s" % mean_func
-        logdet = inf
-    else:
-        logdet = retval[1]/2.
+    try:
+        retval = linalg.slogdet(H)
+        if retval[0] == 0 and retval[1] == -inf:
+            print "Warning: skipping model %s" % mean_func
+            logdet = inf
+        else:
+            logdet = retval[1]/2.
+    except AttributeError:
+        #older numpy versions don't have slogdet, try built-in
+        #at the cost of an extra hessian calculation
+        try:
+            retval = gpr.get_logdet_hessian()
+            if isinf(retval):
+                print "Warning: re-skipping model %s" % mean_func
+                logdet = inf
+            else:
+                logdet = retval/2.
+        except IMP.ModelException:
+            print "Warning: Hessian is not positive definite"
+            logdet=inf
     return (Np, (2*pi)**(Np/2.), H, logdet, MP, ML, MP-ML,
             exp(-MP)*(2*pi)**(Np/2.)*exp(-logdet),
             MP - Np/2.*log(2*pi) + logdet)
@@ -1552,9 +1570,12 @@ def rescale_curves(refdata, data, normal = False, offset = False):
 
 def write_individual_profile(prof, qvals, args):
     destname = os.path.basename(prof.get_filename())
-    if args.outlevel == 'sparse' or args.outlevel == 'normal':
+    if args.outlevel == 'sparse':
         dflags = ['q','I','err']
         mflags = ['q','I','err']
+    elif args.outlevel == 'normal':
+        dflags = ['q','I','err','agood']
+        mflags = ['q','I','err','mean','agood']
     else:
         dflags = None
         mflags = None
@@ -1563,7 +1584,8 @@ def write_individual_profile(prof, qvals, args):
     if args.postpone_cleanup or args.stop != "cleanup" :
         if args.npoints >0:
             prof.write_mean(destname, bool_to_int=True, dir=args.destdir,
-                header=args.header, average=args.eaverage, num=args.npoints)
+                header=args.header, average=args.eaverage, num=args.npoints,
+                flags=mflags)
         else:
             qvalues = prof.get_data(colwise=True)['q']
             qmin = min(qvalues)
@@ -1571,7 +1593,8 @@ def write_individual_profile(prof, qvals, args):
             qvalues = qvals[where(qvals >= qmin)]
             qvalues = qvalues[where(qvalues <= qmax)]
             prof.write_mean(destname, bool_to_int=True, dir=args.destdir,
-                header=args.header, average=args.eaverage, qvalues=qvalues)
+                header=args.header, average=args.eaverage, qvalues=qvalues,
+                flags=mflags)
 
 def write_merge_profile(merge,qvals, args):
     if args.outlevel == 'sparse':
@@ -1639,7 +1662,7 @@ def write_summary_file(merge, profiles, args):
         fl.write("  Gaussian Process parameters\n")
         fl.write("   mean function : %s\n" % merge.mean)
         data = merge.get_params()
-        if args.eerror or args.ecomp:
+        if args.eerror or (not args.enocomp):
             Hessian, Hess_names = get_hessian_stats(merge,args.elimit_hessian)
         else:
             Hessian = None
@@ -1656,7 +1679,7 @@ def write_summary_file(merge, profiles, args):
         fl.write("   I(0) : %f\n" % \
                         (merge.get_mean(qvalues=[0],
                                             average=args.eaverage)[0][1]))
-        if args.ecomp:
+        if not args.enocomp:
             fl.write("  Model Comparison : num_params -log10(Bayes Factor) "
                     "-log(Posterior) -log(Likelihood) BIC AIC\n")
             for i in merge.bayes:
@@ -1664,9 +1687,9 @@ def write_summary_file(merge, profiles, args):
                 fl.write("   %s : %d\t%f\t%f\t%f\t%f\t%f\n" %
                         (name, merge.bayes[i][0], merge.bayes[i][8]/log(10),
                             merge.bayes[i][4], merge.bayes[i][5],
-                            -2*merge.bayes[i][4]
+                            -2*merge.bayes[i][5]
                              +merge.bayes[i][0]*log(len(merge.get_raw_data())),
-                            -2*merge.bayes[i][4]+2*merge.bayes[i][0]))
+                            -2*merge.bayes[i][5]+2*merge.bayes[i][0]))
             fl.write("  Model Comparison : best model\n")
             fl.write("   Name : %s\n" % merge.mean)
             fl.write("   Number of parameters : %d\n" %
@@ -1710,7 +1733,7 @@ def write_summary_file(merge, profiles, args):
         data = p.get_params()
         fl.write("  2. GP parameters (values for non-rescaled curve)\n")
         fl.write("   mean function : %s\n" % p.mean)
-        if args.berror or args.bcomp:
+        if args.berror or (not args.bnocomp):
             Hessian, Hess_names = get_hessian_stats(p,args.blimit_hessian)
         else:
             Hessian = None
@@ -1860,8 +1883,8 @@ def fitting(profiles, args):
     verbose = args.verbose
     maxpointsF = args.blimit_fitting
     maxpointsH = args.blimit_hessian
-    mean_function = args.boptimize
-    model_comp=args.bcomp
+    mean_function = args.bmean
+    model_comp = not args.bnocomp
     if verbose >0:
         print "2. fitting"
     for p in profiles:
@@ -1966,10 +1989,10 @@ def rescaling(profiles, args):
             raise RuntimeError, "Got NAN in ref err"
         gammas.append(rescale_curves(prefvalues, pvalues,
             normal = use_normal, offset = use_offset))
-        fl=open('rescale_%d.npy' % ctr, 'w')
-        import cPickle
-        cPickle.dump([pvalues,prefvalues],fl)
-        fl.close()
+        #fl=open('rescale_%d.npy' % ctr, 'w')
+        #import cPickle
+        #cPickle.dump([pvalues,prefvalues],fl)
+        #fl.close()
         #fl=open('rescale_%d.dat' % ctr, 'w')
         #for i in xrange(len(pvalues['q'])):
         #    fl.write("%s " % pvalues['q'][i])
@@ -2068,8 +2091,8 @@ def merging(profiles, args):
     maxpointsH = args.elimit_hessian
     do_extrapolation = not args.enoextrapolate
     extrapolate = 1+args.eextrapolate/float(100)
-    mean_function = args.eoptimize
-    model_comp=args.ecomp
+    mean_function = args.emean
+    model_comp = not args.enocomp
     if verbose > 0:
         print "5. merging"
         print "   gathering data"

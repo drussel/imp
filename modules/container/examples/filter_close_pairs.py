@@ -1,3 +1,6 @@
+## \example container/filter_close_pairs.py
+## This example shows how to filter the list of close pairs generated in the IMP.container.ClosePairContainer (or IMP.container.CloseBipartitePairContainer). Eventually the filter should probably be implemented in C++, for speed but implementing the filter in python is good for prototyping.
+
 import IMP
 import IMP.container
 import IMP.core
@@ -7,7 +10,7 @@ np=10
 bb= IMP.algebra.BoundingBox3D(IMP.algebra.Vector3D(0,0,0),
                               IMP.algebra.Vector3D(5,5,5))
 ik= IMP.IntKey("num")
-IMP.set_log_level(IMP.SILENT)
+IMP.base.set_log_level(IMP.base.SILENT)
 m= IMP.Model()
 l= []
 for i in range(0, np):

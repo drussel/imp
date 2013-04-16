@@ -12,6 +12,7 @@
 #include <IMP/atom/atom_config.h>
 #include <IMP/core/XYZ.h>
 #include "Hierarchy.h"
+#include "Selection.h"
 #include "IMP/base_types.h"
 
 IMPATOM_BEGIN_NAMESPACE
@@ -31,7 +32,7 @@ inline double get_rmsd(const Vector3DsOrXYZs0& m1, const Vector3DsOrXYZs1& m2,
                   ==std::distance(m2.begin(), m2.end()),
             "The input sets of XYZ points "
             <<"should be of the same size");
-  float rmsd=0.0;
+  double rmsd=0.0;
   typename Vector3DsOrXYZs0::const_iterator it0= m1.begin();
   typename Vector3DsOrXYZs1::const_iterator it1= m2.begin();
   for(; it0!= m1.end(); ++it0, ++it1) {
@@ -41,6 +42,49 @@ inline double get_rmsd(const Vector3DsOrXYZs0& m1, const Vector3DsOrXYZs1& m2,
                                       tred);
   }
   return std::sqrt(rmsd / m1.size());
+}
+
+/** RMSD on a pair of Selections.*/
+inline double get_rmsd(const Selection &s0,
+                       const Selection &s1,
+                       const IMP::algebra::Transformation3D &tr_for_second
+                       = IMP::algebra::get_identity_transformation_3d()) {
+  return get_rmsd(s0.get_selected_particles(),
+                  s1.get_selected_particles(), tr_for_second);
+}
+
+//! Calculate the root mean square deviation between two sets of 3D points.
+/**
+   \note the function assumes correspondence between the two sets of
+   points and does not need rigid alignment. Note that it is different from
+   get_drms().
+
+   \genericgeometry
+ */
+template <class Vector3DsOrXYZs0, class Vector3DsOrXYZs1>
+inline double get_drmsd(const Vector3DsOrXYZs0& m0, const Vector3DsOrXYZs1& m1)
+  {
+  IMP_USAGE_CHECK(m0.size()==m1.size(),
+            "The input sets of XYZ points "
+            <<"should be of the same size");
+  double drmsd=0.0;
+
+  int npairs = 0;
+  for(unsigned i=0;i<m0.size()-1;++i){
+       algebra::Vector3D v0i=get_vector_d_geometry(m0[i]);
+       algebra::Vector3D v1i=get_vector_d_geometry(m1[i]);
+
+       for(unsigned j=i+1;j<m0.size();++j){
+             algebra::Vector3D v0j=get_vector_d_geometry(m0[j]);
+             algebra::Vector3D v1j=get_vector_d_geometry(m1[j]);
+
+             double dist0=algebra::get_distance(v0i,v0j);
+             double dist1=algebra::get_distance(v1i,v1j);
+             drmsd+=(dist0-dist1)*(dist0-dist1);
+             npairs++;
+       }
+    }
+  return std::sqrt(drmsd/npairs);
 }
 
 
@@ -256,12 +300,12 @@ public:
 \endcode
       where ps is the list of particles passed to the constructor.
  */
-  float get_rmsd(const algebra::Transformation3D& t1,
+  double get_rmsd(const algebra::Transformation3D& t1,
                  const algebra::Transformation3D& t2) {
     return sqrt(get_squared_rmsd(t1, t2));}
 
   //! Get the squared rmsd between two transformations
-  float get_squared_rmsd(const algebra::Transformation3D& t1,
+  double get_squared_rmsd(const algebra::Transformation3D& t1,
               const algebra::Transformation3D& t2);
   IMP_SHOWABLE_INLINE(RMSDCalculator, out << centroid_);
 private:

@@ -4,13 +4,13 @@ import IMP.em
 import IMP.multifit
 import IMP.restrainer
 
-class SampleTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for sampled density maps"""
 
     def setUp(self):
         """initialize IMP environment create particles"""
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.base.SILENT)
 
         #init IMP model ( the environment)
         self.mdl = IMP.Model()

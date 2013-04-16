@@ -127,14 +127,16 @@ Vector3Ds get_uniform_surface_cover(const SpherePatch3D &sph,
   Vector3Ds points;
   while (points.size() < number_of_points) {
     Vector3D rp = get_random_vector_on(sph.get_sphere());
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
     double r2
       = (rp-sph.get_sphere().get_center())
       .get_squared_magnitude();
-    IMP_CHECK_VARIABLE(r2);
-    IMP_INTERNAL_CHECK(std::abs(r2- square(sph.get_sphere().get_radius()))
+    IMP_INTERNAL_CHECK(std::abs(r2- get_squared(sph.get_sphere().get_radius()))
                        < .05 *r2,
                "Bad point on sphere " << r2
-               << " " << square(sph.get_sphere().get_radius()) << std::endl);
+               << " " << get_squared(sph.get_sphere().get_radius())
+                       << std::endl);
+#endif
     if (sph.get_contains(rp)) {
       points.push_back(rp);
     }
@@ -146,8 +148,8 @@ Vector3Ds get_uniform_surface_cover(const Cone3D &cone,
                         unsigned int number_of_points) {
  Vector3Ds points;
  Vector3D sph_p;
- Sphere3D sph(cone.get_tip(), std::sqrt(square(cone.get_radius())
-                                        +square(cone.get_height())));
+ Sphere3D sph(cone.get_tip(), std::sqrt(get_squared(cone.get_radius())
+                                        +get_squared(cone.get_height())));
  while (points.size() < number_of_points) {
    sph_p=get_random_vector_in(sph);
    if (cone.get_contains(sph_p)) {
@@ -174,12 +176,12 @@ Vector3Ds get_random_chain(unsigned int n, double r,
       IMP_FAILURE("Cannot place first random point");
     }
     if (failures.back() > max_failures) {
-      IMP_LOG(VERBOSE, "Popping " << ret.back() << std::endl);
+      IMP_LOG_VERBOSE( "Popping " << ret.back() << std::endl);
       ret.pop_back();
       failures.pop_back();
     }
     Vector3D v= get_random_vector_on(Sphere3D(ret.back(), 2*r));
-    IMP_LOG(VERBOSE, "Trying " << v << " (" << ret.size() << ")"
+    IMP_LOG_VERBOSE( "Trying " << v << " (" << ret.size() << ")"
             << std::endl);
     Sphere3D cb(v, r); // some slack
     bool bad=false;

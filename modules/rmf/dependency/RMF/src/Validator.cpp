@@ -2,12 +2,15 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #include <RMF/Validator.h>
 #include <algorithm>
+
+RMF_ENABLE_WARNINGS
+
 namespace RMF {
 
 Creators& get_validators() {
@@ -24,7 +27,7 @@ NodeValidator::NodeValidator(FileConstHandle rh, std::string name):
 
 void NodeValidator::write_errors(std::ostream &out) const {
   typedef std::pair<NodeConstHandles, NodeConstHandle> QI;
-  vector<QI >
+  std::vector<QI >
   queue(1, QI(NodeConstHandles(), get_file().get_root_node()));
   do {
     QI c = queue.back();
@@ -38,23 +41,6 @@ void NodeValidator::write_errors(std::ostream &out) const {
   } while (!queue.empty());
 }
 Validator::~Validator() {
-}
-
-namespace {
-struct NodeIDsLess {
-  bool operator()(const NodeConstHandles &a, const NodeConstHandles&b) const {
-    return std::lexicographical_compare(a.begin(), a.end(),
-                                        b.begin(), b.end());
-  }
-};
-struct NodeIDsEqual {
-  bool operator()(const NodeConstHandles &a, const NodeConstHandles&b) const {
-    // super lazy
-    return !std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end())
-           && !std::lexicographical_compare(b.begin(), b.end(),
-                                            a.begin(), a.end());
-  }
-};
 }
 
 struct NonNegativeChecker {
@@ -146,3 +132,5 @@ public:
 RMF_VALIDATOR(PhysicsValidator);
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS

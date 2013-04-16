@@ -1,3 +1,6 @@
+## \example domino/interactive_with_containers.py
+## Run domino storing the intermediate and final results in an hdf5 database. This has the advantage that if you interrupt the run at any point, you have a list of everything computed so far and so can get some more idea of what is going on.
+
 import IMP.domino
 import IMP.algebra
 import IMP.container
@@ -22,7 +25,7 @@ pst= IMP.domino.ParticleStatesTable()
 for p in ps:
     pst.set_particle_states(p, space)
 
-m.set_log_level(IMP.SILENT)
+m.set_log_level(IMP.base.SILENT)
 
 # make sure to break up the
 mt= IMP.domino.get_merge_tree([r], pst)
@@ -38,7 +41,7 @@ leaf_table=IMP.domino.BranchAndBoundAssignmentsTable(pst, filters)
 
 # create a database to store the results
 name=IMP.create_temporary_file_name("assignments", ".hdf5")
-root= RMF.create_hdf5_file(name)
+root= RMF.HDF5.create_file(name)
 
 # recurse down the tree getting the assignments and printing them
 def get_assignments(vertex):

@@ -2,16 +2,17 @@ import IMP
 import IMP.test
 import sys
 import IMP.em
+import IMP.base
 import os
 
-class SampleTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for sampled density maps"""
 
     def setUp(self):
         """initialize IMP environment create particles"""
         IMP.test.TestCase.setUp(self)
-        IMP.set_log_level(IMP.SILENT)
-        IMP.set_check_level(IMP.NONE)
+        IMP.base.set_log_level(IMP.base.SILENT)
+        IMP.base.set_check_level(IMP.base.NONE)
         #init IMP model ( the environment)
         self.imp_model = IMP.Model()
         self.particles = []
@@ -45,14 +46,15 @@ class SampleTests(IMP.test.TestCase):
             self.assertGreater(model_map.get_value(v), 0.6,
                          "map was not sampled correctly")
         model_map.calcRMS()
-        IMP.em.write_map(model_map, "xxx.em",erw)
+        mapfile = IMP.base.create_temporary_file_name("xxx.em")
+        IMP.em.write_map(model_map, mapfile, erw)
         em_map = IMP.em.DensityMap()
-        em_map= IMP.em.read_map("xxx.em",erw)
+        em_map= IMP.em.read_map(mapfile, erw)
         em_map.calcRMS()
         self.assertAlmostEqual(em_map.get_header().rms,
                                model_map.get_header().rms, delta=.000001,
                                msg="standard deviations of maps differ")
-        os.unlink("xxx.em")
+        os.unlink(mapfile)
 
     def test_sample_pdb(self):
         """Check that sampling particles works"""

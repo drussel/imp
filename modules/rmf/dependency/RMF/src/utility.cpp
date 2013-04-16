@@ -2,7 +2,7 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,6 +14,8 @@
 #include <RMF/internal/set.h>
 #include <RMF/internal/utility.h>
 #include <RMF/decorators.h>
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 namespace {
@@ -70,8 +72,8 @@ namespace {
 template <class TypeTraits>
 void copy_node_frame_type_node(NodeConstHandle                in,
                                NodeHandle                     out,
-                               const vector<Key<TypeTraits> > &inkeys,
-                               const vector<Key<TypeTraits> > &outkeys) {
+                               const std::vector<Key<TypeTraits> > &inkeys,
+                               const std::vector<Key<TypeTraits> > &outkeys) {
   if (!in.get_has_association()) return;
   for (unsigned int i = 0; i < inkeys.size(); ++i) {
     if (in.get_has_frame_value(inkeys[i])) {
@@ -89,10 +91,10 @@ void copy_node_frame_type_node(NodeConstHandle                in,
 template <class TypeTraits>
 void copy_node_frame_type(FileConstHandle in, FileHandle out,
                           Categories incats, Categories outcats) {
-  vector<Key<TypeTraits> > inkeys;
-  vector<Key<TypeTraits> > outkeys;
+  std::vector<Key<TypeTraits> > inkeys;
+  std::vector<Key<TypeTraits> > outkeys;
   for (unsigned int i = 0; i < incats.size(); ++i) {
-    vector<Key<TypeTraits> > cinkeys = in.get_keys<TypeTraits>(incats[i]);
+    std::vector<Key<TypeTraits> > cinkeys = in.get_keys<TypeTraits>(incats[i]);
     inkeys.insert(inkeys.end(), cinkeys.begin(), cinkeys.end());
     for (unsigned int j = 0; j < cinkeys.size(); ++j) {
       outkeys.push_back(out.get_key<TypeTraits>(outcats[i],
@@ -189,8 +191,8 @@ namespace {
 template <class TypeTraits>
 bool get_equal_node_frame_type_node(NodeConstHandle                in,
                                     NodeConstHandle                out,
-                                    const vector<Key<TypeTraits> > &inkeys,
-                                    const vector<Key<TypeTraits> > &outkeys,
+                                    const std::vector<Key<TypeTraits> > &inkeys,
+                                    const std::vector<Key<TypeTraits> > &outkeys,
                                     bool                           print_diff) {
   bool ret = true;
   for (unsigned int i = 0; i < inkeys.size(); ++i) {
@@ -208,7 +210,10 @@ bool get_equal_node_frame_type_node(NodeConstHandle                in,
       if (print_diff) {
         std::cout << "Node differ about value "
                   << in.get_file().get_name(inkeys[i]) << " at "
-                  << in << " and " << out << std::endl;
+                  << in << " and " << out << " "
+                  << in.get_value(inkeys[i])
+                  << " != "
+                  << out.get_value(outkeys[i]) << std::endl;
       }
       ret = false;
     }
@@ -226,10 +231,10 @@ template <class TypeTraits>
 bool get_equal_node_frame_type(FileConstHandle in, FileConstHandle out,
                                Categories incats, Categories outcats,
                                bool print_diff) {
-  vector<Key<TypeTraits> > inkeys;
-  vector<Key<TypeTraits> > outkeys;
+  std::vector<Key<TypeTraits> > inkeys;
+  std::vector<Key<TypeTraits> > outkeys;
   for (unsigned int i = 0; i < incats.size(); ++i) {
-    vector<Key<TypeTraits> > cinkeys = in.get_keys<TypeTraits>(incats[i]);
+    std::vector<Key<TypeTraits> > cinkeys = in.get_keys<TypeTraits>(incats[i]);
     inkeys.insert(inkeys.end(), cinkeys.begin(), cinkeys.end());
     for (unsigned int j = 0; j < cinkeys.size(); ++j) {
       outkeys.push_back(out.get_key<TypeTraits>
@@ -277,3 +282,5 @@ void test_throw_exception() {
 }
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS

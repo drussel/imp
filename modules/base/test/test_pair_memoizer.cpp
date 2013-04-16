@@ -9,10 +9,22 @@
 #include <IMP/base/showable_macros.h>
 #include <IMP/base/comparison_macros.h>
 #include <IMP/base/hash_macros.h>
+#include <IMP/base/nullptr_macros.h>
 #include <IMP/base/tuple_macros.h>
+#include <IMP/base/flags.h>
+#include <IMP/test/test_macros.h>
 #include <IMP/base/random.h>
 #include <boost/random/uniform_int.hpp>
 #include <numeric>
+
+// Skip test on g++ 4.2, since it fails to compile due to a g++ bug
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 2
+int main(int argc, char *argv[]) {
+  std::cout << "Skipped due to g++ 4.2 bug" << std::endl;
+  return 0;
+}
+
+#else
 
 const int threshold=2;
 namespace IMP {
@@ -47,6 +59,8 @@ namespace IMP {
     typedef IMP::base::Array<2, IMP::base::IP> Entry;
   }
 }
+
+namespace {
 typedef IMP::base::IP KeyPart;
 
 IMP::base::Vector<IMP::base::Entry>
@@ -177,10 +191,12 @@ void check(Table &t, IMP::base::Vector<int> values) {
       }
     }
   }
-  assert(sum==rsum);
+  IMP_TEST_EQUAL(sum, rsum);
+}
 }
 
-int main(int, char *[]) {
+int main(int argc, char *argv[]) {
+  IMP::base::setup_from_argv(argc, argv, "Test memoizer");
   IMP::base::set_log_level(IMP::base::VERBOSE);
   const int n=5;
   boost::uniform_int<> ui(0,n*2);
@@ -206,3 +222,5 @@ int main(int, char *[]) {
   }
   return 0;
 }
+
+#endif // GNUC 4.2

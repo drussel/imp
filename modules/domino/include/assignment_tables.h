@@ -19,7 +19,7 @@
 #include "domino_macros.h"
 #include <IMP/Sampler.h>
 #include <IMP/macros.h>
-#include <IMP/compatibility/map.h>
+#include <IMP/base/map.h>
 #include <boost/pending/disjoint_sets.hpp>
 #if BOOST_VERSION > 103900
 #include <boost/property_map/property_map.hpp>
@@ -31,8 +31,8 @@ IMPDOMINO_BEGIN_NAMESPACE
 class DominoSampler;
 
 /** The base class for classes that create Assignments, one per
-    subset. The main method of interest is get_assignments()
-    which returns a Assignments containing the valid states.
+    subset. The main method of interest is load_assignments()
+    which enumerates the assignments and loads them into an AssignmentContainer.
 */
 class IMPDOMINOEXPORT AssignmentsTable: public IMP::base::Object {
  public:
@@ -101,8 +101,8 @@ public:
   Pointer<ParticleStatesTable> pst_;
   SubsetFilterTables sft_;
   unsigned int max_;
-#if IMP_BUILD < IMP_FAST
-  IMP::compatibility::map<Particle*, ParticlesTemp> rls_;
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
+  IMP::base::map<Particle*, ParticlesTemp> rls_;
 #endif
 #endif
  public:
@@ -121,7 +121,7 @@ public:
     in to domino.
 */
 class IMPDOMINOEXPORT ListAssignmentsTable: public AssignmentsTable {
-  IMP::compatibility::map<Subset,
+  IMP::base::map<Subset,
                           IMP::OwnerPointer<AssignmentContainer> >
     states_;
  public:

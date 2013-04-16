@@ -2,7 +2,7 @@
  *  \file RMF/internal/SharedData.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -18,46 +18,10 @@
 #include "AvroSharedData.types.h"
 #include <utility>
 
+RMF_ENABLE_WARNINGS
+
 namespace RMF {
-namespace internal {
-
-template <class Out, class In>
-void avro_assign(Out &out, In in) {
-  out = in;
-}
-
-inline void avro_assign(NodeID &out, int32_t in) {
-  out = NodeID(in);
-}
-inline void avro_assign(int32_t &out, NodeID in) {
-  out = in.get_index();
-}
-
-#if RMF_USE_DEBUG_VECTOR
-template <class Out, class In>
-void avro_assign(std::vector<Out> &out, vector<In> in) {
-  out.resize(in.size());
-  for (unsigned int i = 0; i < in.size(); ++i) {
-      avro_assign(out[i], in[i]);
-  }
-}
-template <class Out, class In>
-void avro_assign(vector<Out> &out, std::vector<In> in) {
-  out.resize(in.size());
-  for (unsigned int i = 0; i < in.size(); ++i) {
-      avro_assign(out[i], in[i]);
-  }
-}
-#else
-template <class Out, class In>
-void avro_assign(std::vector<Out> &out, const std::vector<In>& in) {
-  out.resize(in.size());
-  for (unsigned int i = 0; i < in.size(); ++i) {
-      avro_assign(out[i], in[i]);
-  }
-}
-#endif
-
+namespace avro_backend {
 
 template <class Base>
 class AvroSharedData: public Base {
@@ -68,10 +32,9 @@ class AvroSharedData: public Base {
   template <class TypeTraits>
   void extract_keys(Category              cat,
                     const KeyIndex        &index,
-                    set<Key<TypeTraits> > &ret ) {
+                    internal::set<Key<TypeTraits> > &ret ) {
     for (typename KeyIndex::const_iterator iti
            = index.begin(); iti != index.end(); ++iti) {
-      std::cout << "found " << iti->first << std::endl;
       ret.insert( P::template get_key_helper<TypeTraits>(cat,
                                                          iti->first));
     }
@@ -89,8 +52,8 @@ class AvroSharedData: public Base {
         || it->second >= static_cast<int>(data.size())) {
       return TypeTraits::get_null_value();
     } else {
-      typename TypeTraits::Type ret;
-      avro_assign(ret, data[it->second]);
+      typename TypeTraits::Type ret
+          = get_as<typename TypeTraits::Type>(data[it->second]);
       return ret;
     }
   }
@@ -112,11 +75,11 @@ class AvroSharedData: public Base {
       index_value = it->second;
     }
     if (static_cast<int>(data.size()) <= index_value) {
-      typename TypeTraits::AvroType null;
-      avro_assign(null,              TypeTraits::get_null_value());
+      typename TypeTraits::AvroType null
+          = get_as<typename TypeTraits::AvroType>(TypeTraits::get_null_value());
       data.resize(index_value + 1, null);
     }
-      avro_assign(data[index_value], val);
+    data[index_value]= get_as<typename TypeTraits::AvroType>(val);
   }
   template <class TypeTraits>
   typename TypeTraits::Type get_value_impl( int             frame,
@@ -169,8 +132,10 @@ public:
   RMF_FOREACH_TYPE(RMF_AVRO_SHARED_TYPE);
 
   AvroSharedData(std::string g, bool create, bool read_only);
-  AvroSharedData(std::string &buffer, bool create, bool read_only,
-                 bool use_buffer);
+  // buffer versions
+  AvroSharedData(std::string &buffer, bool create);
+  AvroSharedData(const std::string &buffer);
+
   virtual ~AvroSharedData() {
   }
   std::string get_name(unsigned int node) const;
@@ -180,29 +145,16 @@ public:
   Ints get_children(int node) const;
   void save_frames_hint(int) {
   }
-  unsigned int get_number_of_frames() const;
   std::string get_description() const;
   void set_description(std::string str);
   std::string get_producer() const;
   void set_producer(std::string str);
-  std::string get_frame_name(int i) const;
-
-  void set_current_frame(int frame) {
-    RMF_USAGE_CHECK(frame < static_cast<int>(get_number_of_frames()),
-                    "Setting to invalid frame");
-    P::set_current_frame(frame);
-    RMF_INTERNAL_CHECK(P::get_current_frame() == frame,
-                       "Didn't set frame");
-  }
-
-  int add_child_frame(int node, std::string name, int t);
-  void add_child_frame(int node, int child_node);
-  Ints get_children_frame(int node) const;
 };
 
-}   // namespace internal
+}   // namespace avro_backend
 } /* namespace RMF */
 
+RMF_DISABLE_WARNINGS
 
 #include "AvroSharedData.impl.h"
 

@@ -14,7 +14,7 @@
 #include <IMP/base/Pointer.h>
 #include <IMP/base_types.h>
 #include "RestraintsScoringFunction.h"
-#include <IMP/compatibility/map.h>
+#include <IMP/base/map.h>
 #include <IMP/algebra/vector_search.h>
 
 IMPCORE_BEGIN_NAMESPACE
@@ -37,7 +37,7 @@ namespace internal {
     of sub scoring functions, one per possibly moved particles. Each of
 */
 class IMPCOREEXPORT IncrementalScoringFunction: public ScoringFunction {
-  typedef compatibility::map<ParticleIndex,
+  typedef base::map<ParticleIndex,
       base::
       OwnerPointer<internal::SingleParticleScoringFunction> >
       ScoringFunctionsMap;
@@ -68,6 +68,7 @@ class IMPCOREEXPORT IncrementalScoringFunction: public ScoringFunction {
       @param weight the weight used to scale the restraints
       @param max maximum value for evaluate_if_good or evaluate_if_below,
                  can be ignored for most purposes
+      @param name The name template to use for the scoring function.
 */
   IncrementalScoringFunction(const ParticlesTemp &to_move,
                              const RestraintsTemp &rs,
@@ -79,7 +80,7 @@ class IMPCOREEXPORT IncrementalScoringFunction: public ScoringFunction {
   */
   void reset_moved_particles();
   /** Set which particles have moved since the last evaluate. */
-  void set_moved_particles(const ParticlesTemp &p);
+  void set_moved_particles(const ParticleIndexes &p);
   /** Close pairs scores can be handled separately for efficiency, to do that,
       add a pair score here to act on the list of particles.*/
   void add_close_pair_score(PairScore *ps, double distance,
@@ -88,8 +89,12 @@ class IMPCOREEXPORT IncrementalScoringFunction: public ScoringFunction {
   void add_close_pair_score(PairScore *ps, double distance,
                             const ParticlesTemp &particles);
   void clear_close_pair_scores();
-  ParticlesTemp get_movable_particles() const;
-  IMP_SCORING_FUNCTION(IncrementalScoringFunction);
+  ParticleIndexes get_movable_particles() const;
+  void do_add_score_and_derivatives(IMP::ScoreAccumulator sa,
+                                    const ScoreStatesTemp &ss) IMP_OVERRIDE;
+  Restraints create_restraints() const IMP_OVERRIDE;
+  ScoreStatesTemp get_required_score_states() const IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(IncrementalScoringFunction);
 };
 
 

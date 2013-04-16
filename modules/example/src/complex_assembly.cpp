@@ -40,7 +40,7 @@ IMPEXAMPLE_BEGIN_NAMESPACE
 
 class AssemblyData {
   ParticlesTemp ps_;
-  compatibility::map<Particle*, int> index_;
+  base::map<Particle*, int> index_;
   Restraints rs_;
   ParticlesTemps particles_;
   domino::InteractionGraph interactions_;
@@ -148,7 +148,7 @@ void optimize_assembly(Model *m, const ParticlesTemp &components,
     isf->clear_close_pair_scores();
     isf->add_close_pair_score(ev, 0,cur, excluded);
     RestraintsTemp rs= other_restraints+ad.get_restraints(cur);
-    IMP_LOG(TERSE, "Current restraints are " << rs
+    IMP_LOG_TERSE( "Current restraints are " << rs
             << " and particles " << cur << std::endl);
     mc->set_restraints(rs);
     cg->set_restraints(rs+RestraintsTemp(1, evr.get())
@@ -159,7 +159,7 @@ void optimize_assembly(Model *m, const ParticlesTemp &components,
       mc->set_kt(100.0/(3*j+1));
       mc->optimize(cur.size()*(j+1)*1000);
       e=cg->optimize(10*cur.size());
-      IMP_LOG(PROGRESS, "Energy is " << e << std::endl);
+      IMP_LOG_PROGRESS( "Energy is " << e << std::endl);
     }
     if (e > cutoff) {
       IMP_THROW("Failure to converge", ModelException);

@@ -13,16 +13,16 @@
 #include "Assignment.h"
 #include "Order.h"
 #include "subset_scores.h"
-#include <IMP/compatibility/map.h>
+#include <IMP/base/map.h>
 #include <IMP/statistics/metric_clustering.h>
-#ifdef IMP_DOMINO_USE_RMF
-#include <RMF/HDF5Group.h>
-#include <RMF/HDF5File.h>
+#if IMP_DOMINO_HAS_RMF
+#include <RMF/HDF5/Group.h>
+#include <RMF/HDF5/File.h>
 #endif
 #include <boost/shared_array.hpp>
 #include <algorithm>
-#include <IMP/compatibility/hash.h>
-#include <IMP/compatibility/vector.h>
+#include <IMP/base/hash.h>
+#include <IMP/base/Vector.h>
 
 #include <queue>
 #include <IMP/random.h>
@@ -137,6 +137,8 @@ inline void ListAssignmentContainer::add_assignment(const Assignment& a) {
 
 /** Store a list of k assignments chosen from all of the ones added to this
     table. The states are chosen uniformly.
+
+    This doesn't seem very useful
  */
 class IMPDOMINOEXPORT SampleAssignmentContainer: public AssignmentContainer {
   // store all as one vector
@@ -169,7 +171,7 @@ SampleAssignmentContainer::get_assignment(unsigned int i) const {
 
 
 
-#if defined(IMP_DOMINO_USE_RMF) || defined(IMP_DOXYGEN)
+#if IMP_DOMINO_HAS_RMF || defined(IMP_DOXYGEN)
 /** Store the assignments in an HDF5DataSet. Make sure to delete this
     container before trying to read from the same data set (unless
     you pass the data set explicitly, in which case it may be OK).
@@ -178,18 +180,18 @@ SampleAssignmentContainer::get_assignment(unsigned int i) const {
     not, yet, be considered stable.
  */
 class IMPDOMINOEXPORT WriteHDF5AssignmentContainer: public AssignmentContainer {
-  RMF::HDF5IndexDataSet2D ds_;
+  RMF::HDF5::IndexDataSet2D ds_;
   Order order_;
   Ints cache_;
   unsigned int max_cache_;
   void flush();
  public:
-  WriteHDF5AssignmentContainer(RMF::HDF5Group parent,
+  WriteHDF5AssignmentContainer(RMF::HDF5::Group parent,
                           const Subset &s,
                           const ParticlesTemp &all_particles,
                           std::string name);
 
-  WriteHDF5AssignmentContainer(RMF::HDF5IndexDataSet2D dataset,
+  WriteHDF5AssignmentContainer(RMF::HDF5::IndexDataSet2D dataset,
                           const Subset &s,
                           const ParticlesTemp &all_particles,
                           std::string name);
@@ -202,14 +204,14 @@ class IMPDOMINOEXPORT WriteHDF5AssignmentContainer: public AssignmentContainer {
     yet, be considered stable.
  */
 class IMPDOMINOEXPORT ReadHDF5AssignmentContainer: public AssignmentContainer {
-  RMF::HDF5IndexConstDataSet2D ds_;
+  RMF::HDF5::IndexConstDataSet2D ds_;
   Order order_;
   Ints cache_;
   unsigned int max_cache_;
   void flush();
  public:
 
-  ReadHDF5AssignmentContainer(RMF::HDF5IndexConstDataSet2D dataset,
+  ReadHDF5AssignmentContainer(RMF::HDF5::IndexConstDataSet2D dataset,
                                const Subset &s,
                                const ParticlesTemp &all_particles,
                                std::string name);
@@ -311,48 +313,6 @@ class IMPDOMINOEXPORT HeapAssignmentContainer: public AssignmentContainer {
                           std::string name="HeapAssignmentsContainer %1%");
   IMP_ASSIGNMENT_CONTAINER(HeapAssignmentContainer);
 };
-
-/** Store the centers of clusters of the assignments. The metric can either
-    be specified explicitly using the set_metric() function or the
-    default can be used which is to use the l_inf norm on the embedding returned
-    by the ParticleState. We can later add the ability to choose the metric
-    that acts on the vector of distances, but for now it is L2.
-
-    \unstable{ClusteredAssignmentContainer}
-    \untested{ClusteredAssignmentContainer}
-*/
-class IMPDOMINOEXPORT ClusteredAssignmentContainer:
-  public AssignmentContainer {
-  unsigned int k_;
-  Subset s_;
-  Pointer<ParticleStatesTable> pst_;
-  double r_;
-  base::Vector<Assignment> d_;
-  statistics::Metrics metrics_;
-  bool get_in_cluster(const Assignment &v) const;
-  double get_minimum_distance() const;
-  void recluster();
- public:
-  ClusteredAssignmentContainer(unsigned int k,
-                               Subset s,
-                               ParticleStatesTable *pst);
-  /** Return the r parameter defining the maximum size of the cluster.
-   */
-  double get_r() const {return r_;}
-  /** Add a metric to act on the specified particle. Make sure this metric
-      matches the ParticleState (eg if it is an XYZState, that the numbers
-      of the states used in the metric and that in the XYZState coincide).
-  */
-  void add_metric(Particle *p, statistics::Metric *m);
-  //! get the properly ordered metrics
-  const statistics::Metrics &get_metrics() const {
-    return metrics_;
-  }
-  IMP_ASSIGNMENT_CONTAINER(ClusteredAssignmentContainer);
-};
-
-
-
 
 /** This is a wrapper for an AssignmentContainer that throws a ValueException
     if more than a certain number of states are added.*/

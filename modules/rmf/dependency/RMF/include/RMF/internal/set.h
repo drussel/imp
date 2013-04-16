@@ -2,7 +2,7 @@
  *  \file RMF/internal/set.h
  *  \brief Declare an efficient stl-compatible set.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
 
 #ifndef RMF_SET_H
@@ -13,6 +13,8 @@
 
 #include <boost/unordered_set.hpp>
 #include "hash.h"
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 namespace internal {
@@ -37,5 +39,7 @@ public:
 
 }
 }
+
+RMF_DISABLE_WARNINGS
 
 #endif  /* RMF_SET_H */

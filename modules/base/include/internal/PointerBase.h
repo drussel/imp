@@ -12,8 +12,8 @@
 #include "ref_counting.h"
 #include "../check_macros.h"
 #include "../warning_macros.h"
-#include "IMP/compatibility/hash.h"
-#include "IMP/compatibility/nullptr.h"
+#include "IMP/base/hash.h"
+#include "IMP/base/nullptr.h"
 
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
@@ -34,7 +34,6 @@ struct RefCountedPointerTraits {
     internal::unref(t);
   }
   static void check(const TT *o) {
-    IMP_CHECK_VARIABLE(o);
     IMP_CHECK_OBJECT(o);
   }
 };
@@ -69,7 +68,6 @@ struct CheckedWeakPointerTraits {
   static void handle_unset(TT* ) {
   }
   static void check(const TT *o) {
-    IMP_CHECK_VARIABLE(o);
     IMP_CHECK_OBJECT(o);
   }
 };
@@ -84,7 +82,7 @@ template <class O, class OO, class Enabled=void>
     return o;
   }
 };
-#if IMP_DEFINE_NULLPTR
+#if !IMP_COMPILER_HAS_NULLPTR
 template <class O, class OO>
 struct GetPointer<O, OO,
                     typename boost::enable_if<boost::mpl::and_<
@@ -115,10 +113,12 @@ struct GetPointer<O, OO,
                     typename boost::enable_if<boost::is_integral<OO>
                                               >::type> {
   static O* get_pointer(const OO& o) {
+    IMP_INTERNAL_CHECK_VARIABLE(o)
     IMP_INTERNAL_CHECK(o==0, "Non-zero pointer constant found.");
     return static_cast<O*>(nullptr);
   }
   static const O* get_const_pointer(const OO& o) {
+    IMP_INTERNAL_CHECK_VARIABLE(o);
     IMP_INTERNAL_CHECK(o==0, "Non-zero pointer constant found.");
     return static_cast<O*>(nullptr);
   }
@@ -266,7 +266,7 @@ public:
     }
     return *this;
   }
-#if IMP_DEFINE_NULLPTR
+#if !IMP_COMPILER_HAS_NULLPTR
   PointerBase<Traits>& operator=(nullptr_t) {
     set_pointer(nullptr);
     return *this;

@@ -1,3 +1,7 @@
+## \example rmf/pdb.py
+## Write a PDB to an hdf5 file.
+##
+
 import IMP.atom
 import IMP.rmf
 import RMF

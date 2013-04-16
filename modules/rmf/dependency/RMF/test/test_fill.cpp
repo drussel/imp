@@ -2,11 +2,13 @@
  *  \file test_fill.cpp
  *  \brief A nullptr-initialized pointer to an \imp Object.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
+
 #include <hdf5.h>
 #include <iostream>
+
 //#include <RMF/hdf5_handle.h>
 
 #define HDF5_CALL(x)                                             \
@@ -19,6 +21,8 @@
 
 #define HDF5_HANDLE(name, cmd, cleanup) hid_t name = cmd
 //#define HDF5_HANDLE(name, cmd, cleanup) RMF_HDF5_HANDLE(name, cmd, cleanup)
+
+namespace {
 const int D = 2;
 void set_size(hid_t ds,
               int i, int j) {
@@ -50,6 +54,7 @@ void set_value(hid_t ds,
   H5Dwrite(ds,
            H5T_NATIVE_DOUBLE, ids, space,
            H5P_DEFAULT, &v);
+}
 }
 
 int main(int argc, char *argv[]) {

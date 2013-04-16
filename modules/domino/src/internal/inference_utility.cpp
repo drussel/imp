@@ -10,6 +10,7 @@
 #include <IMP/domino/assignment_tables.h>
 #include <algorithm>
 #include <boost/graph/copy.hpp>
+#include <IMP/base/log_macros.h>
 #include <boost/pending/indirect_cmp.hpp>
 
 
@@ -110,10 +111,8 @@ Assignment get_merged_assignment(const Subset &s,
 void
 load_union(const Subset &s0, const Subset &s1,
            AssignmentContainer *nd0, AssignmentContainer *nd1,
-           const EdgeData &ed, double max_error,
-           ParticleStatesTable* pst,
-           const statistics::Metrics &metrics,
-           unsigned int max,
+           const EdgeData &ed,
+           size_t max,
            AssignmentContainer *out) {
   Ints ii0= get_index(s0, ed.intersection_subset);
   Ints ii1= get_index(s1, ed.intersection_subset);
@@ -124,32 +123,20 @@ load_union(const Subset &s0, const Subset &s1,
     = nd1->get_assignments(IntRange(0, nd1->get_number_of_assignments()));
   // chunck outer and writing later
   unsigned int nd0sz= nd0->get_number_of_assignments();
+  IMP_PROGRESS_DISPLAY("Merging subsets " << s0 << " and " << s1,
+                       nd0sz * nd1a.size());
   for (unsigned int i=0; i< nd0sz; ++i) {
     Assignment nd0a=nd0->get_assignment(i);
     Assignment nd0ae=get_sub_assignment(nd0a, ii0);
     for (unsigned int j=0; j< nd1a.size(); ++j) {
       Assignment nd1ae=get_sub_assignment(nd1a[j], ii1);
-      bool merged_ok=(nd1ae==nd0ae);
-      Assignment ss;
-      if (!merged_ok && pst) {;
-        double n= get_distance_if_smaller_than(ed.intersection_subset,
-                                               nd0ae, nd1ae, pst,
-                                               metrics, max_error);
-        if ( n < max_error) {
-          merged_ok=true;
-        }
-      }
-      if (merged_ok) {
-        ss= get_merged_assignment(ed.union_subset,
-                                  nd0a, ui0,
-                                  nd1a[j], ui1);
-      }
-      if (merged_ok) {
+      if (nd1ae==nd0ae) {
+        Assignment ss= get_merged_assignment(ed.union_subset,
+                                             nd0a, ui0,
+                                             nd1a[j], ui1);
         bool ok=true;
         for (unsigned int k=0; k< ed.filters.size(); ++k) {
-          if (ed.filters[k]->get_is_ok(ss)) {
-            // pass
-          } else {
+          if (!ed.filters[k]->get_is_ok(ss)) {
             ok=false;
             break;
           }
@@ -163,6 +150,7 @@ load_union(const Subset &s0, const Subset &s1,
           }
         }
       }
+      IMP::base::add_to_progress_display(1);
     }
   }
 }

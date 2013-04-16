@@ -5,7 +5,7 @@ import IMP.core
 import IMP.algebra
 
 
-class DOMINOTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def test_global_min2(self):
         """Test clustering of states"""
@@ -40,7 +40,7 @@ class DOMINOTests(IMP.test.TestCase):
         ps=IMP.domino.XYZStates(pts)
         pst.set_particle_states(p0, ps)
         pst.set_particle_states(p1, IMP.domino.XYZStates(pts))
-        IMP.set_log_level(IMP.TERSE)
+        IMP.base.set_log_level(IMP.base.TERSE)
         ssl= IMP.domino.get_state_clusters(s, states, pst, 6)
         print "Solutions are"
         for s in ssl:

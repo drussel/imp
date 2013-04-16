@@ -15,6 +15,7 @@
 #include <IMP/algebra/Vector3D.h>
 #include <IMP/SingletonScore.h>
 #include <IMP/Pointer.h>
+#include <IMP/singleton_macros.h>
 #include <IMP/UnaryFunction.h>
 #include <boost/lambda/lambda.hpp>
 
@@ -40,7 +41,8 @@ class GenericDistanceToSingletonScore : public SingletonScore
     StaticD(algebra::Vector3D v): v_(v){}
     Float get_coordinate(unsigned int i) {return v_[i];}
     void add_to_derivatives(algebra::Vector3D v, DerivativeAccumulator){
-      IMP_LOG(VERBOSE, "DistanceTo dropped deriv of " <<  v << std::endl);
+      IMP_UNUSED(v);
+      IMP_WARN( "DistanceTo dropped deriv of " <<  v << std::endl);
     }
   };
 public:
@@ -64,7 +66,7 @@ Float GenericDistanceToSingletonScore<UF>::evaluate(Particle *b,
   Float v= internal::evaluate_distance_pair_score(XYZ(b),
                                                   StaticD(pt_), da,
                                                   f_.get(), boost::lambda::_1);
-  IMP_LOG(VERBOSE, "DistanceTo from " << XYZ(b) << " to "
+  IMP_LOG_VERBOSE( "DistanceTo from " << XYZ(b) << " to "
           << pt_ << " scored " << v << std::endl);
   return v;
 }
@@ -104,7 +106,7 @@ class IMPCOREEXPORT SphereDistanceToSingletonScore : public SingletonScore
     Float get_coordinate(unsigned int i) {return v_[i];}
     void add_to_derivatives(algebra::Vector3D v, DerivativeAccumulator){
       IMP_UNUSED(v);
-      IMP_LOG(VERBOSE, "DistanceTo dropped deriv of " <<  v << std::endl);
+      IMP_LOG_VERBOSE( "DistanceTo dropped deriv of " <<  v << std::endl);
     }
   };
 public:

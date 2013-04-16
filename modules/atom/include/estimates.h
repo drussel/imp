@@ -25,7 +25,7 @@ IMPATOM_BEGIN_NAMESPACE
  *  in the literature.
  *  - ALBER et al. (structure 2005)  Estimated value 0.625 (1/1.60) Da/A3
  *  - HARPAZ et al. (1994)           Computed value  0.826446=1/1.21 Da/A3
- *  - ANDERSSON and Hovmšller (1998) Computed value  1.22 g/cm3 ~ 0.7347 Da/A3
+ *  - ANDERSSON and Hovmuller (1998) Computed value  1.22 g/cm3 ~ 0.7347 Da/A3
  *  - TSAI et al. (1999)             Computed value  1.40 g/cm3 ~ 0.84309 Da/A3
  *  - QUILLIN and Matthews (2000)    Computed value  1.43 g/cm3 ~ 0.86116 Da/A3
  *  - SQUIRE and Himmel (1979),
@@ -106,7 +106,9 @@ inline double get_kd(double na, double nb, double nab,
 /** Return the prediction diffusion coefficient in Angstrom squared per
     femtosecond given a radius in angstrom.
     See \external{http://en.wikipedia.org/wiki/Einstein_relation_(kinetic_theory),
-    wikipedia} for a reference.*/
+    wikipedia} for a reference and
+    \external{http://en.wikipedia.org/wiki/Viscosity,Wikipedia on Viscosity}
+    for the values of the viscosity of water used.*/
 IMPATOMEXPORT double get_einstein_diffusion_coefficient(double r);
 
 

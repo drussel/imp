@@ -4,7 +4,7 @@ import IMP.core
 import IMP.algebra
 
 
-class RBDTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for RigidBody function"""
     def _add_rb_restraints(self, rbd):
         #intentionally kept trivial to ensure convergence
@@ -37,7 +37,7 @@ class RBDTests(IMP.test.TestCase):
         success=0
         for i in range(0, count):
             m= IMP.Model()
-            IMP.set_log_level(IMP.SILENT)
+            IMP.base.set_log_level(IMP.base.SILENT)
             print "creating"
             p= self._create_hierarchy(m)
             print "created", p
@@ -65,7 +65,7 @@ class RBDTests(IMP.test.TestCase):
     def test_create_one_from_pdb(self):
         """Testing create_rigid_bodies"""
         m= IMP.Model()
-        hs= IMP._create_particles_from_pdb(self.get_input_file_name("input.pdb"), m)
+        hs= IMP.kernel._create_particles_from_pdb(self.get_input_file_name("input.pdb"), m)
         print "done reading"
         rb= IMP.core.RigidBody.setup_particle(IMP.Particle(m), hs)
         rb.set_coordinates_are_optimized(True)

@@ -1,19 +1,26 @@
+## \example misc/decay.py
+## Use the IMP::misc::DecayPairContainerOptimizerState to gradually break the bonds in a bd simulation.
+
 import IMP.atom
 import IMP.container
 import IMP.misc
 import IMP.display
 import IMP.example
+import IMP.base
+import sys
 import IMP.rmf
 #import IMP.benchmark
 import RMF
 import random
 
-if IMP.build=="debug" or IMP.build=="release":
+IMP.base.setup_from_argv(sys.argv, "Use the IMP::misc::DecayPairContainerOptimizerState to gradually break the bonds in a bd simulation")
+
+if IMP.base.get_bool_flag("run_quick_test"):
     np=8
     nb=8
     prob=.5
-    period=10
-    steps=100
+    period=2
+    steps=10
 else:
     np=20
     nb=40
@@ -47,7 +54,7 @@ for i in range(0,nb):
 cf= IMP.core.CoinFlipPairPredicate(prob)
 dos= IMP.misc.DecayPairContainerOptimizerState(cf, bds, "decay")
 dos.set_period(period)
-dos.set_log_level(IMP.VERBOSE)
+dos.set_log_level(IMP.base.VERBOSE)
 
 # create restraints
 rs=[]
@@ -60,7 +67,7 @@ rs.append(IMP.container.PairsRestraint(bond_score,
 ev= IMP.core.ExcludedVolumeRestraint(ps, 10,10)
 # equilibrate
 print "equilibrating"
-IMP.set_log_level(IMP.PROGRESS)
+IMP.base.set_log_level(IMP.PROGRESS)
 
 #IMP.benchmark.set_is_profiling(True)
 IMP.example.optimize_balls(ps, rs)
@@ -80,7 +87,7 @@ IMP.rmf.add_restraints(rmf, rs+[ev])
 g= IMP.display.BoundingBoxGeometry(bb)
 IMP.rmf.add_geometries(rmf, [g])
 os= IMP.rmf.SaveOptimizerState(rmf)
-os.set_period(steps/100)
+os.set_period(max(steps/100, 1))
 bd.add_optimizer_state(os)
 
 # actually optimize things

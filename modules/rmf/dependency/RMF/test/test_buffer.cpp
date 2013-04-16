@@ -2,18 +2,16 @@
  *  \file test_associations.cpp
  *  \brief A nullptr-initialized pointer to an \imp Object.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 #include <boost/shared_ptr.hpp>
 #include <RMF/FileHandle.h>
 
+namespace {
 struct MyInt {
   int i;
 };
-int get_uint(MyInt i) {
-  return i.i;
-}
 
 void test()
 {
@@ -29,6 +27,7 @@ void test()
     RMF::NodeConstHandles ch = rt.get_children();
     assert(ch.size() == 2);
   }
+}
 }
 
 int main(int, char *[]) {

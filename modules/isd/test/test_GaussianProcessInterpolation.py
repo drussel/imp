@@ -14,15 +14,15 @@ from IMP.isd import *
 #unit testing framework
 import IMP.test
 
-class TestGaussianProcessInterpolation2Points(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """test of the GPI with two data points, linear prior mean and gaussian
     prior covariances
     """
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.q=[[0],[1]]
         self.I=[1,1]

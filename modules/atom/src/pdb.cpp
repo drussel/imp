@@ -24,7 +24,6 @@
 #include <fstream>
 #include <iomanip>
 
-#ifdef IMP_ATOM_USE_BOOST_FILESYSTEM
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 105000
 #define BOOST_FILESYSTEM_VERSION 3
@@ -32,7 +31,6 @@
 #else
 #define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/path.hpp>
-#endif
 #endif
 
 IMPATOM_BEGIN_NAMESPACE
@@ -72,15 +70,11 @@ bool HydrogenPDBSelector::is_hydrogen(std::string pdb_line) const {
 
 namespace {
   std::string nicename(std::string name) {
-#if defined(IMP_ATOM_USE_BOOST_FILESYSTEM)
     boost::filesystem::path path(name);
 #if BOOST_VERSION >= 105000
     return path.string();
 #else
     return path.filename();
-#endif
-#else
-    return name;
 #endif
   }
 }
@@ -175,7 +169,7 @@ Element get_element_from_pdb_line(const std::string& pdb_line) {
     if (e != UNKNOWN_ELEMENT) return e;
   }
 
-  IMP_LOG(VERBOSE,"Unable to parse element from line: " << pdb_line << "\n");
+  IMP_LOG_VERBOSE("Unable to parse element from line: " << pdb_line << "\n");
   return UNKNOWN_ELEMENT;
 }
 
@@ -204,7 +198,7 @@ Particle* atom_particle(Model *m, const std::string& pdb_line)
       string_name="UNK";
     }
     if (!AtomType::get_key_exists(string_name)) {
-      IMP_LOG(VERBOSE, "ATOM record type not found: \"" << string_name
+      IMP_LOG_VERBOSE( "ATOM record type not found: \"" << string_name
               << "\" from " << pdb_line << std::endl);
       atom_name = add_atom_type(string_name, e);
     } else {
@@ -233,7 +227,7 @@ Particle* atom_particle(Model *m, const std::string& pdb_line)
   // check if the element matches
   Element e2 = get_element_for_atom_type(atom_name);
   if (e != e2) {
-    IMP_LOG(VERBOSE,
+    IMP_LOG_VERBOSE(
             "AtomType element and PDB line elements don't match. AtomType "
              << e2 << " determined from PDB line " << e
              << " line " << pdb_line << std::endl);
@@ -349,7 +343,7 @@ namespace {
     // Particle to the Model
     if (internal::is_ATOM_rec(line) || internal::is_HETATM_rec(line)) {
       if (!selector->get_is_selected(line)) {
-        IMP_LOG(VERBOSE, "Selector rejected line " << line << std::endl);
+        IMP_LOG_VERBOSE( "Selector rejected line " << line << std::endl);
         continue;
       }
       int residue_index = internal::atom_residue_number(line);
@@ -438,9 +432,9 @@ Hierarchy read_pdb(base::TextInput in, Model *model) {
 }
 
 void read_pdb(base::TextInput in, int model, Hierarchy h) {
-  compatibility::map<int, Particle*> atoms_map;
+  base::map<int, Particle*> atoms_map;
   atom::Hierarchies atoms= get_by_type(h, ATOM_TYPE);
-  compatibility::map<core::RigidBody, ParticleIndexes> rigid_bodies;
+  base::map<core::RigidBody, ParticleIndexes> rigid_bodies;
   for (unsigned int i=0; i< atoms.size(); ++i) {
     atoms_map[atoms[i]->get_value(get_pdb_index_key())]= atoms[i];
     if (core::RigidMember::particle_is_instance(atoms[i])) {
@@ -476,7 +470,7 @@ void read_pdb(base::TextInput in, int model, Hierarchy h) {
       }
     }
   }
-  for (compatibility::map<core::RigidBody, ParticleIndexes>::iterator
+  for (base::map<core::RigidBody, ParticleIndexes>::iterator
          it = rigid_bodies.begin(); it != rigid_bodies.end(); ++it) {
     core::RigidBody rb=it->first;
     rb.set_reference_frame_from_members(it->second);
@@ -506,11 +500,15 @@ Hierarchy read_pdb(base::TextInput in, Model *model,
 
 
 Hierarchies read_multimodel_pdb(base::TextInput in, Model *model,
-                                PDBSelector* selector)
+                                PDBSelector* selector, bool noradii)
 {
   IMP::OwnerPointer<PDBSelector> sp(selector);
-  return read_pdb(in, nicename(in.get_name()), model, selector, false,
-                  true, false);
+  Hierarchies ret= read_pdb(in, nicename(in.get_name()), model, selector, false,
+                            true, noradii);
+  if (ret.empty()) {
+    IMP_THROW("No molecule read from file " << in.get_name(), ValueException);
+  }
+  return ret;
 }
 
 Hierarchies read_multimodel_pdb(base::TextInput in, Model *model)
@@ -588,16 +586,11 @@ namespace {
   }
 }
 
-void write_pdb(Hierarchy mhd, base::TextOutput out, unsigned int model)
+void write_pdb(const Selection& mhd, base::TextOutput out, unsigned int model)
 {
-  write_model(Hierarchies(1, mhd), out, model);
+  ParticlesTemp sel=mhd.get_selected_particles();
+  write_model(Hierarchies(sel.begin(), sel.end()), out, model);
 }
-
-void write_pdb(const Hierarchies& mhd, base::TextOutput out, unsigned int model)
-{
-  write_model(mhd, out, model);
-}
-
 
 void write_multimodel_pdb(const Hierarchies& mhd, base::TextOutput oout)
 {
@@ -607,7 +600,7 @@ void write_multimodel_pdb(const Hierarchies& mhd, base::TextOutput oout)
 }
 
 
-void write_pdb_of_c_alphas( Hierarchy mhd, base::TextOutput out,
+void write_pdb_of_c_alphas( const Selection& mhd, base::TextOutput out,
                            unsigned int model)
 {
   IMP_FUNCTION_LOG;

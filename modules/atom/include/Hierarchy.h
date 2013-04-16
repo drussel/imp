@@ -234,11 +234,8 @@ public:
               " IMP.core.Hierarchy");
   }
 
-  /** Create a Hierarchy of level t by adding the needed
-      attributes. */
-  static Hierarchy setup_particle(Particle *p,
-                                  const ParticlesTemp &children
-                                  = ParticlesTemp()) {
+  static Hierarchy setup_particle(Particle* p,
+                                  const ParticlesTemp &children) {
     H::setup_particle(p, get_traits());
     Hierarchy ret(p);
     for (unsigned int i=0; i< children.size(); ++i) {
@@ -250,10 +247,36 @@ public:
     return ret;
   }
 
+  /** Create a Hierarchy of level t by adding the needed
+      attributes. */
+  static Hierarchy setup_particle(Model *m, ParticleIndex pi,
+                                  const ParticlesTemp &children
+                                  = ParticlesTemp()) {
+    Particle *p= m->get_particle(pi);
+    H::setup_particle(p, get_traits());
+    Hierarchy ret(p);
+    for (unsigned int i=0; i< children.size(); ++i) {
+      if (!particle_is_instance(children[i])) {
+        setup_particle(children[i]);
+      }
+      ret.add_child(Hierarchy(children[i]));
+    }
+    return ret;
+  }
+
+ static Hierarchy setup_particle(Particle *p) {
+    return setup_particle(p->get_model(),
+                          p->get_index());
+  }
+
   /** Check if the particle has the needed attributes for a
    cast to succeed */
   static bool particle_is_instance(Particle *p){
     return H::particle_is_instance(p, get_traits());
+  }
+
+  static bool particle_is_instance(Model *m, ParticleIndex p){
+    return H::particle_is_instance(m->get_particle(p), get_traits());
   }
 
   //! Return true if the hierarchy is valid.
@@ -489,7 +512,8 @@ Hierarchy create_clone_one(Hierarchy d);
 //! Delete the Hierarchy
 /** All bonds connecting to these atoms are destroyed as are
     hierarchy links in the Hierarchy and the particles are
-    removed from the Model.
+    removed from the Model. If this particle has a parent, it is
+    removed from the parent.
     \relatesalso Hierarchy
 */
 IMPATOMEXPORT

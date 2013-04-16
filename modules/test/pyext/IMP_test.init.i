@@ -8,6 +8,8 @@
 import re, math
 import sys
 import os
+import re
+import tempfile
 import random
 import IMP
 import time
@@ -57,6 +59,20 @@ expectedFailure = unittest.expectedFailure
 skip = unittest.skip
 skipIf = unittest.skipIf
 skipUnless = unittest.skipUnless
+
+class RunInTempDir(object):
+    """Simple RAII-style class to run in a temporary directory.
+       When the object is created, the temporary directory is created
+       and becomes the current working directory. When the object goes out
+       of scope, the working directory is reset and the temporary directory
+       deleted."""
+    def __init__(self):
+        self.origdir = os.getcwd()
+        self.tmpdir = tempfile.mkdtemp()
+        os.chdir(self.tmpdir)
+    def __del__(self):
+        os.chdir(self.origdir)
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
 
 def numerical_derivative(func, val, step):
@@ -120,16 +136,16 @@ class TestCase(unittest.TestCase):
     """Super class for IMP test cases"""
 
     def setUp(self):
-        self.__check_level = IMP.get_check_level()
+        self.__check_level = IMP.base.get_check_level()
         # Turn on expensive runtime checks while running the test suite:
-        IMP.set_check_level(IMP.USAGE_AND_INTERNAL)
+        IMP.base.set_check_level(IMP.base.USAGE_AND_INTERNAL)
         # python ints are bigger than C++ ones, so we need to make sure it fits
         # otherwise python throws fits
-        IMP.random_number_generator.seed(hash(time.time())%2**30)
+        IMP.base.random_number_generator.seed(hash(time.time())%2**30)
 
     def tearDown(self):
         # Restore original check level
-        IMP.set_check_level(self.__check_level)
+        IMP.base.set_check_level(self.__check_level)
 
     def get_input_file_name(self, filename):
         """Get the full name of an input file in the top-level
@@ -314,7 +330,7 @@ class TestCase(unittest.TestCase):
     def _check_spelling(self, word, words):
         """Check that the word is spelled correctly"""
         if "words" not in dir(self):
-            wordlist= open(IMP.get_data_path("linux.words"), "r").read().split("\n")
+            wordlist= open(IMP.test.get_data_path("linux.words"), "r").read().split("\n")
             # why is "all" missing on my mac?
             custom_words=["info", "prechange", "int", "ints", "optimizeds", "graphviz",
                           "voxel", "voxels", "endian", 'rna', 'dna',
@@ -432,6 +448,7 @@ class TestCase(unittest.TestCase):
         all= dir(module)
         verbs=["add", "remove", "get", "set", "evaluate", "compute", "show", "create", "destroy",
                "push", "pop", "write", "read", "do", "show", "load", "save", "reset",
+               "accept", "reject",
                "clear", "handle", "update", "apply", "optimize", "reserve", "dump",
                "propose", "setup", "teardown", "visit", "find", "run", "swap", "link",
                "validate"]
@@ -782,6 +799,46 @@ class ApplicationTestCase(TestCase):
                        "Application exited uncleanly, with exit code %d\n" % ret\
                              + error)
 
+    def read_shell_commands(self, doxfile):
+        """Read and return a set of shell commands from a doxygen file.
+           Each command is assumed to be in a \code{.sh}...\endcode block.
+           The doxygen file is specified relative to the test file itself.
+           This is used to make sure the commands shown in an application
+           example actually work (the testcase can also check the resulting
+           files for correctness)."""
+        def fix_win32_command(cmd):
+            # Make substitutions so a Unix shell command works on Windows
+            if cmd.startswith('cp -r '):
+                return 'xcopy /E ' + cmd[7:]
+            elif cmd.startswith('cp '):
+                return 'copy ' + cmd[4:]
+            else:
+                return cmd
+        d = os.path.dirname(sys.argv[0])
+        doc = os.path.join(d, doxfile)
+        inline = False
+        cmds = []
+        example_path = os.path.abspath(IMP.get_example_path('..'))
+        for line in open(doc).readlines():
+          if '\code{.sh}' in line:
+              inline = True
+          elif '\endcode' in line:
+              inline = False
+          elif inline:
+              cmds.append(line.rstrip('\r\n').replace('<imp_example_path>',
+                                                      example_path))
+        if sys.platform == 'win32':
+            cmds = [fix_win32_command(x) for x in cmds]
+        return cmds
+
+    def run_shell_command(self, cmd):
+        "Print and run a shell command, as returned by read_shell_commands()"
+        import subprocess
+        print cmd
+        p = subprocess.call(cmd, shell=True)
+        if p != 0:
+            raise OSError("%s failed with exit value %d" % (cmd, p))
+
 
 class RefCountChecker(object):
     """Check to make sure the number of C++ object references is as expected"""
@@ -790,17 +847,17 @@ class RefCountChecker(object):
         # Make sure no director objects are hanging around; otherwise these
         # may be unexpectedly garbage collected later, decreasing the
         # live object count
-        IMP._director_objects.cleanup()
+        IMP.base._director_objects.cleanup()
         self.__testcase = testcase
-        if IMP.build != "fast":
+        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             self.__basenum = IMP.base.RefCounted.get_number_of_live_objects()
             self.__names= IMP.base.get_live_object_names()
 
     def assert_number(self, expected):
         "Make sure that the number of references matches the expected value."
         t = self.__testcase
-        IMP._director_objects.cleanup()
-        if IMP.build != "fast":
+        IMP.base._director_objects.cleanup()
+        if IMP.base.get_check_level() >= IMP.base.USAGE_AND_INTERNAL:
             newnames=[x for x in IMP.base.get_live_object_names() if x not in self.__names]
             newnum=IMP.base.RefCounted.get_number_of_live_objects()-self.__basenum
             t.assertEqual(newnum, expected,
@@ -815,9 +872,9 @@ class DirectorObjectChecker(object):
     """Check to make sure the number of director references is as expected"""
 
     def __init__(self, testcase):
-        IMP._director_objects.cleanup()
+        IMP.base._director_objects.cleanup()
         self.__testcase = testcase
-        self.__basenum = IMP._director_objects.get_object_count()
+        self.__basenum = IMP.base._director_objects.get_object_count()
 
     def assert_number(self, expected, force_cleanup=True):
         """Make sure that the number of references matches the expected value.
@@ -826,8 +883,21 @@ class DirectorObjectChecker(object):
         """
         t = self.__testcase
         if force_cleanup:
-            IMP._director_objects.cleanup()
-        t.assertEqual(IMP._director_objects.get_object_count() \
+            IMP.base._director_objects.cleanup()
+        t.assertEqual(IMP.base._director_objects.get_object_count() \
                       - self.__basenum, expected)
 
+# Make sure that the IMP binary directory (build/bin) is in the PATH, if
+# we're running under wine (the imppy.sh script normally ensures this, but
+# wine overrides the PATH). This is needed so that tests of imported Python
+# applications can successfully spawn C++ applications (e.g. idock.py tries
+# to run recompute_zscore.exe). build/lib also needs to be in the PATH, since
+# that's how Windows locates dependent DLLs such as libimp.dll.
+if sys.platform == 'win32' and 'PYTHONPATH' in os.environ \
+   and 'IMP_BIN_DIR' in os.environ:
+    libdir = os.environ['PYTHONPATH'].split(';')[0]
+    bindir = os.environ['IMP_BIN_DIR']
+    path = os.environ['PATH']
+    if libdir not in path or bindir not in path:
+        os.environ['PATH'] = bindir + ';' + libdir + ';' + path
 %}

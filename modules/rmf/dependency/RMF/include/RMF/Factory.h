@@ -2,7 +2,7 @@
  *  \file RMF/Factory.h
  *  \brief Helper functions for manipulating RMF files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,6 +11,9 @@
 
 #include <RMF/config.h>
 #include "infrastructure_macros.h"
+
+RMF_ENABLE_WARNINGS
+
 namespace RMF {
 
 /** Factories in RMF allow one to create Decorator objects as well
@@ -41,5 +44,7 @@ public:
 };
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_FACTORY_H */

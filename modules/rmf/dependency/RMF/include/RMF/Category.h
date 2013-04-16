@@ -2,7 +2,7 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,6 +12,8 @@
 #include <RMF/config.h>
 #include "infrastructure_macros.h"
 #include <vector>
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 
@@ -53,10 +55,12 @@ public:
 };
 
 #ifndef RMF_DOXYGEN
-typedef vector<Category > Categories;
+typedef std::vector<Category > Categories;
 #endif
 
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_KEY_CATEGORY_H */

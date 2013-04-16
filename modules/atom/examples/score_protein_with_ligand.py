@@ -1,7 +1,10 @@
+## \example atom/score_protein_with_ligand.py
+## Show how to score a number of ligand conformations loaded from a file against a protein loaded from a pdb.
+
 import IMP.atom
 
 m = IMP.Model()
-IMP.set_check_level(IMP.NONE)
+IMP.base.set_check_level(IMP.base.NONE)
 protein= IMP.atom.read_pdb(IMP.atom.get_example_path('1d3d-protein.pdb'), m)
 protein_atoms= IMP.atom.get_by_type(protein, IMP.atom.ATOM_TYPE)
 ligands= IMP.atom.read_mol2(IMP.atom.get_example_path('1d3d-ligands.mol2'), m)

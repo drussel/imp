@@ -7,16 +7,12 @@
  */
 
 #include <IMP/cnmultifit/symmetry_utils.h>
+#include <IMP/cnmultifit/internal/Parameters.h>
 #include <IMP/atom/pdb.h>
 #include <IMP/atom/force_fields.h>
-#include <libTAU/Parameters.h>
-#include <libTAU/SymmAssembly.h>
-#include <libTAU/SymmProgParams.h>
 #include <IMP/multifit/pca_based_rigid_fitting.h>
 #include <IMP/em/MRCReaderWriter.h>
-#include <IMP/cnmultifit/MultiFitParams.h>
 #include <IMP/em/DensityMap.h>
-#include <libTAU/CnResult.h>
 #include <IMP/atom/pdb.h>
 #include <IMP/em/CoarseCC.h>
 #include <IMP/em/converters.h>
@@ -390,11 +386,7 @@ multifit::FittingSolutionRecords prune_by_pca(
                              const multifit::FittingSolutionRecords &sols,
                              int dn) {
   multifit::FittingSolutionRecords pruned_sols;
-  TAU::SymmProgParams par(param_fn.c_str());
-  if (!par.processParameters()) {
-    std::cerr<<"Can not load file: "<< param_fn<<std::endl;
-    exit(1);
-  }
+  internal::Parameters par(param_fn.c_str());
   //load the protein
   IMP_NEW(Model,mdl,());
   atom::CAlphaPDBSelector *sel = new atom::CAlphaPDBSelector();
@@ -460,13 +452,13 @@ float get_cn_rmsd(
   core::XYZs mh1_xyz;
   int m=mh1.size();
   int sign=1;
-  IMP_LOG(VERBOSE,"closest_to_11: "<<closest_to_11<<" closest_to_12: "
+  IMP_LOG_VERBOSE("closest_to_11: "<<closest_to_11<<" closest_to_12: "
                   <<closest_to_12<<std::endl);
   if ((closest_to_12<closest_to_11) && (closest_to_12 != 0)) sign=-1;
   if ((closest_to_11 == 0) && (closest_to_12==m-1)) sign=-1;
   for(int j=0;j<m;j++) {
     int j2=my_mod(sign*j+closest_to_11,m);//we also have negative numbers
-    IMP_LOG(VERBOSE,"Matching:"<<j<<" to "<<j2<<std::endl);
+    IMP_LOG_VERBOSE("Matching:"<<j<<" to "<<j2<<std::endl);
     core::XYZs temp(core::get_leaves(mh2[j2]));
     mh2_xyz_cor.insert(mh2_xyz_cor.end(),temp.begin(),temp.end());
     temp = core::XYZs(core::get_leaves(mh1[j]));

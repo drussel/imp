@@ -1,5 +1,5 @@
 /**
- *  \file IMP/declare_Restraint.h
+ *  \file IMP/kernel/declare_Restraint.h
  *  \brief Abstract base class for all restraints.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -9,7 +9,7 @@
 #ifndef IMPKERNEL_DECLARE_RESTRAINT_H
 #define IMPKERNEL_DECLARE_RESTRAINT_H
 
-#include "kernel_config.h"
+#include <IMP/kernel/kernel_config.h>
 #include "ModelObject.h"
 #include "ScoreAccumulator.h"
 #include "DerivativeAccumulator.h"
@@ -17,18 +17,22 @@
 #include <IMP/base/tracking.h>
 #include <IMP/base/deprecation_macros.h>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 class DerivativeAccumulator;
 
-//! Abstract class for representing restraints
-/** Restraints should take their score function or UnaryFunction
-    as the first argument. Restraints which act on large numbers of
-    particles should allow the particle list to be skipped in the
-    constructor and should provide methods so that the set of particles
-    can be modified after construction.
+//!  A restraint is a term in an \imp ScoringFunction.
+/**
+    \note Restraints will print a warning message if they are destroyed
+    without ever having been added to a model as this is an easy mistake
+    to make. To disable this warning for a particular restraint, call
+    set_was_used(true).
 
-    A restraint can be added to the model multiple times or to multiple
-    restraint sets in the same model.
+To implement a new restraint, just implement the two methods:
+- IMP::Restraint::do_add_score_and_derivatives()
+  (or IMP::Restraint::unprotected_evaluate())
+- IMP::ModelObject::do_get_inputs();
+and use the macro to handle IMP::base::Object
+- IMP_OBJECT_METHODS()
 
     \note When logging is VERBOSE, restraints should print enough information
     in evaluate to reproduce the the entire flow of data in evaluate. When
@@ -38,25 +42,38 @@ class DerivativeAccumulator;
     \note Physical restraints should use the units of kcal/mol for restraint
     values and kcal/mol/A for derivatives.
 
-    \note Restraints will print a warning message if they are destroyed
-    without ever having been added to a model as this is an easy mistake
-    to make. To disable this warning for a particular restraint, call
-    set_was_used(true).
+    When implementing an expensive restraint it makes sense to support early
+    abort of evaluation if the user is only interested in good scores or scores
+    below a threshold. To do this, look at the fields of the ScoreAccumulator
+    object such as
+    - ScoreAccumulator::get_is_evaluate_if_below(),
+    - ScoreAccumulator::get_is_evaluate_if_good()
+    - ScoreAccumulator::get_maximum()
 
     \headerfile Restraint.h "IMP/Restraint.h"
 
     See IMP::example::ExampleRestraint for an example.
  */
-class IMPEXPORT Restraint : public ModelObject
+class IMPKERNELEXPORT Restraint : public ModelObject
 {
 public:
   /** Create a restraint and register it with the model. The restraint is
       not added to implicit scoring function in the Model.*/
   Restraint(Model *m, std::string name);
 #ifndef IMP_DOXYGEN
+#ifndef SWIG
+  struct ModelInitTag{};
+  // for model
+  Restraint(ModelInitTag, std::string name="Restraint %1%");
+#endif
   Restraint(std::string name="Restraint %1%");
 #endif
 
+  /** Compute and return the current score for the restraint.
+   */
+  double get_score() const;
+
+#ifndef IMP_DOXYGEN
   //! Return the score for this restraint for the current state of the model.
   /** \return Current score.
 
@@ -67,14 +84,12 @@ public:
    */
   double evaluate(bool calc_derivs) const;
 
-
-  //! See Model::evaluate_if_good()
+ //! See Model::evaluate_if_good()
   double evaluate_if_good(bool calc_derivatives) const;
 
   //! See Model::evaluate_with_maximum()
   double evaluate_if_below(bool calc_derivatives, double max) const;
 
-#ifndef IMP_DOXYGEN
   /** \name Evaluation implementation
       These methods are called in order to perform the actual restraint
       scoring. The restraints should assume that all appropriate ScoreState
@@ -106,8 +121,12 @@ public:
   /** @} */
 #endif
 
-  void
-      add_score_and_derivatives(ScoreAccumulator sa) const;
+  /** This methid is called in order to perform the actual restraint
+      scoring. The restraints should assume that all appropriate ScoreState
+      objects have been updated and so that the input particles and containers
+      are up to date. The returned score should be the unweighted score.
+  */
+  void add_score_and_derivatives(ScoreAccumulator sa) const;
 
   //! Decompose this restraint into constituent terms
   /** Given the set of input particles, decompose the restraint into as
@@ -164,15 +183,18 @@ public:
   void set_maximum_score(double s);
   /** @} */
 
-#if !defined(SWIG) && !defined(IMP_DOXYGEN)
-  /** This method cannot be implemented in python due to memory
+  /** Create a scoring function with only this restarint.
+
+      \note This method cannot be implemented in python due to memory
       management issues (and the question of why you would ever
       want to).
    */
-  virtual ScoringFunction *create_scoring_function(double weight=1.0,
+#ifndef SWIG
+virtual
+#endif
+ScoringFunction *create_scoring_function(double weight=1.0,
                                                    double max
                                                    = NO_MAX) const;
-#endif
 #if !defined(IMP_DOXYGEN)
   void set_last_score(double s) const { last_score_=s;}
 #endif
@@ -188,7 +210,7 @@ public:
    */
   bool get_was_good() const {return get_last_score() < max_;}
 
-#ifdef IMP_USE_DEPRECATED
+#if IMP_HAS_DEPRECATED
   /** \deprecated use get_inputs() instead.*/
   IMP_DEPRECATED_WARN ParticlesTemp get_input_particles() const;
   /** \deprecated use get_inputs() instead.*/
@@ -196,14 +218,16 @@ public:
 #endif
 
   IMP_REF_COUNTED_DESTRUCTOR(Restraint);
+
+protected:
   /** A Restraint should override this if they want to decompose themselves
       for domino and other purposes. The returned restraints will be made
       in to a RestraintSet, if needed and the weight and maximum score
       set for the restraint set.
   */
-  IMP_PROTECTED_METHOD(virtual Restraints, do_create_decomposition, (), const, {
+  virtual Restraints do_create_decomposition() const {
     return Restraints(1, const_cast<Restraint*>(this));
-    });
+  }
   /** A Restraint should override this if they want to decompose themselves
       for display and other purposes. The returned restraints will be made
       in to a RestraintSet, if needed and the weight and maximum score
@@ -212,29 +236,29 @@ public:
       The returned restraints should be only the non-zero terms and should
       have their last scores set appropriately;
    */
-    IMP_PROTECTED_METHOD(virtual Restraints, do_create_current_decomposition,
-                         (), const, {
-                           return do_create_decomposition();
-                         });
-
+  virtual Restraints do_create_current_decomposition() const {
+    return do_create_decomposition();
+  }
     /** A restraint should override this to compute the score and derivatives.
     */
-    IMP_PROTECTED_METHOD(virtual void, do_add_score_and_derivatives,
-                         (ScoreAccumulator sa), const,);
+   virtual void do_add_score_and_derivatives(ScoreAccumulator sa) const;
 
     /** There is no interesting dependency tracking. */
-  void do_update_dependencies(const DependencyGraph &,
-                              const DependencyGraphVertexIndex &){}
+  virtual void do_update_dependencies() IMP_OVERRIDE{}
   /** No outputs. */
   ModelObjectsTemp do_get_outputs() const {
     return ModelObjectsTemp();
   }
  private:
+  ScoringFunction *create_internal_scoring_function() const;
+
   double weight_;
   double max_;
   mutable double last_score_;
+  // cannot be released outside the class
+  mutable base::Pointer<ScoringFunction> cached_internal_scoring_function_;
 };
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE
 
 #endif  /* IMPKERNEL_DECLARE_RESTRAINT_H */

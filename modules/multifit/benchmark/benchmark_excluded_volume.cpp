@@ -30,7 +30,7 @@ using namespace IMP::multifit;
 */
 
 namespace {
-#if IMP_BUILD==IMP_FAST
+#if IMP_BUILD>=IMP_RELEASE
   const unsigned int onreps=400;
 #else
   const unsigned int onreps=2;
@@ -135,7 +135,6 @@ void test_one(std::string name,
     report(name, oss.str(), runtime, result/total_reps);
   }
 }
-}
 
 void do_it() {
  IMP_NEW(Model, m, ());
@@ -210,9 +209,11 @@ void do_it() {
                                        true);
   }
 }
+}
 
 int main(int argc, char *argv[]) {
-  IMP::base::setup_from_argv(argc, argv, 0);
+  IMP::base::setup_from_argv(argc, argv,
+                             "Benchmark methods for excluded volume");
   IMP_CATCH_AND_TERMINATE(do_it(););
   return IMP::benchmark::get_return_value();
 }

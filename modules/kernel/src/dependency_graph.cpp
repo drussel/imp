@@ -6,26 +6,26 @@
  *
  */
 
-#include "IMP/dependency_graph.h"
-#include "IMP/Model.h"
-#include "IMP/RestraintSet.h"
+#include "IMP/kernel/dependency_graph.h"
+#include "IMP/kernel/Model.h"
+#include "IMP/kernel/RestraintSet.h"
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/visitors.hpp>
-#include <IMP/internal/graph_utility.h>
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <IMP/kernel/internal/graph_utility.h>
+IMP_GCC_PRAGMA(diagnostic ignored "-Wunused-parameter")
 #include <boost/graph/topological_sort.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include <IMP/base/warning_macros.h>
+#include <IMP/base//warning_macros.h>
 #include <boost/foreach.hpp>
-#include <IMP/base/file.h>
+#include <IMP/base//file.h>
 //#include <boost/graph/lookup_edge.hpp>
-#include <IMP/compatibility/vector_property_map.h>
+#include <IMP/base//vector_property_map.h>
 #include <boost/graph/reverse_graph.hpp>
 
-IMP_BEGIN_NAMESPACE
+IMPKERNEL_BEGIN_NAMESPACE
 
 template <class Graph, class Type, class Types>
 class DirectCollectVisitor: public boost::default_dfs_visitor {
@@ -49,10 +49,10 @@ public:
     //std::cout << "Visiting " << o->get_name() << std::endl;
     Type *p=dynamic_cast<Type*>(o);
     if (p) {
-      //IMP_LOG(VERBOSE, "Found vertex " << o->get_name() << std::endl);
+      //IMP_LOG_VERBOSE( "Found vertex " << o->get_name() << std::endl);
       vals_.push_back(p);
     } else {
-      //IMP_LOG(VERBOSE, "Visited vertex " << o->get_name() << std::endl);
+      //IMP_LOG_VERBOSE( "Visited vertex " << o->get_name() << std::endl);
     }
   }
 };
@@ -154,6 +154,7 @@ namespace {
   C filter(C c, O*o) {
     std::sort(c.begin(), c.end());
     c.erase(std::unique(c.begin(), c.end()), c.end());
+    IMP_INTERNAL_CHECK_VARIABLE(o);
     IMP_INTERNAL_CHECK(c.empty() || c[0],
                        "nullptr returned for dependencies of "
                        << o->get_name());
@@ -178,20 +179,21 @@ namespace {
                 DependencyGraphTraits::vertex_descriptor vb) {
     if (get_has_edge(graph, va, vb)) return;
     // const conversion broken
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
     DependencyGraphVertexName names = boost::get(boost::vertex_name, graph);
-    IMP_CHECK_VARIABLE(names);
     IMP_INTERNAL_CHECK(va != vb, "Can't depend on itself "
                        << names[va]->get_name());
     IMP_INTERNAL_CHECK(!get_has_edge(graph, va, vb),
                        "Already has edge between " << names[va]->get_name()
                        << " and " << names[vb]->get_name());
+#endif
     boost::add_edge(va, vb, graph);
     IMP_INTERNAL_CHECK(get_has_edge(graph, va, vb),
                        "No has edge between " << va << " and " << vb);
 
   }
 
-  DependencyGraphTraits::vertex_descriptor get_vertex(DependencyGraph &dg,
+  DependencyGraphTraits::vertex_descriptor get_vertex(DependencyGraph &,
                                           const DependencyGraphVertexIndex &dgi,
                                                       ModelObject *o) {
     DependencyGraphVertexIndex::const_iterator it=dgi.find(o);
@@ -317,6 +319,7 @@ namespace {
                                                  in.end())
                         + boost::hash_range(out.begin(),
                                             out.end()));
+IMP_CLANG_PRAGMA(diagnostic ignored "-Wunused-member-function")
     IMP_COMPARISONS(Connections);
   };
   //IMP_VALUES(Connections, ConnectionsList);
@@ -336,23 +339,16 @@ get_pruned_dependency_graph(Model *m) {
   bool changed=true;
   while (changed) {
     changed=false;
-    IMP_LOG(VERBOSE, "Searching for vertices to prune" << std::endl);
-    compatibility::set<Connections> connections;
+    IMP_LOG_VERBOSE( "Searching for vertices to prune" << std::endl);
+    base::set<Connections> connections;
     for (unsigned int i=0; i< boost::num_vertices(full); ++i) {
       Connections c(i, full);
       if (connections.find(c) != connections.end()) {
+#if IMP_HAS_LOG >= IMP_VERBOSE
         DependencyGraphVertexName
           vm = boost::get(boost::vertex_name, full);
-        IMP_LOG_VARIABLE(vm);
-        IMP_LOG(VERBOSE, "Removing object " << vm[i]->get_name() << std::endl);
-        for (unsigned int j=0; j< c.in.size(); ++j) {
-          for (unsigned int k=0; k< c.out.size(); ++k) {
-            //if (!boost::lookup_edge(c.in[j], c.out[k], full).second) {
-              // why am I doing this anyway?
-              //boost::add_edge(c.in[j], c.out[k], full);
-            //}
-          }
-        }
+        IMP_LOG_VERBOSE( "Removing object " << vm[i]->get_name() << std::endl);
+#endif
         boost::clear_vertex(i, full);
         boost::remove_vertex(i, full);
         changed=true;
@@ -377,6 +373,7 @@ struct cycle_detector : public boost::default_dfs_visitor {
   }
   template <class DependencyGraphVertex>
   void finish_vertex(DependencyGraphVertex v, const DependencyGraph&) {
+    IMP_USAGE_CHECK_VARIABLE(v);
     IMP_USAGE_CHECK(cycle_.back()==v, "They don't match");
     cycle_.pop_back();
   }
@@ -399,7 +396,7 @@ struct cycle_detector : public boost::default_dfs_visitor {
 
 
 
-ScoreStatesTemp get_required_score_states(const RestraintsTemp &irs,
+ScoreStatesTemp get_required_score_states(const ModelObjectsTemp &irs,
                                           const DependencyGraph &dg,
                              const DependencyGraphVertexIndex &index) {
   ScoreStatesTemp sst
@@ -420,7 +417,7 @@ void set_score_state_update_order(const DependencyGraph& dg,
       it has an input that is not already added.*/
   // find all score states
   ModelObjectsTemp added;
-  compatibility::set<ModelObject*> not_added;
+  base::set<ModelObject*> not_added;
   for (unsigned int i=0; i < boost::num_vertices(dg); ++i) {
     if (dynamic_cast<ScoreState*>(map[i])) {
       not_added.insert(map[i]);
@@ -433,7 +430,7 @@ void set_score_state_update_order(const DependencyGraph& dg,
       ScoreStatesTemp inputs= get_required_score_states(s,
                                                         added,
                                                         dg, index);
-      IMP_LOG(TERSE, Showable(s) << " depends on " << inputs << std::endl);
+      IMP_LOG_TERSE( Showable(s) << " depends on " << inputs << std::endl);
       // includes self
       if (inputs.size() <=1) {
         cur.push_back(dynamic_cast<ScoreState*>(s));
@@ -451,4 +448,4 @@ void set_score_state_update_order(const DependencyGraph& dg,
   }
 }
 
-IMP_END_NAMESPACE
+IMPKERNEL_END_NAMESPACE

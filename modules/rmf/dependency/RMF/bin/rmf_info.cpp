@@ -1,10 +1,12 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
+
 #include <RMF/FileHandle.h>
 #include <sstream>
 #include "common.h"
 
+namespace {
 std::string description("Print out information about categories and keys.");
 
 
@@ -32,7 +34,7 @@ void show_key_info(RMF::FileConstHandle rh,
                    RMF::Category        cat,
                    std::string          name,
                    std::ostream         &out) {
-  RMF::vector<RMF::Key<Traits> > keys = rh.get_keys<Traits>(cat);
+  std::vector<RMF::Key<Traits> > keys = rh.get_keys<Traits>(cat);
   for (unsigned int i = 0; i < keys.size(); ++i) {
     out << "    " << rh.get_name(keys[i]);
     out << ", " << name;
@@ -67,7 +69,7 @@ void show_info(RMF::FileConstHandle rh, std::ostream &out) {
   out << "Nodes:" << std::endl;
   std::set<RMF::NodeConstHandle> seen;
   out << "  number: " << count(rh.get_root_node(), seen) << std::endl;
-  RMF::vector<RMF::Category > categories
+  std::vector<RMF::Category > categories
     = rh.get_categories();
   for (unsigned int i = 0; i < categories.size(); ++i) {
     out << "  " << rh.get_name(categories[i]) << ":" << std::endl;
@@ -76,6 +78,7 @@ void show_info(RMF::FileConstHandle rh, std::ostream &out) {
 }
 
 int frame = 0;
+}
 
 int main(int argc, char **argv) {
   try {

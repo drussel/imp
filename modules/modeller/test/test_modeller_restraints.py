@@ -5,7 +5,7 @@ import IMP.core
 import IMP.modeller
 from test_rsr_file_read import assertSimilarModellerIMPScores
 
-class ModellerRestraintsTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Check using Modeller restraints in IMP"""
 
     def test_modeller_restraints(self):
@@ -24,7 +24,7 @@ class ModellerRestraintsTests(IMP.test.TestCase):
         m = IMP.Model()
         protein = IMP.modeller.ModelLoader(modmodel).load_atoms(m)
         atoms = IMP.atom.get_by_type(protein, IMP.atom.ATOM_TYPE)
-        m.add_restraint(IMP.modeller.ModellerRestraints(modmodel,
+        m.add_restraint(IMP.modeller.ModellerRestraints(m, modmodel,
                                                         atoms))
 
         assertSimilarModellerIMPScores(self, modmodel, protein)

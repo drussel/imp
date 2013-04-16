@@ -1,5 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
-for h in sys.argv:
-    if h.endswith(".h"):
-        print "#include <RMF/"+h[h.rfind("RMF")+4:]+">"
+import glob
+import os
+for h in sys.argv[2:]:
+    pat = os.path.join(h, "*.h")
+    allh= glob.glob(pat)
+    allh.sort()
+    for g in allh:
+        name= os.path.split(g)[1]
+        print "#include <%s/"%sys.argv[1] + name + ">"

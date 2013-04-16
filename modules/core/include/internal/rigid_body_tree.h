@@ -12,7 +12,7 @@
 #include "../XYZ.h"
 #include "../rigid_bodies.h"
 #include <IMP/algebra/Sphere3D.h>
-#include <IMP/compatibility/set.h>
+#include <IMP/base/set.h>
 #include <queue>
 
 IMPCORE_BEGIN_INTERNAL_NAMESPACE
@@ -184,7 +184,7 @@ inline void fill_close_pairs(Model *m,
   while (!queue.empty()) {
     QP v= queue.top();
     queue.pop();
-    /*IMP_LOG(TERSE, "Trying pair " << v.second.first << " " << v.second.second
+    /*IMP_LOG_TERSE( "Trying pair " << v.second.first << " " << v.second.second
       << std::endl);*/
     if (da->get_is_leaf(v.second.first) && db->get_is_leaf(v.second.second)) {
       for (unsigned int i=0;
@@ -241,13 +241,15 @@ inline void fill_close_pairs(Model *m,
 
 
   IMP_IF_CHECK(base::USAGE_AND_INTERNAL) {
-    for (unsigned int i=0; i< da->get_constituents().size(); ++i) {
-      XYZR ca(m, da->get_constituents()[i]);
-      for (unsigned int j=0; j< db->get_constituents().size(); ++j) {
-        XYZR cb(m, db->get_constituents()[j]);
-        if (get_distance(ca, cb) < .9*dist) {
-          sink.check_contains(da->get_constituents()[i],
-                              db->get_constituents()[j]);
+    if (da->get_constituents().size()* db->get_constituents().size() < 1000) {
+      for (unsigned int i=0; i< da->get_constituents().size(); ++i) {
+        XYZR ca(m, da->get_constituents()[i]);
+        for (unsigned int j=0; j< db->get_constituents().size(); ++j) {
+          XYZR cb(m, db->get_constituents()[j]);
+          if (get_distance(ca, cb) < .9*dist) {
+            sink.check_contains(da->get_constituents()[i],
+                                db->get_constituents()[j]);
+          }
         }
       }
     }

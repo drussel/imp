@@ -1,6 +1,7 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
+
 #include <RMF/FileHandle.h>
 #include <boost/timer.hpp>
 #include <sstream>
@@ -56,7 +57,6 @@ double show_xml(RMF::NodeConstHandle  nh,
   }
   return ret;
 }
-}
 
 
 double traverse(std::string name) {
@@ -65,6 +65,7 @@ double traverse(std::string name) {
   RMF::Categories kcs = rh.get_categories();
   ret += show_xml(rh.get_root_node(), kcs);
   return ret;
+}
 }
 
 int main(int, char **) {

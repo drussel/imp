@@ -1,5 +1,5 @@
 /**
- *  \file Fine2DRegistrationxRestraint.h
+ *  \file Fine2DRegistrationRestraint.h
  *  \brief Alignment of 2D projections of a 3D volume
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
 */
@@ -40,18 +40,6 @@ public:
   };
 
 
-  //! Initialization function. To be called after setting the model for the
-  //! restraint
-  /*!
-    \param[in] ps ParticlesTemp
-    \param[in] subjects The subject 2D-EM images to register
-    \param[in] resolution
-    \param[in] pixelsize
-    \param[in] scoring_model model to associate to this restraint
-    \param[in] masks - Masks manager with the projection masks por the particles
-                of the model. If not given, it is generated
-
-  */
   /**
    * Initialization function. To be called after setting the model for the
    * restraint

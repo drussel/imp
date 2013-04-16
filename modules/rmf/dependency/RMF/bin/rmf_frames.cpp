@@ -1,12 +1,14 @@
 /**
- * Copyright 2007-2012 IMP Inventors. All rights reserved.
+ * Copyright 2007-2013 IMP Inventors. All rights reserved.
  */
+
 #include <RMF/FileHandle.h>
 #include <sstream>
 #include "common.h"
 
+namespace {
 std::string description("Print out information about frames");
-
+}
 
 int main(int argc, char **argv) {
   try {

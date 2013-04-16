@@ -15,17 +15,17 @@ from IMP.isd import *
 #unit testing framework
 import IMP.test
 
-class TestGaussianProcessInterpolationRestraint2Points(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """test of the GPI restraint with two data points, linear prior mean and
     gaussian prior covariances
     """
 
     def setUp(self):
-        if not IMP.isd.has_cholmod:
+        if not IMP.isd.IMP_ISD_HAS_CHOLMOD:
             self.skipTest("IMP not built with CHOLMOD")
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.q=[[0],[1]]
         self.I=[1,1]

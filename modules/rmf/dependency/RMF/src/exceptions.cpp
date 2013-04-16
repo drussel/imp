@@ -2,7 +2,7 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -10,6 +10,8 @@
 #include <RMF/internal/errors.h>
 #include <sstream>
 #include <algorithm>
+
+RMF_ENABLE_WARNINGS
 
 namespace RMF {
 Exception::Exception() {
@@ -54,11 +56,11 @@ std::string get_message(const Exception &e) {
     if (file) {
       oss << " in file \"" << *file << "\"";;
     }
-    const FrameID *frame = boost::get_error_info<Frame>(e);
+    const int *frame = boost::get_error_info<Frame>(e);
     if (frame) {
       oss << " at frame " << *frame;
     }
-    const NodeID *node = boost::get_error_info<Node>(e);
+    const int *node = boost::get_error_info<Node>(e);
     if (node) {
       oss << " at node " << *node;
     }
@@ -103,3 +105,5 @@ InternalException::~InternalException() throw() {
 }
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS

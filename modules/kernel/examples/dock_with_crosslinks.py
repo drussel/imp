@@ -1,6 +1,11 @@
+## \example kernel/dock_with_crosslinks.py
+## This example docks several proteins using excluded volume and crosslinking terms. To set the pdbs and crosslinks to use, edit the data at the start of the python script.
+##
+
 import IMP
 import IMP.core
 import IMP.algebra
+import IMP.base
 import IMP.atom
 import IMP.container
 import random
@@ -11,8 +16,11 @@ try:
 except:
     print "Script requires networkx to run"
     sys.exit()
+
+IMP.base.setup_from_argv(sys.argv, "Dock several proteins using excluded volume and crosslinking")
+
 # remove internal checks
-IMP.set_check_level(IMP.USAGE)
+IMP.base.set_check_level(IMP.base.USAGE)
 pdbs=[IMP.get_example_path('dock_data/chainf.pdb'),
       IMP.get_example_path('dock_data/chaind.pdb')]
 xlinks=[
@@ -116,7 +124,7 @@ def setup_move_them_all_MonteCarlo_external(connected_chain_list,rb_ext_list=[],
 
         print 'RIGID BODY LIST', [r.get_name( ) for r in rb_tmp_list]
         p=IMP.Particle(m)
-        p.set_name("root rigid body "+chain_id[s])
+        p.set_name("root rigid body "+str(chain_id[s]))
         rb=IMP.core.RigidBody.setup_particle(p,rb_tmp_list)
         rb_ext_list.append(rb)
         mv= IMP.core.RigidBodyMover(rb, mc_dx, mc_dang)
@@ -335,8 +343,12 @@ nsteps_ext=100
 cg=IMP.core.ConjugateGradients()
 cg.set_model(m)
 
+number_of_steps = 10000
 
-for steps in range(10000):
+if IMP.base.get_bool_flag("run_quick_test"):
+    number_of_steps = 2
+
+for steps in range(number_of_steps):
 
     nop_cutoff=10000000
     connected_chains_list,nop_cutoff=create_graph(chains,nop_cutoff)

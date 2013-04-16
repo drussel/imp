@@ -14,7 +14,7 @@ class TrivialParticleStates(IMP.domino.ParticleStates):
     def do_show(self, stream):
         pass
 
-class DOMINOTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def _test_basic(self, nm):
         """Testing default subset states"""
@@ -36,7 +36,7 @@ class DOMINOTests(IMP.test.TestCase):
         self.assertEqual(len(ss), ns**len(ps))
         all_states=[]
         for state in ss:
-            print state
+            #print state
             #print all_states
             self.assertNotIn(state, all_states)
             all_states.append(state)
@@ -58,7 +58,7 @@ class DOMINOTests(IMP.test.TestCase):
         pft= IMP.domino.ExclusionSubsetFilterTable(pst)
         dsst= nm(pst, [pft])
         lsc= IMP.domino.Subset(ps)
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.SILENT)
         pss= IMP.domino.PackedAssignmentContainer()
         dsst.load_assignments(lsc, pss)
         ss= pss.get_assignments((0, pss.get_number_of_assignments()))
@@ -66,7 +66,7 @@ class DOMINOTests(IMP.test.TestCase):
         all_states=[]
         print "testing"
         for state in ss:
-            print state
+            #print state
             #print all_states
             self.assertNotIn(state, all_states)
             all_states.append(state)
@@ -89,7 +89,7 @@ class DOMINOTests(IMP.test.TestCase):
         pft.add_pair((ps[0], ps[1]))
         dsst= nm(pst, [pft])
         lsc= IMP.domino.Subset(ps)
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.SILENT)
         pss= IMP.domino.PackedAssignmentContainer()
         dsst.load_assignments(lsc, pss)
         ss= pss.get_assignments((0, pss.get_number_of_assignments()))
@@ -97,7 +97,7 @@ class DOMINOTests(IMP.test.TestCase):
         all_states=[]
         print "testing"
         for state in ss:
-            print state
+            #print state
             #print all_states
             self.assertNotIn(state, all_states)
             all_states.append(state)

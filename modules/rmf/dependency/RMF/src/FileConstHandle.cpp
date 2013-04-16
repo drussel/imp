@@ -2,7 +2,7 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -11,6 +11,10 @@
 #include <RMF/Validator.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sstream>
+
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DEF(FileConstHandle);
 
 namespace RMF {
 
@@ -93,3 +97,5 @@ void FileConstHandle::reload() {
 }
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS

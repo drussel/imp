@@ -9,7 +9,9 @@
 #define IMPBASE_INTERNAL_GRAPH_UTILITY_H
 
 #include <IMP/base/base_config.h>
-#include <IMP/compatibility/map.h>
+#include <IMP/base/map.h>
+#include "../Vector.h"
+#include "../Object.h"
 #include <cctype>
 #include <algorithm>
 #include <sstream>
@@ -19,7 +21,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
-#include <IMP/compatibility/vector_property_map.h>
+#include <IMP/base/vector_property_map.h>
 
 
 IMPBASE_BEGIN_INTERNAL_NAMESPACE
@@ -60,13 +62,13 @@ inline void show_as_graphviz(const Graph &g, std::ostream &out) {
 }
 
 template <class Base, class Graph>
-inline compatibility::map<Base*, int> get_graph_index(const Graph &g) {
-  compatibility::map<Base*, int>ret;
+inline base::map<Base*, int> get_graph_index(const Graph &g) {
+  base::map<Base*, int>ret;
   typename boost::property_map<Graph,
                                boost::vertex_name_t>::const_type
     vm= boost::get(boost::vertex_name,g);
   for (unsigned int i=0; i< boost::num_vertices(g); ++i) {
-    Object *o= vm[i];
+    base::Object *o= vm[i];
     if (dynamic_cast<Base*>(o)) {
       ret[dynamic_cast<Base*>(o)]= i;
     }

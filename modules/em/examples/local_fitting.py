@@ -1,10 +1,19 @@
+## \example em/local_fitting.py
+## Shows how to locally refine a fit of a protein inside
+## its density using a MC/CG optimization protocol.
+## This example does not necessarily converges to the global minimum
+## as that may require more optimization steps.
+## If one wishes to use this example as a template for real refinement purposes,
+## please adjust the parameters of the function IMP.em.local_rigid_fitting
+## accordingly.
+
 import IMP.em
 import IMP.core
 import IMP.atom
 import random,math
 
-IMP.set_log_level(IMP.SILENT)
-IMP.set_check_level(IMP.NONE)
+IMP.base.set_log_level(IMP.base.SILENT)
+IMP.base.set_check_level(IMP.base.NONE)
 m= IMP.Model()
 #1. setup the input protein
 ##1.1 select a selector.

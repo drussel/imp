@@ -265,14 +265,14 @@ struct RigidBodyRigidBodyParticleIndexPairSink:
   public ParticleIndexPairSink {
   ObjectKey key_;
   double dist_;
-  const IMP::compatibility::map<ParticleIndex,
+  const IMP::base::map<ParticleIndex,
                                 ParticleIndexes> &map_;
   RigidBodyRigidBodyParticleIndexPairSink(Model *m,
                                           const PairPredicates &filters,
                                      ParticleIndexPairs &out,
                                      ObjectKey key,
                                      double dist,
-                      const IMP::compatibility::map<ParticleIndex,
+                      const IMP::base::map<ParticleIndex,
                                 ParticleIndexes>
                                      &map):
     ParticleIndexPairSink(m, filters, out),
@@ -282,7 +282,7 @@ struct RigidBodyRigidBodyParticleIndexPairSink:
     return get_rigid_body_hierarchy(rb, map_.find(p)->second, key_);
   }
   bool operator()(ParticleIndex a, ParticleIndex b) {
-    IMP_LOG(VERBOSE, "Processing interesction between "
+    IMP_LOG_VERBOSE( "Processing interesction between "
             << a << " and "
             << b << std::endl);
     fill_close_pairs(m_, get_hierarchy(a),
@@ -300,13 +300,13 @@ struct RigidBodyParticleParticleIndexPairSink:
   public ParticleIndexPairSink {
   ObjectKey key_;
   double dist_;
-  const IMP::compatibility::map<ParticleIndex,
+  const IMP::base::map<ParticleIndex,
                                 ParticleIndexes> &map_;
   RigidBodyParticleParticleIndexPairSink(Model *m,
                                          const PairPredicates &filters,
                                     ParticleIndexPairs &out,
                                     ObjectKey key, double dist,
-               const IMP::compatibility::map<ParticleIndex,
+               const IMP::base::map<ParticleIndex,
                                     ParticleIndexes> &map):
     ParticleIndexPairSink(m, filters, out),
     key_(key), dist_(dist), map_(map){}
@@ -315,7 +315,7 @@ struct RigidBodyParticleParticleIndexPairSink:
     return get_rigid_body_hierarchy(rb, map_.find(p)->second, key_);
   }
   bool operator()(ParticleIndex a, ParticleIndex b) {
-    IMP_LOG(VERBOSE, "Processing rb-p interesction between "
+    IMP_LOG_VERBOSE( "Processing rb-p interesction between "
             << a << " and "
             << b << std::endl);
     SwappedHalfParticleIndexPairSink hps(m_, filters_, out_, b);
@@ -335,13 +335,13 @@ struct ParticleRigidBodyParticleIndexPairSink:
   public ParticleIndexPairSink {
   ObjectKey key_;
   double dist_;
-  const IMP::compatibility::map<ParticleIndex,
+  const IMP::base::map<ParticleIndex,
                                 ParticleIndexes> &map_;
   ParticleRigidBodyParticleIndexPairSink(Model *m,
                                          const PairPredicates &filters,
                                     ParticleIndexPairs &out,
                                     ObjectKey key, double dist,
-               const IMP::compatibility::map<ParticleIndex,
+               const IMP::base::map<ParticleIndex,
                                     ParticleIndexes> &map):
     ParticleIndexPairSink(m, filters, out),
     key_(key), dist_(dist), map_(map){}
@@ -350,7 +350,7 @@ struct ParticleRigidBodyParticleIndexPairSink:
     return get_rigid_body_hierarchy(rb, map_.find(p)->second, key_);
   }
   bool operator()(ParticleIndex a, ParticleIndex b) {
-    IMP_LOG(VERBOSE, "Processing p-rb interesction between "
+    IMP_LOG_VERBOSE( "Processing p-rb interesction between "
             << a << " and "
             << b << std::endl);
     HalfParticleIndexPairSink hps(m_, filters_, out_, a);
@@ -370,7 +370,7 @@ struct RigidBodyParticleIndexPairSinkWithMax:
   public ParticleIndexPairSinkWithMax<PS> {
   ObjectKey key_;
   double dist_;
-  const IMP::compatibility::map<ParticleIndex,
+  const IMP::base::map<ParticleIndex,
                                 ParticleIndexes> &map_;
   RigidBodyParticleIndexPairSinkWithMax(Model *m,
                                         const PairPredicates &filters,
@@ -381,7 +381,7 @@ struct RigidBodyParticleIndexPairSinkWithMax:
                                    double max,
                                    ObjectKey key,
                                    double dist,
-  const IMP::compatibility::map<ParticleIndex,
+  const IMP::base::map<ParticleIndex,
                                 ParticleIndexes> &map):
     ParticleIndexPairSinkWithMax<PS>(m, filters, out, ssps, da, score, max),
     key_(key), dist_(dist), map_(map){}
@@ -408,7 +408,7 @@ struct RigidBodyRigidBodyParticleIndexPairSinkWithMax:
    double &score,
    double max,
    ObjectKey key, double dist,
-   const IMP::compatibility::map<ParticleIndex,
+   const IMP::base::map<ParticleIndex,
                                 ParticleIndexes> &map):
     P(m, filters, out, ssps, da,
       score, max,
@@ -440,7 +440,7 @@ struct RigidBodyParticleParticleIndexPairSinkWithMax:
    double &score,
    double max,
    ObjectKey key, double dist,
-   const IMP::compatibility::map<ParticleIndex,
+   const IMP::base::map<ParticleIndex,
    ParticleIndexes>
    &map): P(m, filters, out, ssps, da,
             score, max, key, dist, map)

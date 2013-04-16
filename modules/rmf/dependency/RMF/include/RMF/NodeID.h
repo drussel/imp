@@ -2,7 +2,7 @@
  *  \file RMF/NodeID.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,6 +14,8 @@
 #include <vector>
 #include <iostream>
 
+RMF_ENABLE_WARNINGS
+
 namespace RMF {
 
 /** Each node in the hierarchy (RMF::NodeHandle)
@@ -21,9 +23,6 @@ namespace RMF {
     that %RMF file. These are stored using NodeID classes.*/
 class NodeID {
   int i_;
-  friend class NodeHandle;
-  friend struct NodeIDTraits;
-  friend class FileHandle;
   int compare(const NodeID&o) const {
     if (i_ < o.i_) return -1;
     else if (i_ > o.i_) return 1;
@@ -41,12 +40,12 @@ public:
   RMF_COMPARISONS(NodeID);
   RMF_HASHABLE(NodeID, return i_);
 };
-#ifndef RMF_DOXYGEN
-typedef vector<NodeID> NodeIDs;
-#endif
 
-
+  /** Lists of NodeIDs */
+  typedef std::vector<NodeID> NodeIDs;
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_NODE_ID_H */

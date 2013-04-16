@@ -2,13 +2,13 @@ import IMP
 import IMP.test
 import IMP.core
 
-class Test(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for children refiner"""
 
 
     def test_set_position(self):
         """Make sure the Table PR works"""
-        IMP.set_log_level(IMP.VERBOSE)
+        IMP.base.set_log_level(IMP.base.VERBOSE)
         print "hello"
         m= IMP.Model()
         p= IMP.Particle(m)

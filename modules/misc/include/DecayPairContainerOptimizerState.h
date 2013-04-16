@@ -12,6 +12,7 @@
 #include <IMP/OptimizerState.h>
 #include <IMP/PairContainer.h>
 #include <IMP/PairContainer.h>
+#include <IMP/core/PeriodicOptimizerState.h>
 #include <IMP/internal/InternalDynamicListPairContainer.h>
 #include <IMP/PairPredicate.h>
 #include <IMP/base/Pointer.h>
@@ -25,7 +26,8 @@ IMPMISC_BEGIN_NAMESPACE
     pedicate is applied to all the remaining pairs and ones for which
     it evaluates to 0 are removed.
  */
-class IMPMISCEXPORT DecayPairContainerOptimizerState : public OptimizerState
+class IMPMISCEXPORT DecayPairContainerOptimizerState :
+  public core::PeriodicOptimizerState
 {
   base::OwnerPointer<PairPredicate> pred_;
   base::OwnerPointer<PairContainer> input_;
@@ -38,7 +40,8 @@ class IMPMISCEXPORT DecayPairContainerOptimizerState : public OptimizerState
   PairContainer *get_output_container() const {
     return output_;
   }
-  IMP_PERIODIC_OPTIMIZER_STATE(DecayPairContainerOptimizerState);
+  virtual void do_update(unsigned int call_num) IMP_OVERRIDE;
+  IMP_OBJECT_METHODS(DecayPairContainerOptimizerState);
 };
 
 

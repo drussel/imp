@@ -47,9 +47,9 @@ public:
 
   // join operation
   /*!
-    \param[in] id of the 1st cluster joined
-    \param[in] id of the 2nd cluster merged
-    \param[in] distance between the merged clusters
+    \param[in] cluster_id1 id of the 1st cluster joined
+    \param[in] cluster_id2 id of the 2nd cluster merged
+    \param[in] distance_between_clusters distance between the merged clusters
   */
   void do_join_clusters(unsigned int cluster_id1,
                          unsigned int cluster_id2,
@@ -73,7 +73,6 @@ public:
 
   // Return the elements of the cluster formed at a given step
   /*!
-    \param[in] s Step
   */
   Ints get_cluster_formed_at_step(unsigned int step) const;
 
@@ -188,7 +187,7 @@ public:
   // Distance between the clusters
   /*!
     \note See SingleLinkage class for the meaning of the arguments
-    \param[out] Average between all members of the merged cluster
+    \return Average between all members of the merged cluster
   */
   double operator()(unsigned int id1,
                   unsigned int id2,
@@ -219,7 +218,7 @@ ClusterSet
 // http://nlp.stanford.edu/IR-book/html/htmledition/
 //      time-complexity-of-hac-1.html)
 
-  IMP_LOG(TERSE,
+  IMP_LOG_TERSE(
             "starting hierarchical_agglomerative_clustering " << std::endl);
 
   unsigned int N = distances.size(); // number of elements
@@ -248,7 +247,7 @@ ClusterSet
   unsigned int steps = N-1;// Steps of clustering
   // cluster algorithm
   for (unsigned int k=0;k<steps;++k) {
-    IMP_LOG(TERSE, std::endl);
+    IMP_LOG_TERSE( std::endl);
     // Find the list that contains lower distance
     double minimum_distance=std::numeric_limits<double>::max();
     unsigned int l1=0;
@@ -265,7 +264,7 @@ ClusterSet
     // lowest distance is between list l1 and list l2
     unsigned int l2=lists[l1].front().first;
     minimum_distance=lists[l2].front().second;
-    IMP_LOG(TERSE,"step " << k << ": joining clusters " << cluster_id[l1]
+    IMP_LOG_TERSE("step " << k << ": joining clusters " << cluster_id[l1]
             << " and " << cluster_id[l2]
             << " to form cluster "
             << cluster_set.get_id_for_cluster_at_step(k) << " distance = "
@@ -279,9 +278,9 @@ ClusterSet
     lists[l1].clear();
     // Update lists of distances
     for (unsigned int i=0;i<N;++i) {
-      IMP_LOG(TERSE,"Updating list of distances " << i << std::endl);
+      IMP_LOG_TERSE("Updating list of distances " << i << std::endl);
       if(active_list[i]==true && i!=l1) {
-      IMP_LOG(TERSE,"List " << i << " is active " << std::endl);
+      IMP_LOG_TERSE("List " << i << " is active " << std::endl);
         // Delete list elements that store distances to the merged clusters
         list_cluster_id_distance::iterator it;
         for (it=lists[i].begin() ; it!=lists[i].end() ; ++it) {
@@ -295,7 +294,7 @@ ClusterSet
                                       cluster_id[i],
                                       cluster_set,
                                       distances);
-        IMP_LOG(TERSE,"Distance by linkage function "<< dist<< std::endl);
+        IMP_LOG_TERSE("Distance by linkage function "<< dist<< std::endl);
         lists[i].push_back(std::make_pair(l1,dist));
         lists[l1].push_back(std::make_pair(i,dist));
       }

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys,os
 import tempfile
@@ -75,6 +75,13 @@ class SAXSProfileTestTwo(IMP.test.ApplicationTestCase):
         functions['covariance']=MockFunction()
         profile.set_interpolant(gp, {'sigma':s}, functions, 'test', m, None)
         return gp
+
+    def test_has_slogdet(self):
+        """needs numpy >= 1.6.0 for linalg.slogdet"""
+        import numpy
+        import numpy.linalg
+        numpy.linalg.slogdet([[1]])
+
 
     def test_cleanup_simple(self):
         """Test cleanup good/bad"""
@@ -240,7 +247,7 @@ class SAXSProfileTestTwo(IMP.test.ApplicationTestCase):
         #run classification and merging
         args=MockArgs(verbose=0, mergename="merge",
                 dalpha=0.05, eextrapolate=0, enoextrapolate=False,
-                baverage=False, ecomp=False, eoptimize='Flat',
+                baverage=False, enocomp=True, emean='Flat',
                 elimit_fitting=-1, elimit_hessian=-1,
                 lambdamin=0.005)
         self.merge.classification([p1,p2],args)

@@ -2,7 +2,7 @@
  *  \file RMF/internal/SharedData.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -14,8 +14,10 @@
 #include <backend/avro/AllJSON.h>
 #include <boost/tuple/tuple.hpp>
 
+RMF_ENABLE_WARNINGS
+
 namespace RMF {
-namespace internal {
+namespace avro_backend {
 
 
 #define RMF_AVRO_SHARED_TYPE(lcname, Ucname, PassValue, ReturnValue,       \
@@ -31,7 +33,7 @@ private:                                                                   \
   get_frame_type_data(Key<Ucname##Traits>, int node,                       \
                       Category category,                                   \
                       int frame) const {                                   \
-    const RMF_internal::Data &data = P::get_frame_data(category, frame);   \
+    const RMF_avro_backend::Data &data = P::get_frame_data(category, frame);   \
     typename std::map<std::string, Ucname##Data>::const_iterator           \
     it = data.lcname##_data.nodes.find(P::get_node_string(node));          \
     if (it == data.lcname##_data.nodes.end()) {                            \
@@ -45,7 +47,7 @@ private:                                                                   \
   Ucname##DataIndexPair                                                    \
   access_frame_type_data(Key<Ucname##Traits>, int node,                    \
                          Category category, int frame) {                   \
-    RMF_internal::Data &data = P::access_frame_data(category, frame);      \
+    RMF_avro_backend::Data &data = P::access_frame_data(category, frame);      \
     std::string ns = P::get_node_string(node);                             \
     return Ucname##DataIndexPair(data.lcname##_data.nodes[ns],             \
                                  data.lcname##_data.index);                \
@@ -58,15 +60,6 @@ public:                                                                    \
   Ucname##Traits::Type get_value_frame(unsigned int frame,                 \
                                        Key<Ucname##Traits> k) const {      \
     return get_value_impl(frame, -1, k);                                   \
-  }                                                                        \
-  Ucname##Traits::Types get_all_values(unsigned int node,                  \
-                                       Key<Ucname##Traits> k) {            \
-    Ucname##Traits::Types ret;                                             \
-    for (unsigned int i = 0; i < get_number_of_frames(); ++i) {            \
-      P::set_current_frame(i);                                             \
-      ret.push_back(get_value(node, k));                                   \
-    }                                                                      \
-    return ret;                                                            \
   }                                                                        \
   void set_value(unsigned int node,                                        \
                  Key<Ucname##Traits> k,                                    \
@@ -89,19 +82,17 @@ public:                                                                    \
                                                             data.get<1>(), \
                                                             k));           \
   }                                                                        \
-  vector<Key<Ucname##Traits> >                                             \
+  std::vector<Key<Ucname##Traits> >                                     \
   get_##lcname##_keys(Category cat) {                                      \
-    set<Key<Ucname##Traits> > ret;                                         \
-    std::cout << "Getting keys with frame " << P::get_current_frame()      \
-              << std::endl;                                                \
-    const RMF_internal::Data &data                                         \
+    internal::set<Key<Ucname##Traits> > ret;                            \
+    const RMF_avro_backend::Data &data                                         \
       = P::get_frame_data(cat,                                             \
                           P::get_current_frame());                         \
     extract_keys(cat, data.lcname##_data.index,       ret);                \
-    const RMF_internal::Data &staticdata = P::get_frame_data(cat,          \
+    const RMF_avro_backend::Data &staticdata = P::get_frame_data(cat,          \
                                                              ALL_FRAMES);  \
     extract_keys(cat, staticdata.lcname##_data.index, ret);                \
-    return vector<Key<Ucname##Traits> >(ret.begin(), ret.end());           \
+    return std::vector<Key<Ucname##Traits> >(ret.begin(), ret.end());   \
   }                                                                        \
   Key<Ucname##Traits>                                                      \
   get_##lcname##_key(Category category,                                    \
@@ -116,7 +107,9 @@ public:                                                                    \
   }
 
 
-}   // namespace internal
+}   // namespace avro_backend
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_INTERNAL_AVRO_SHARED_DATA_TYPES_H */

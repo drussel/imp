@@ -1,0 +1,52 @@
+vars = Variables('config.py')
+vars.Add(PathVariable('libpath',
+                      'Directory where IMP libraries are installed', None))
+vars.Add(PathVariable('cpppath',
+                      'Directory where IMP headers are installed', None))
+vars.Add('cxxflags', 'C++ compile flags', '')
+vars.Add('linkflags', 'Link flags', '')
+vars.Add(PathVariable('pypath',
+                      'Directory/ies where IMP Python wrappers are installed',
+                      None, PathVariable.PathAccept))
+vars.Add('python', 'The Python executable to use to execute IMP Python scripts',
+         'python')
+
+env = Environment(variables=vars)
+Help(vars.GenerateHelpText(env))
+
+libpath = env.get('libpath', None)
+cpppath = env.get('cpppath', None)
+pypath = env.get('pypath', None)
+cxxflags = env.get('cxxflags', '').split(' ')
+linkflags = env.get('linkflags', '').split(' ')
+python = env['python']
+
+# Set dynamic library search path on all platforms
+env['ENV']['LD_LIBRARY_PATH'] = libpath     # Linux/Sun
+env['ENV']['DYLD_LIBRARY_PATH'] = libpath   # Mac
+env['ENV']['LIBPATH'] = libpath             # AIX
+
+# Set Python search path
+env['ENV']['PYTHONPATH'] = '%s:%s' % (pypath, libpath)
+
+# Test compiling and running a C++ program that links against IMP
+testcpp = env.Program('test.cpp', CPPPATH=cpppath, LIBPATH=libpath,
+                      CXXFLAGS=cxxflags, LINKFLAGS=linkflags,
+                      LIBS=['imp_base', 'imp_core', 'imp_algebra',
+                            'imp_example', 'imp_container', 'imp_kernel'])
+runcpp = env.Command('cpp.out', testcpp, "./$SOURCES > $TARGET")
+
+# Test compiling and running a C++ program that links against RMF
+testcpp_rmf = env.Program('test_rmf.cpp', CPPPATH=cpppath, LIBPATH=libpath,
+                          CXXFLAGS=cxxflags, LINKFLAGS=linkflags,
+                          LIBS=['RMF', 'boost_system'])
+runcpp_rmf = env.Command('cpp_rmf.out', testcpp_rmf, "./$SOURCES > $TARGET")
+
+# Test running a Python unittest program that uses IMP
+runpy = env.Command('py.out', 'test.py', "%s $SOURCES -v > $TARGET" % python)
+
+# Test running a Python unittest program that uses RMF
+runpy_rmf = env.Command('py_rmf.out', 'test_rmf.py',
+                        "%s $SOURCES -v > $TARGET" % python)
+
+env.Default([runcpp, runcpp_rmf, runpy, runpy_rmf])

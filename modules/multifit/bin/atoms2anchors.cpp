@@ -12,8 +12,8 @@
 #include "IMP/atom/Hierarchy.h"
 #include "IMP/atom/pdb.h"
 #include "IMP/atom/force_fields.h"
-#include <IMP/statistics/VQClustering.h>
-#include <IMP/statistics/DataPoints.h>
+#include <IMP/statistics/internal/VQClustering.h>
+#include <IMP/statistics/internal/DataPoints.h>
 #include <IMP/multifit/DataPointsAssignment.h>
 #include <IMP/multifit/anchors_reader.h>
 //others
@@ -21,7 +21,7 @@
 #include <boost/format.hpp>
 
 using namespace IMP;
-
+namespace {
 int parse_input(int argc, char *argv[],std::string &pdb_filename,
                 int &num_means,std::string &cmm_filename,
                 std::string &output_pdb_filename,std::string &seg_filename,
@@ -71,16 +71,16 @@ int parse_input(int argc, char *argv[],std::string &pdb_filename,
    }
 
    set_log_level(VERBOSE);
-   IMP_LOG(VERBOSE,"============= parameters ============"<<std::endl);
-   IMP_LOG(VERBOSE,"pdb_filename : " << pdb_filename <<std::endl);
-   IMP_LOG(VERBOSE,"num_centers : " << num_means <<std::endl);
-   IMP_LOG(VERBOSE,"output_pdb_filename : " << output_pdb_filename <<std::endl);
-   IMP_LOG(VERBOSE,"output_cmm_filename : " << cmm_filename <<std::endl);
- IMP_LOG(VERBOSE,"segment pdb files names : " << seg_filename << std::endl);
-   IMP_LOG(VERBOSE,"====================================="<<std::endl);
+   IMP_LOG_VERBOSE("============= parameters ============"<<std::endl);
+   IMP_LOG_VERBOSE("pdb_filename : " << pdb_filename <<std::endl);
+   IMP_LOG_VERBOSE("num_centers : " << num_means <<std::endl);
+   IMP_LOG_VERBOSE("output_pdb_filename : " << output_pdb_filename <<std::endl);
+   IMP_LOG_VERBOSE("output_cmm_filename : " << cmm_filename <<std::endl);
+ IMP_LOG_VERBOSE("segment pdb files names : " << seg_filename << std::endl);
+   IMP_LOG_VERBOSE("====================================="<<std::endl);
    return 0;
 }
-
+}
 int main(int argc, char *argv[]) {
   std::string pdb_filename,cmm_filename, output_pdb_filename,seg_filename;
   std::string txt_filename;
@@ -94,8 +94,9 @@ int main(int argc, char *argv[]) {
   Model *m = new Model();
   atom::Hierarchy mh;
   mh = atom::read_pdb(pdb_filename,m);
-  IMP_NEW(IMP::statistics::ParticlesDataPoints,ddp,(core::get_leaves(mh)));
-  IMP::statistics::VQClustering vq(ddp,num_means);
+  IMP_NEW(IMP::statistics::internal::ParticlesDataPoints,ddp,
+          (core::get_leaves(mh)));
+  IMP::statistics::internal::VQClustering vq(ddp,num_means);
   vq.run();
   multifit::DataPointsAssignment assignment(ddp,&vq);
   multifit::AnchorsData ad(

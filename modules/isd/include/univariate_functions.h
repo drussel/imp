@@ -115,7 +115,7 @@ class IMPISDEXPORT Linear1DFunction : public UnivariateFunction
         Linear1DFunction(Particle * a, Particle * b)
             : UnivariateFunction("Linear1DFunction %1%"), a_(a), b_(b)
         {
-            IMP_LOG(TERSE, "Linear1DFunction: constructor" << std::endl);
+            IMP_LOG_TERSE( "Linear1DFunction: constructor" << std::endl);
             IMP_IF_CHECK(USAGE_AND_INTERNAL) { Nuisance::decorate_particle(a); }
             IMP_IF_CHECK(USAGE_AND_INTERNAL) { Nuisance::decorate_particle(b); }
             a_val_ = Nuisance(a).get_nuisance();
@@ -130,8 +130,8 @@ class IMPISDEXPORT Linear1DFunction : public UnivariateFunction
                     || (std::abs(tmpb - b_val_) >
                         IMP_ISD_UNIVARIATE_FUNCTIONS_MINIMUM))
             {
-                IMP_LOG(TERSE, "Linear1DFunction: has_changed():");
-                IMP_LOG(TERSE, "true" << std::endl);
+                IMP_LOG_TERSE( "Linear1DFunction: has_changed():");
+                IMP_LOG_TERSE( "true" << std::endl);
                 return true;
             } else {
                 return false;
@@ -141,7 +141,7 @@ class IMPISDEXPORT Linear1DFunction : public UnivariateFunction
         void update() {
             a_val_ = Nuisance(a_).get_nuisance();
             b_val_ = Nuisance(b_).get_nuisance();
-            IMP_LOG(TERSE, "Linear1DFunction: update()  a:= "
+            IMP_LOG_TERSE( "Linear1DFunction: update()  a:= "
                     << a_val_ << " b:=" << b_val_ << std::endl);
         }
 
@@ -329,7 +329,7 @@ class IMPISDEXPORT GeneralizedGuinierPorodFunction : public UnivariateFunction
             : UnivariateFunction("GeneralizedGuinierPorodFunction %1%"),
             G_(G), Rg_(Rg), d_(d), s_(s), A_(A)
         {
-            IMP_LOG(TERSE, "GeneralizedGuinierPorodFunction: constructor"
+            IMP_LOG_TERSE( "GeneralizedGuinierPorodFunction: constructor"
                             << std::endl);
             IMP_IF_CHECK(USAGE_AND_INTERNAL) { Scale::decorate_particle(G); }
             IMP_IF_CHECK(USAGE_AND_INTERNAL) { Scale::decorate_particle(Rg); }
@@ -355,9 +355,9 @@ class IMPISDEXPORT GeneralizedGuinierPorodFunction : public UnivariateFunction
                     || (std::abs(tmpA - A_val_) >
                         IMP_ISD_UNIVARIATE_FUNCTIONS_MINIMUM))
             {
-                IMP_LOG(TERSE,
+                IMP_LOG_TERSE(
                         "GeneralizedGuinierPorodFunction: has_changed():");
-                IMP_LOG(TERSE, "true" << std::endl);
+                IMP_LOG_TERSE( "true" << std::endl);
                 return true;
             } else {
                 return false;
@@ -374,7 +374,7 @@ class IMPISDEXPORT GeneralizedGuinierPorodFunction : public UnivariateFunction
             D_param_ = G_val_ *std::exp(-IMP::square(q1_param_)/(3-s_val_));
             q1_param_ = q1_param_ / Rg_val_;
             D_param_ *= std::pow(q1_param_,d_val_-s_val_);
-            IMP_LOG(TERSE, "GeneralizedGuinierPorodFunction: update()  G:= "
+            IMP_LOG_TERSE( "GeneralizedGuinierPorodFunction: update()  G:= "
                             << G_val_
                     << " Rg:=" << Rg_val_
                     << " d:=" << d_val_
@@ -430,14 +430,14 @@ class IMPISDEXPORT GeneralizedGuinierPorodFunction : public UnivariateFunction
             double deriv;
             //d[f(x)+A]/dG = f(x)/G
             deriv = value/G_val_;
-            IMP_INTERNAL_CHECK(!compatibility::isnan(deriv),
+            IMP_INTERNAL_CHECK(!base::isnan(deriv),
                         "derivative for G is nan.");
             Scale(G_).add_to_nuisance_derivative(deriv, accum);
             if (qval <= q1_param_)
             {
                 //d[f(x)]/dRg = - f(x) * 2 q^2 Rg / (3-s)
                 deriv = - value * 2*IMP::square(qval)*Rg_val_/(3-s_val_);
-                IMP_INTERNAL_CHECK(!compatibility::isnan(deriv),
+                IMP_INTERNAL_CHECK(!base::isnan(deriv),
                         "derivative for Rg is nan.");
                 Scale(Rg_).add_to_nuisance_derivative(deriv, accum);
                 //d[f(x)]/dd = 0
@@ -445,24 +445,24 @@ class IMPISDEXPORT GeneralizedGuinierPorodFunction : public UnivariateFunction
                 //d[f(x)]/ds = - f(x) * ( (q Rg / (3-s))^2 + log(q) )
                 deriv = - value
                     * (IMP::square((qval*Rg_val_)/(3-s_val_)) + std::log(qval));
-                IMP_INTERNAL_CHECK(!compatibility::isnan(deriv),
+                IMP_INTERNAL_CHECK(!base::isnan(deriv),
                         "derivative for s is nan.");
                 Scale(s_).add_to_nuisance_derivative(deriv, accum);
             } else {
                 //d[f(x)]/dRg = f(x) * (s-d)/Rg
                 deriv = value * (s_val_-d_val_)/Rg_val_;
-                IMP_INTERNAL_CHECK(!compatibility::isnan(deriv),
+                IMP_INTERNAL_CHECK(!base::isnan(deriv),
                         "derivative for Rg is nan.");
                 Scale(Rg_).add_to_nuisance_derivative(deriv, accum);
                 //d[f(x)]/dd = f(x) * log(q1/q)
                 deriv = value * std::log(q1_param_/qval);
-                IMP_INTERNAL_CHECK(!compatibility::isnan(deriv),
+                IMP_INTERNAL_CHECK(!base::isnan(deriv),
                         "derivative for d is nan.");
                 Scale(d_).add_to_nuisance_derivative(deriv, accum);
                 //d[f(x)]/ds = - f(x) * ( (d-s)/(2(3-s)) + log(q1) )
                 deriv = - value * ( (d_val_-s_val_)/(2*(3-s_val_))
                                         + std::log(q1_param_) );
-                IMP_INTERNAL_CHECK(!compatibility::isnan(deriv),
+                IMP_INTERNAL_CHECK(!base::isnan(deriv),
                         "derivative for d is nan.");
                 Scale(s_).add_to_nuisance_derivative(deriv, accum);
             }
@@ -477,27 +477,27 @@ class IMPISDEXPORT GeneralizedGuinierPorodFunction : public UnivariateFunction
             switch (particle_no)
             {
                 case 0:
-                    IMP_INTERNAL_CHECK(!compatibility::isnan(value),
+                    IMP_INTERNAL_CHECK(!base::isnan(value),
                         "derivative for G is nan.");
                     Scale(G_).add_to_scale_derivative(value, accum);
                     break;
                 case 1:
-                    IMP_INTERNAL_CHECK(!compatibility::isnan(value),
+                    IMP_INTERNAL_CHECK(!base::isnan(value),
                         "derivative for Rg is nan.");
                     Scale(Rg_).add_to_scale_derivative(value, accum);
                     break;
                 case 2:
-                    IMP_INTERNAL_CHECK(!compatibility::isnan(value),
+                    IMP_INTERNAL_CHECK(!base::isnan(value),
                         "derivative for d is nan.");
                     Scale(d_).add_to_scale_derivative(value, accum);
                     break;
                 case 3:
-                    IMP_INTERNAL_CHECK(!compatibility::isnan(value),
+                    IMP_INTERNAL_CHECK(!base::isnan(value),
                         "derivative for s is nan.");
                     Scale(s_).add_to_scale_derivative(value, accum);
                     break;
                 case 4:
-                    IMP_INTERNAL_CHECK(!compatibility::isnan(value),
+                    IMP_INTERNAL_CHECK(!base::isnan(value),
                         "derivative for A is nan.");
                     Nuisance(A_).add_to_nuisance_derivative(value, accum);
                     break;

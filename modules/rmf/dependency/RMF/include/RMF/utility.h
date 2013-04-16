@@ -2,7 +2,7 @@
  *  \file RMF/utility.h
  *  \brief Helper functions for manipulating RMF files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -13,6 +13,8 @@
 #include "internal/intrusive_ptr_object.h"
 #include "internal/errors.h"
 #include "NodeConstHandle.h"
+
+RMF_ENABLE_WARNINGS
 namespace RMF {
 
 class FileConstHandle;
@@ -26,13 +28,6 @@ class NodeConstHandle;
     \note These functions make use of the association field.
     @{
  */
-/** Turn on and off printing of hdf5 error messages. They can help in
-      diagnostics, but, for the moment, can only be output to standard
-      error and so are off by default.
- */
-inline void set_show_hdf5_errors(bool tf) {
-  internal::show_hdf5_errors = tf;
-}
 
 /** Copy the hierarchy structure and set structure from one rmf
     file to another.*/
@@ -72,5 +67,7 @@ RMFEXPORT void test_throw_exception();
 
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_UTILITY_H */

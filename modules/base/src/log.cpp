@@ -6,16 +6,27 @@
  */
 
 #include "IMP/base/log.h"
-#include "IMP/base/internal/log_stream.h"
 #include "IMP/base/exception.h"
 #include "IMP/base/file.h"
 #include "IMP/base/internal/static.h"
 #include "IMP/base/Object.h"
+#include "IMP/base/thread_macros.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
+#if IMP_BASE_HAS_LOG4CXX
+#include <log4cxx/basicconfigurator.h>
+#include <log4cxx/consoleappender.h>
+#include <log4cxx/patternlayout.h>
+#include <log4cxx/helpers/exception.h>
+#include <log4cxx/level.h>
+#else
+#include "IMP/base/internal/log_stream.h"
+#endif
+
 IMPBASE_BEGIN_NAMESPACE
+#if !IMP_BASE_HAS_LOG4CXX
 
 namespace {
   base::Vector<std::pair<const char*, const void*> > contexts;
@@ -52,29 +63,89 @@ std::string get_context_message() {
   }
   return oss.str();
 }
+#endif // Log4CXX
 
 void set_log_level(LogLevel l) {
+  // snap to max level
+  if (l > IMP_HAS_LOG) {
+    l = LogLevel(IMP_HAS_LOG);
+  }
+#if IMP_BASE_HAS_LOG4CXX
+ try {
+   switch (l) {
+   case PROGRESS:
+   case SILENT:
+     get_logger()->setLevel(log4cxx::Level::getOff());
+     break;
+   case WARNING:
+     get_logger()->setLevel(log4cxx::Level::getWarn());
+     break;
+   case TERSE:
+     get_logger()->setLevel(log4cxx::Level::getInfo());
+     break;
+   case VERBOSE:
+     get_logger()->setLevel(log4cxx::Level::getDebug());
+     break;
+   case MEMORY:
+     get_logger()->setLevel(log4cxx::Level::getTrace());
+     break;
+   case DEFAULT:
+   case ALL_LOG:
+   default:
+     IMP_WARN("Unknown log level " << boost::lexical_cast<std::string>(l));
+   }
+ } catch (log4cxx::helpers::Exception &) {
+   IMP_THROW("Invalid log level", ValueException);
+ }
+#else
   IMP_USAGE_CHECK(l >= SILENT && l < ALL_LOG,
-            "Setting log to invalid level: " << l);
-#pragma omp critical(imp_log)
-  if (FLAGS_log_level!=l ){
-    FLAGS_log_level=l;
-    // creates too many useless messages, should be part of context
-    //IMP_LOG(l, "Setting log level to " << l << std::endl);
+                  "Setting log to invalid level: " << l);
+#endif
+  IMP_OMP_PRAGMA(critical(imp_log))
+  if (internal::log_level!=l ){
+    internal::log_level=l;
   }
 }
 
 void set_log_target(TextOutput l)
 {
+#if IMP_BASE_HAS_LOG4CXX
+  IMP_UNUSED(l);
+#else
   internal::stream.set_stream(l);
+#endif
 }
 
 TextOutput get_log_target()
 {
+#if IMP_BASE_HAS_LOG4CXX
+  return TextOutput(std::cout);
+#else
   return internal::stream.get_stream();
+#endif
 }
 
-IMPBASEEXPORT void push_log_context(const char * functionname,
+
+void set_log_timer(bool tb) {
+#if IMP_BASE_HAS_LOG4CXX
+  // always on for now
+  IMP_UNUSED(tb);
+#else
+  internal::print_time=tb;
+  reset_log_timer();
+#endif
+}
+
+void reset_log_timer() {
+#if IMP_BASE_HAS_LOG4CXX
+
+#else
+  internal::log_timer= boost::timer();
+#endif
+}
+
+#if !IMP_BASE_HAS_LOG4CXX
+void push_log_context(const char * functionname,
                                     const void * classname) {
   // we don't have multithread support
 #ifdef _OPENMP
@@ -85,17 +156,7 @@ IMPBASEEXPORT void push_log_context(const char * functionname,
     }
 }
 
-void set_log_timer(bool tb) {
-  internal::print_time=tb;
-  reset_log_timer();
-}
-
-void reset_log_timer() {
-  internal::log_timer= boost::timer();
-}
-
-
-IMPBASEEXPORT void pop_log_context() {
+void pop_log_context() {
 #ifdef _OPENMP
   if (!omp_in_parallel())
 #endif
@@ -111,11 +172,16 @@ IMPBASEEXPORT void pop_log_context() {
     contexts.pop_back();
   }
 }
+#endif
 
+void add_to_log(LogLevel ll, std::string str) {
+  IMP_LOG(ll, str);
+  IMP_LOG_VARIABLE(ll);
+  IMP_LOG_VARIABLE(str);
+}
 
+#if !IMP_BASE_HAS_LOG4CXX
 void add_to_log(std::string str) {
-  IMP_INTERNAL_CHECK(static_cast<int>(internal::initialized)==11111111,
-                     "You connot use the log before main is called.");
   #pragma omp critical(imp_log)
   {
     if (!contexts.empty()
@@ -133,6 +199,25 @@ void add_to_log(std::string str) {
     }
     internal::stream.write(str.c_str(), str.size());
     internal::stream.strict_sync();
+  }
+}
+#endif
+
+void set_progress_display(std::string description,
+                      unsigned int steps) {
+  if (get_log_level() == PROGRESS) {
+    IMP_USAGE_CHECK(!internal::progress, "There is already a progress bar.");
+    std::cout << description << std::endl;
+    internal::progress.reset(new boost::progress_display(steps));
+  }
+}
+
+void add_to_progress_display(unsigned int step) {
+  if (get_log_level() == PROGRESS) {
+    IMP_USAGE_CHECK(internal::progress, "There is no progress bar.");
+    for (unsigned int i = 0; i< step; ++i) {
+      ++(*internal::progress);
+    }
   }
 }
 

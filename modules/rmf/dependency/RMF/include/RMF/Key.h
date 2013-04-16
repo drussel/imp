@@ -2,7 +2,7 @@
  *  \file RMF/Key.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -12,7 +12,9 @@
 #include <RMF/config.h>
 #include "Category.h"
 #include "types.h"
-#include "HDF5DataSetD.h"
+
+RMF_ENABLE_WARNINGS
+
 #if !defined(SWIG) && !defined(RMF_DOXYGEN)
 namespace RMF {
 namespace internal {
@@ -57,12 +59,12 @@ public:
 };
 
 
-#ifndef RMF_DOXYGEN
+} /* namespace RMF */
+
 
 #  define RMF_DECLARE_KEY(lcname, Ucname, PassValue, ReturnValue, \
                           PassValues, ReturnValues)               \
-  typedef Key<Ucname##Traits> Ucname##Key;                        \
-  typedef vector<Ucname##Key> Ucname##Keys
+  RMF_TEMPLATE_DECL(Key, Ucname##Traits, Ucname##Key)
 
 
 /** \name Key types
@@ -81,8 +83,8 @@ public:
  */
 RMF_FOREACH_TYPE(RMF_DECLARE_KEY);
 /** @} */
-#endif
 
-} /* namespace RMF */
+RMF_DISABLE_WARNINGS
+
 
 #endif /* RMF_KEY_H */

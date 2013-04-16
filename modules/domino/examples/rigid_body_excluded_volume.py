@@ -1,3 +1,6 @@
+## \example domino/rigid_body_excluded_volume.py
+## This example shows using two rigid bodies and doing excluded volume with them.
+
 import IMP
 import IMP.core
 import IMP.algebra
@@ -66,7 +69,7 @@ def display(m,helices,name):
         g.set_color(IMP.display.get_display_color(i))
         w.add_geometry(g)
 
-IMP.set_log_level(IMP.SILENT)
+IMP.base.set_log_level(IMP.base.SILENT)
 print "creating representation"
 (m,helices)=create_representation()
 
@@ -78,8 +81,8 @@ pst=create_discrete_states(m,helices)
 
 print "creating sampler"
 s=create_sampler(m, rs, pst)
-m.set_log_level(IMP.SILENT)
-IMP.set_log_level(IMP.VERBOSE)
+m.set_log_level(IMP.base.SILENT)
+IMP.base.set_log_level(IMP.base.VERBOSE)
 print "sampling"
 cs=s.get_sample()
 

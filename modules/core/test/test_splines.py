@@ -11,7 +11,7 @@ def _periodic_testfunc(val):
     """Simple periodic function and its first derivative"""
     return math.cos(val), -math.sin(val)
 
-class CubicSplineTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for cubic spline unary functions"""
 
     def test_range(self):
@@ -26,12 +26,12 @@ class CubicSplineTests(IMP.test.TestCase):
         closed_spline.set_was_used(True)
         self.assertEqual(open_spline.evaluate(10.0), 0.0)
         self.assertEqual(open_spline.evaluate(20.0), 0.0)
-        self.assertRaises(ValueError, open_spline.evaluate, 9.9)
-        self.assertRaises(ValueError, open_spline.evaluate, 20.1)
+        self.assertRaises(IMP.base.ModelException, open_spline.evaluate, 9.9)
+        self.assertRaises(IMP.base.ModelException, open_spline.evaluate, 20.1)
         self.assertEqual(closed_spline.evaluate(10.0), 0.0)
         self.assertEqual(closed_spline.evaluate(25.0), 0.0)
-        self.assertRaises(ValueError, open_spline.evaluate, 9.9)
-        self.assertRaises(ValueError, open_spline.evaluate, 25.1)
+        self.assertRaises(IMP.base.ModelException, open_spline.evaluate, 9.9)
+        self.assertRaises(IMP.base.ModelException, open_spline.evaluate, 25.1)
 
     def test_interpolate(self):
         """Test that spline-interpolated values are correct"""

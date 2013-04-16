@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import IMP.em
 
 def main():
-    IMP.set_log_level(IMP.SILENT)
+    IMP.base.set_log_level(IMP.base.SILENT)
     usage = """%prog [options] <complex.pdb>
            <output: density.mrc> <resolution> <a/pix>
 

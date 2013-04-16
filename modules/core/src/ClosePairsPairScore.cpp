@@ -53,7 +53,7 @@ namespace {
     if (r->get_can_refine(p)) {
       ParticleIndexes ret= IMP::internal::get_index(r->get_refined(p));
       IMP_IF_CHECK(USAGE) {
-        compatibility::set<ParticleIndex> uret(ret.begin(), ret.end());
+        base::set<ParticleIndex> uret(ret.begin(), ret.end());
         IMP_USAGE_CHECK(uret.size()==ret.size(),
                         "Duplicate particles in refined result: "
                         << uret.size() << " != " << ret.size());
@@ -132,7 +132,7 @@ get_close_pairs(Model *m,
   IMP_USAGE_CHECK(ps1.size() > 0, "Empty set of particles used for "
                   << p[1]);
   do {
-    IMP_LOG(VERBOSE, "Searching for close pairs "
+    IMP_LOG_VERBOSE( "Searching for close pairs "
             << dist << std::endl);
     fill_close_pairs(cpf_, m, dist,ps0, ps1, ppt);
     dist*=2;

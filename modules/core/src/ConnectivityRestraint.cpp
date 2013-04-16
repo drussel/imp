@@ -38,7 +38,7 @@ ConnectivityRestraint::ConnectivityRestraint(PairScore *ps,
 
 
 ConnectivityRestraint::ConnectivityRestraint(PairScore *ps):
-  Restraint("ConnectivityRestraint %1%"),
+    Restraint("ConnectivityRestraint %1%"),
   ps_(ps)
 {
 }
@@ -102,7 +102,7 @@ namespace {
           double d= ps->evaluate_index(m,
                                        ParticleIndexPair(pis[i],
                                                          pis[j]), nullptr);
-          IMP_LOG(VERBOSE, "ConnectivityRestraint edge between "
+          IMP_LOG_VERBOSE( "ConnectivityRestraint edge between "
                   << ParticleIndexPair(pis[i],
                                        pis[j]) << " with weight "
                   << d << std::endl);
@@ -111,7 +111,7 @@ namespace {
         }
       }
       mst.resize(pis.size()-1);
-    } catch (std::bad_alloc&c) {
+    } catch (std::bad_alloc&) {
       IMP_FAILURE("Out of memory in ConnectivityRestraint.");
     }
     boost::kruskal_minimum_spanning_tree(g, mst.begin());
@@ -138,7 +138,7 @@ namespace {
     for (unsigned int index=0; index< mst.size(); ++index) {
       int i= boost::target(mst[index], g);
       int j= boost::source(mst[index], g);
-      IMP_LOG(VERBOSE, "ConnectivityRestraint edge between "
+      IMP_LOG_VERBOSE( "ConnectivityRestraint edge between "
             << pis[i]
             << " and " << pis[j] << std::endl);
       ret[index]= ParticleIndexPair(pis[i], pis[j]);

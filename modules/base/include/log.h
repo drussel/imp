@@ -17,6 +17,9 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
+#if IMP_BASE_HAS_LOG4CXX
+#include <log4cxx/logger.h>
+#endif
 
 IMPBASE_BEGIN_NAMESPACE
 
@@ -38,7 +41,8 @@ IMPBASE_BEGIN_NAMESPACE
     All logging is disabled when \imp is built using \c build='fast'.
     @{
  */
-
+#ifndef IMP_DOXYGEN
+#if !IMP_BASE_HAS_LOG4CXX
 //! Push a new log context onto the stack
 /** A log context is, eg, a function name.
  */
@@ -50,7 +54,12 @@ IMPBASEEXPORT void pop_log_context();
 
 //! Write a string to the log
 IMPBASEEXPORT void add_to_log(std::string to_write);
+#endif
+#endif
 
+
+//! Write a string to the log, for python
+IMPBASEEXPORT void add_to_log(LogLevel level, std::string to_write);
 
 //! Set the current global log level
 /** Note that this should not, currently, be used directly
@@ -71,15 +80,40 @@ IMPBASEEXPORT void reset_log_timer();
  */
 inline LogLevel get_log_level()
 {
-  return LogLevel(FLAGS_log_level);
+  return LogLevel(internal::log_level);
 }
 
+
+#if IMP_BASE_HAS_LOG4CXX
+inline log4cxx::LoggerPtr get_logger() {
+  static log4cxx::LoggerPtr ret = log4cxx::Logger::getLogger("IMP");
+  return ret;
+}
+#else
 #if !defined(IMP_DOXYGEN) && !defined(SWIG)
 inline bool get_is_log_output(LogLevel l)
 {
   return l <= get_log_level();
 }
 #endif
+#endif
+
+/** @} */
+
+
+/** \name Create a progress bar in the terminal
+
+    @{
+ */
+/** Set up the progress bar with the passed description.
+
+    See IMP_PROGRESS_DISPLAY().
+*/
+IMPBASEEXPORT void set_progress_display(std::string description,
+                                    unsigned int steps);
+/** Set the current progress. When it equals the number of steps,
+    the bar is done.*/
+IMPBASEEXPORT void add_to_progress_display(unsigned int step = 1);
 
 /** @} */
 

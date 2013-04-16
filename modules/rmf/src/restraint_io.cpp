@@ -28,22 +28,21 @@ public:
   RMFRestraint(Model *m, std::string name);
   void set_particles(const ParticlesTemp &ps) {ps_=ps;}
 #endif
-  IMP_RESTRAINT(RMFRestraint);
+  double unprotected_evaluate(IMP::kernel::DerivativeAccumulator *accum) const;
+  ModelObjectsTemp do_get_inputs() const;
   Restraints do_create_current_decomposition() const;
+  IMP_OBJECT_METHODS(RMFRestraint);
 };
 
 double RMFRestraint::unprotected_evaluate(DerivativeAccumulator *) const {
   set_was_used(true);
   return get_last_score();
 }
-ParticlesTemp RMFRestraint::get_input_particles() const {
+
+ModelObjectsTemp RMFRestraint::do_get_inputs() const {
   return ps_;
 }
-ContainersTemp RMFRestraint::get_input_containers() const {
-  return ContainersTemp();
-}
-void RMFRestraint::do_show(std::ostream &) const {
-}
+
 Restraints RMFRestraint::do_create_current_decomposition() const {
   set_was_used(true);
   if (get_last_score() != 0) {
@@ -53,6 +52,7 @@ Restraints RMFRestraint::do_create_current_decomposition() const {
     return Restraints();
   }
 }
+
 RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
 
   class Subset: public base::ConstVector<base::WeakPointer<Particle>,
@@ -64,13 +64,9 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
       return ps;
     }
   public:
-    Subset(){}
     /** Construct a subset from a non-empty list of particles.
      */
     explicit Subset(const ParticlesTemp &ps): P(get_sorted(ps)) {
-    }
-    Model *get_model() const {
-      return operator[](0)->get_model();
     }
     std::string get_name() const {
       std::ostringstream oss;
@@ -79,9 +75,6 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
         oss << "\'" << operator[](i)->get_name() << "\'";
       }
       return oss.str();
-    }
-    bool get_contains(const Subset &o) const {
-      return std::includes(begin(), end(), o.begin(), o.end());
     }
   };
 
@@ -105,7 +98,7 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
 
   struct RestraintSaveData {
     // must not be a handle so as not to keep things alive
-    compatibility::map<Subset, RMF::NodeID> map_;
+    base::map<Subset, RMF::NodeID> map_;
   };
 
   RMF::NodeHandle get_node(Subset s, RestraintSaveData &d,
@@ -113,7 +106,7 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
                            RMF::NodeHandle parent) {
     if (d.map_.find(s) == d.map_.end()) {
       IMP_IF_CHECK(USAGE_AND_INTERNAL) {
-        for (compatibility::map<Subset, RMF::NodeID>::const_iterator it
+        for (base::map<Subset, RMF::NodeID>::const_iterator it
                = d.map_.begin(); it != d.map_.end(); ++it) {
           IMP_INTERNAL_CHECK(it->first != s,
                              "Found!!!!");
@@ -124,7 +117,13 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
       IMP_INTERNAL_CHECK(d.map_.find(s) != d.map_.end(),
                          "Not found");
       RMF::Score csd= sf.get(n);
-      csd.set_representation(get_node_ids(parent.get_file(), s));
+      RMF::NodeConstHandles nodes=get_node_ids(parent.get_file(), s);
+      csd.set_representation(nodes);
+      IMP_IF_CHECK(USAGE_AND_INTERNAL) {
+        RMF::NodeHandles reps= csd.get_representation();
+        IMP_INTERNAL_CHECK(reps.size() == nodes.size(),
+                           "Representation not set right");
+      }
     }
     return parent.get_file().get_node_from_id(d.map_.find(s)->second);
   }
@@ -154,23 +153,41 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
     Restraint* do_create(RMF::NodeConstHandle name) {
       RMF::NodeConstHandles chs= name.get_children();
       Restraints childr;
+      ParticlesTemp inputs;
       for (unsigned int i=0; i < chs.size(); ++i) {
         if (chs[i].get_type() == RMF::FEATURE) {
           childr.push_back(do_create(chs[i]));
           add_link(childr.back(), chs[i]);
         } else if(af_.get_is(chs[i])) {
           RMF::NodeConstHandle an= af_.get(chs[i]).get_aliased();
-          if (an.get_type()== RMF::FEATURE) {
-            Restraint*r= get_association<Restraint>(an);
-            childr.push_back(r);
+          IMP_LOG_TERSE( "Found alias child to " << an.get_name()
+                  << " of type " << an.get_type() << std::endl);
+          Particle *p= get_association<Particle>(an);
+          if (p) {
+            inputs.push_back(p);
+          } else {
+            Restraint *r= get_association<Restraint>(an);
+            if (r) {
+              childr.push_back(do_create(an));
+              add_link(r, an);
+            } else {
+              IMP_WARN("No IMP particle or restraint for node " << an.get_name()
+                       << std::endl);
+            }
           }
+        } else {
+          IMP_WARN("Not sure what to do with unknown child "
+                   << chs[i].get_name()
+                   << std::endl);
         }
       }
       base::Pointer<Restraint> ret;
       if (!childr.empty()) {
         ret= new RestraintSet(childr, 1.0, name.get_name());
       } else {
-        ret= new RMFRestraint(m_, name.get_name());
+        IMP_NEW(RMFRestraint, r, (m_, name.get_name()));
+        ret=r;
+        r->set_particles(inputs);
       }
       if (name.get_has_value(weight_key_)) {
         ret->set_weight(name.get_value(weight_key_));
@@ -194,38 +211,42 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
     RMF::AliasFactory af_;
     RMF::Category imp_cat_;
     RMF::FloatKey weight_key_;
-    compatibility::map<Restraint*, RestraintSaveData> data_;
+    base::map<Restraint*, RestraintSaveData> data_;
     Restraints all_;
     base::OwnerPointer<core::RestraintsScoringFunction> rsf_;
     unsigned int max_terms_;
-    compatibility::set<Restraint*> no_terms_;
+    base::set<Restraint*> no_terms_;
 
     void do_add(Restraint* r, RMF::NodeHandle nh) {
       // handle restraints being in multiple sets
       all_.push_back(r);
       rsf_= new core::RestraintsScoringFunction(all_);
-      if (get_has_associated_node(nh.get_file(), r)) {
-        RMF::NodeHandle an= get_node_from_association(nh.get_file(), r);
-        RMF::Alias a= af_.get(nh);
-        a.set_aliased(an);
-        return;
-      }
       nh.set_value(weight_key_, r->get_weight());
       add_link(r, nh);
       RestraintSet* rs= dynamic_cast<RestraintSet*>(r);
       if (rs) {
         for (unsigned int i=0; i< rs->get_number_of_restraints(); ++i) {
           Restraint *rc= rs->get_restraint(i);
-          RMF::NodeHandle c= nh.add_child(RMF::get_as_node_name(rc->get_name()),
-                                          RMF::FEATURE);
-          do_add(rc, c);
+          if (get_has_associated_node(nh.get_file(), rc)) {
+            RMF::NodeHandle an= get_node_from_association(nh.get_file(), rc);
+            RMF::NodeHandle c
+              = nh.add_child(RMF::get_as_node_name(rc->get_name()),
+                             RMF::ALIAS);
+            RMF::Alias a= af_.get(c);
+            a.set_aliased(an);
+          } else {
+            RMF::NodeHandle c
+              = nh.add_child(RMF::get_as_node_name(rc->get_name()),
+                             RMF::FEATURE);
+            do_add(rc, c);
+          }
         }
       }
     }
     void do_save_one(Restraint *o,
                      RMF::NodeHandle nh) {
       IMP_OBJECT_LOG;
-      IMP_LOG(TERSE, "Saving restraint info for " << o->get_name()
+      IMP_LOG_TERSE( "Saving restraint info for " << o->get_name()
               << std::endl);
       RestraintSaveData &d= data_[o];
       {
@@ -248,7 +269,7 @@ RMFRestraint::RMFRestraint(Model *m, std::string name): Restraint(m, name){}
       double score=o->get_last_score();
       // only set score if it is valid
       if (score < std::numeric_limits<double>::max()) {
-        IMP_LOG(TERSE, "Saving score" << std::endl);
+        IMP_LOG_TERSE( "Saving score" << std::endl);
         sd.set_score(score);
         if (no_terms_.find(o) != no_terms_.end()) {
           // too big, do nothing

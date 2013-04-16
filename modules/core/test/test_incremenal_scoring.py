@@ -8,7 +8,7 @@ class Tests(IMP.test.TestCase):
     def test_incr(self):
         """Testing incremental scoring with non-bonded"""
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         ps=[]
         bb= IMP.algebra.get_unit_bounding_box_3d()
         for i in range(0,10):
@@ -20,7 +20,7 @@ class Tests(IMP.test.TestCase):
             d.set_coordinates_are_optimized(True)
         cpc= IMP.container.ConsecutivePairContainer(ps)
         hps= IMP.core.HarmonicDistancePairScore(1,100)
-        #hps.set_log_level(IMP.VERBOSE)
+        #hps.set_log_level(IMP.base.VERBOSE)
         r= IMP.container.PairsRestraint(hps, cpc)
         r.set_name("chain")
         r.set_model(m)
@@ -40,8 +40,8 @@ class Tests(IMP.test.TestCase):
         print "iscore"
         iscore=isf.evaluate(False)
         print "oscore"
-        sf.set_log_level(IMP.VERBOSE)
-        m.set_log_level(IMP.VERBOSE)
+        sf.set_log_level(IMP.base.VERBOSE)
+        m.set_log_level(IMP.base.VERBOSE)
         oscore=sf.evaluate(False)
         self.assertAlmostEqual(iscore,
                                oscore, delta=.1)
@@ -52,7 +52,7 @@ class Tests(IMP.test.TestCase):
             oc= d.get_coordinates()
             nc= oc+ IMP.algebra.get_random_vector_in(s)
             d.set_coordinates(nc)
-            isf.set_moved_particles([pi])
+            isf.set_moved_particles([pi.get_particle_index()])
             print "moved", pi
             iscore=isf.evaluate(False)
             dscore=dsf.evaluate(False)
@@ -76,7 +76,7 @@ class Tests(IMP.test.TestCase):
     def test_incr_no_restraints(self):
         """Testing incremental scoring with no restraints"""
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         ps=[]
         bb= IMP.algebra.get_unit_bounding_box_3d()
         for i in range(0,10):
@@ -99,8 +99,8 @@ class Tests(IMP.test.TestCase):
         print "iscore"
         iscore=isf.evaluate(False)
         print "oscore"
-        sf.set_log_level(IMP.VERBOSE)
-        m.set_log_level(IMP.VERBOSE)
+        sf.set_log_level(IMP.base.VERBOSE)
+        m.set_log_level(IMP.base.VERBOSE)
         oscore=sf.evaluate(False)
         self.assertAlmostEqual(iscore,
                                oscore, delta=.1)
@@ -111,7 +111,7 @@ class Tests(IMP.test.TestCase):
             oc= d.get_coordinates()
             nc= oc+ IMP.algebra.get_random_vector_in(s)
             d.set_coordinates(nc)
-            isf.set_moved_particles([pi])
+            isf.set_moved_particles([pi.get_particle_index()])
             print "moved", pi
             iscore=isf.evaluate(False)
             dscore=dsf.evaluate(False)
@@ -135,7 +135,7 @@ class Tests(IMP.test.TestCase):
     def test_incrnonb(self):
         """Testing incremental scoring"""
         m= IMP.Model()
-        #mc.set_log_level(IMP.TERSE)
+        #mc.set_log_level(IMP.base.TERSE)
         ps=[]
         bb= IMP.algebra.get_unit_bounding_box_3d()
         for i in range(0,10):
@@ -147,13 +147,13 @@ class Tests(IMP.test.TestCase):
             d.set_coordinates_are_optimized(True)
         cpc= IMP.container.ConsecutivePairContainer(ps)
         hps= IMP.core.HarmonicDistancePairScore(1,100)
-        #hps.set_log_level(IMP.VERBOSE)
+        #hps.set_log_level(IMP.base.VERBOSE)
         r= IMP.container.PairsRestraint(hps, cpc)
         r.set_model(m)
         dsf=IMP.core.RestraintsScoringFunction([r.create_decomposition()])
         sf= IMP.core.RestraintsScoringFunction([r])
         isf= IMP.core.IncrementalScoringFunction(ps, [r])
-        isf.set_log_level(IMP.VERBOSE)
+        isf.set_log_level(IMP.base.VERBOSE)
         print 'initial test'
         iscore=isf.evaluate(False)
         dscore=dsf.evaluate(False)
@@ -170,7 +170,7 @@ class Tests(IMP.test.TestCase):
             oc= d.get_coordinates()
             nc= oc+ IMP.algebra.get_random_vector_in(s)
             d.set_coordinates(nc)
-            isf.set_moved_particles([pi])
+            isf.set_moved_particles([pi.get_particle_index()])
             print "moved", pi
             iscore=isf.evaluate(False)
             dscore=dsf.evaluate(False)
@@ -209,7 +209,7 @@ class Tests(IMP.test.TestCase):
             oc= d.get_coordinates()
             nc= oc+ IMP.algebra.get_random_vector_in(s)
             d.set_coordinates(nc)
-            isf.set_moved_particles([pi])
+            isf.set_moved_particles([pi.get_particle_index()])
             print "moved", pi
             iscore=isf.evaluate(False)
             dscore=dsf.evaluate(False)
@@ -235,8 +235,8 @@ class Tests(IMP.test.TestCase):
     def test_incrigid(self):
         """Testing incremental scoring with rigid bodies"""
         m= IMP.Model()
-        #m.set_log_level(IMP.SILENT)
-        #mc.set_log_level(IMP.TERSE)
+        #m.set_log_level(IMP.base.SILENT)
+        #mc.set_log_level(IMP.base.TERSE)
         ps=[]
         bb= IMP.algebra.get_unit_bounding_box_3d()
         rbs=[]
@@ -255,7 +255,7 @@ class Tests(IMP.test.TestCase):
             rbs.append(rb)
         cpc= IMP.container.ConsecutivePairContainer(rbs)
         hps= IMP.core.HarmonicDistancePairScore(1,100)
-        #hps.set_log_level(IMP.VERBOSE)
+        #hps.set_log_level(IMP.base.VERBOSE)
         r= IMP.container.PairsRestraint(hps, cpc)
         r.set_name("C")
         r.set_model(m)
@@ -274,14 +274,14 @@ class Tests(IMP.test.TestCase):
                                                "D")
         isf= IMP.core.IncrementalScoringFunction(rbs, [r], 1.0, IMP.NO_MAX, "I")
         isf.add_close_pair_score(nbps, 0, ps, [f])
-        isf.set_log_level(IMP.VERBOSE)
+        isf.set_log_level(IMP.base.VERBOSE)
         iscore=isf.evaluate(False)
         dscore=dsf.evaluate(False)
         rscore=sf.evaluate(False)
         print 'scores', iscore, dscore, rscore
 
         dg= IMP.get_dependency_graph(m)
-        IMP.base.show_graphviz(dg)
+        #IMP.base.show_graphviz(dg)
         self.assertAlmostEqual(iscore,
                                dscore, delta=.1)
         self.assertAlmostEqual(iscore,
@@ -294,7 +294,7 @@ class Tests(IMP.test.TestCase):
             oc= d.get_coordinates()
             nc= oc+ IMP.algebra.get_random_vector_in(s)
             d.set_coordinates(nc)
-            isf.set_moved_particles([pi])
+            isf.set_moved_particles([pi.get_index()])
             print "moved", pi.get_name(), pi.get_particle().get_index()
             iscore=isf.evaluate(False)
             dscore=dsf.evaluate(False)

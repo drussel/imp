@@ -135,7 +135,7 @@ inline void
 reset_moved(Model *m,
             ParticleIndexes &xyzrs_,
             ParticleIndexes &rbs_,
-            IMP::compatibility::map<ParticleIndex,
+            IMP::base::map<ParticleIndex,
                                             ParticleIndexes>&
             /*constituents_*/,
             algebra::Transformation3Ds&
@@ -157,7 +157,7 @@ inline void initialize_particles( SingletonContainer*sc,
                                   ObjectKey key,
                                  ParticleIndexes &xyzrs_,
                                  ParticleIndexes &rbs_,
-                                  IMP::compatibility::map<ParticleIndex,
+                                  IMP::base::map<ParticleIndex,
                                                           ParticleIndexes>&
                                   constituents_,
                                   algebra::Transformation3Ds&
@@ -166,13 +166,13 @@ inline void initialize_particles( SingletonContainer*sc,
                                   bool use_rigid_bodies=true) {
   IMP_IF_CHECK(base::USAGE) {
     ParticleIndexes pis = sc->get_indexes();
-    IMP::compatibility::set<ParticleIndex> spis(pis.begin(), pis.end());
+    IMP::base::set<ParticleIndex> spis(pis.begin(), pis.end());
     IMP_USAGE_CHECK(pis.size() == spis.size(),
                     "Duplicate particle indexes in input");
   }
   IMP_IF_CHECK(base::USAGE) {
     ParticlesTemp pis = sc->get();
-    IMP::compatibility::set<Particle*> spis(pis.begin(), pis.end());
+    IMP::base::set<Particle*> spis(pis.begin(), pis.end());
     IMP_USAGE_CHECK(pis.size() == spis.size(), "Duplicate particles in input");
   }
   //constituents_.clear();
@@ -180,7 +180,7 @@ inline void initialize_particles( SingletonContainer*sc,
   rbs_.clear();
   using IMP::operator<<;
   IMP_FOREACH_SINGLETON(sc, {
-      IMP_LOG(VERBOSE, "Processing " << _1->get_name()
+      IMP_LOG_VERBOSE( "Processing " << _1->get_name()
               << " (" << _1->get_index() << ")" << std::endl);
       if (use_rigid_bodies && RigidMember::particle_is_instance(_1)) {
         RigidBody rb=RigidMember(_1).get_rigid_body();
@@ -196,7 +196,7 @@ inline void initialize_particles( SingletonContainer*sc,
           ParticleIndexes cur= constituents_[pi];
           IMP_USAGE_CHECK(std::find(cur.begin(), cur.end(), pi) == cur.end(),
                           "A rigid body cann't be its own constituent.");
-          IMP::compatibility::set<ParticleIndex> scur(cur.begin(), cur.end());
+          IMP::base::set<ParticleIndex> scur(cur.begin(), cur.end());
           IMP_USAGE_CHECK(cur.size() == scur.size(),
                           "Duplicate constituents for "
                           << sc->get_model()->get_particle(pi)->get_name()
@@ -218,7 +218,7 @@ inline void initialize_particles( SingletonContainer*sc,
   xyzrs_backup_.clear();
   rbs_backup_.clear();
   IMP_IF_CHECK(base::USAGE_AND_INTERNAL) {
-     for (IMP::compatibility::map<ParticleIndex,
+     for (IMP::base::map<ParticleIndex,
                                   ParticleIndexes>::const_iterator it
          = constituents_.begin();
        it != constituents_.end(); ++it) {
@@ -226,7 +226,7 @@ inline void initialize_particles( SingletonContainer*sc,
        IMP_USAGE_CHECK(std::find(cur.begin(), cur.end(),
                                  it->first) == cur.end(),
                        "A rigid body cann't be its own constituent.");
-       IMP::compatibility::set<ParticleIndex> scur(cur.begin(), cur.end());
+       IMP::base::set<ParticleIndex> scur(cur.begin(), cur.end());
        IMP_USAGE_CHECK(cur.size() == scur.size(),
                        "Duplicate constituents for "
                        << sc->get_model()->get_particle(it->first)->get_name()
@@ -240,7 +240,7 @@ inline bool
 get_if_moved(Model *m, double slack_,
              ParticleIndexes &xyzrs_,
              ParticleIndexes &rbs_,
-             IMP::compatibility::map<ParticleIndex,
+             IMP::base::map<ParticleIndex,
                                              ParticleIndexes>&
              /*constituents_*/,
              algebra::Transformation3Ds&
@@ -281,7 +281,9 @@ get_if_moved(Model *m, double slack_,
       return true;
     }
 
-
+    // This check touches particles it shouldn't when the members are not
+    // all being used for collision detection.
+#if 0
     IMP_IF_CHECK(USAGE_AND_INTERNAL) {
       core::RigidBody rbs(m, rbs_[i]);
       core::RigidMembers rms= rbs.get_members();
@@ -300,6 +302,7 @@ get_if_moved(Model *m, double slack_,
                            << " for " << Showable(rms[i].get_particle()));
       }
     }
+#endif
   }
   return false;
 }
@@ -311,12 +314,12 @@ inline void fill_list(Model *m, const PairPredicates &filters,
                       double slack_,
                       ParticleIndexes &xyzrs_,
                       ParticleIndexes &rbs_,
-                      IMP::compatibility::map<ParticleIndex,
+                      IMP::base::map<ParticleIndex,
                                              ParticleIndexes>&
                       constituents_,
                       ParticleIndexPairs &cur_list_) {
   IMP_INTERNAL_CHECK(slack_>=0, "Slack must not be negative");
-  /*IMP_LOG(VERBOSE, "filling particle list with slack " << slack_
+  /*IMP_LOG_VERBOSE( "filling particle list with slack " << slack_
     << " on " << sc_->get_name());*/
   cur_list_.clear();
   internal::ParticleIndexHelper
@@ -351,7 +354,7 @@ inline void fill_list(Model *m, const PairPredicates &filters,
                                                                  key_,
                                                                  slack_,
                                                              constituents_));
-  IMP_LOG(VERBOSE, "found " << cur_list_.size() << std::endl);
+  IMP_LOG_VERBOSE( "found " << cur_list_.size() << std::endl);
 }
 
 
@@ -360,12 +363,12 @@ inline void fill_list(Model *m, const PairPredicates &filters,
                       double slack_,
                       ParticleIndexes xyzrs_[],
                       ParticleIndexes rbs_[],
-                      IMP::compatibility::map<ParticleIndex,
+                      IMP::base::map<ParticleIndex,
                                               ParticleIndexes>&
                       constituents_,
                       ParticleIndexPairs &cur_list_) {
   IMP_INTERNAL_CHECK(slack_>=0, "Slack must not be negative");
-  /*IMP_LOG(VERBOSE, "filling particle list with slack " << slack_
+  /*IMP_LOG_VERBOSE( "filling particle list with slack " << slack_
     << " on " << sc_->get_name());*/
   cur_list_.clear();
   internal::ParticleIndexHelper
@@ -420,7 +423,7 @@ inline void fill_list(Model *m, const PairPredicates &filters,
                                                                     key_,
                                                                     slack_,
                                                              constituents_));
-  IMP_LOG(VERBOSE, "found " << cur_list_.size() << std::endl);
+  IMP_LOG_VERBOSE( "found " << cur_list_.size() << std::endl);
 }
 
 

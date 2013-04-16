@@ -7,10 +7,10 @@ import random
 
 num_particles=3
 num_states=2
-class DOMINOTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def _create_stuff(self):
         m= IMP.Model()
-        m.set_log_level(IMP.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         ps =[IMP.Particle(m) for i in range(0,num_particles)]
         for p in ps:
             d=IMP.core.XYZR.setup_particle(p)
@@ -19,12 +19,12 @@ class DOMINOTests(IMP.test.TestCase):
         sps=[p for p in ps]
         random.shuffle(sps)
         r= IMP.core.ExcludedVolumeRestraint(sps, 1)
-        r.set_log_level(IMP.SILENT)
+        r.set_log_level(IMP.base.SILENT)
         r.set_name("evr")
         r.set_maximum_score(1)
         pst= IMP.domino.ParticleStatesTable()
         cache= IMP.domino.RestraintCache(pst)
-        cache.set_log_level(IMP.VERBOSE)
+        cache.set_log_level(IMP.base.VERBOSE)
         # only one really is used
         r.set_was_used(True)
         pst.set_was_used(True)
@@ -32,6 +32,10 @@ class DOMINOTests(IMP.test.TestCase):
         return (m, ps, r, pst, cache)
     def test_decomposition(self):
         """Test simple I/O of restraint cache"""
+        if not IMP.domino.IMP_DOMINO_HAS_RMF:
+            self.skipTest("domino configured without RMF")
+        else:
+            import RMF
         bb= IMP.algebra.BoundingBox3D([0,0,0], [10,10,10])
         vs= [IMP.algebra.get_random_vector_in(bb) for i in range(0,num_states)]
         print vs
@@ -54,7 +58,7 @@ class DOMINOTests(IMP.test.TestCase):
                 cache0.get_score(r, s0, ass)
         #self.assertEqual(cache0.get_number_of_entries(), len(asss)*len(rs0))
         fn= self.get_tmp_file_name("cache_io.hdf5")
-        fl= RMF.create_hdf5_file(fn)
+        fl= RMF.HDF5.create_file(fn)
         cache0.save_cache(ps0, rs0, fl, 10000000)
         # depend on cache validate call
         cache1.load_cache(ps1, fl)

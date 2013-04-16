@@ -2,12 +2,16 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #include <RMF/FileHandle.h>
 #include <RMF/internal/SharedData.h>
+
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DEF(FileHandle);
 
 namespace RMF {
 
@@ -57,3 +61,6 @@ FileHandle create_rmf_buffer(std::string &buffer) {
 
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
+

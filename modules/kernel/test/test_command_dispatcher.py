@@ -72,11 +72,11 @@ class Tests(IMP.test.TestCase):
         c = IMP.CommandDispatcher("short", "long", "TestModule")
         c.main()
         out = sys.stdout.getvalue()
-        self.assertEquals("testver\n", out)
+        self.assertEquals("testprog testver\n", out)
 
     def test_show_help(self):
         """Test CommandDispatcher show help"""
-        for arg in ('help', '--help'):
+        for arg in ('help', '--help', '-h'):
             sys.argv = ['testprog', arg]
             c = IMP.CommandDispatcher("short", "long", "TestModule")
             c.main()

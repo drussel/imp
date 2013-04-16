@@ -72,25 +72,23 @@ void SampleAssignmentContainer::add_assignment(const Assignment& a) {
   }
 }
 
-#ifdef IMP_DOMINO_USE_RMF
-
-
+#if IMP_DOMINO_HAS_RMF
 WriteHDF5AssignmentContainer
-::WriteHDF5AssignmentContainer(RMF::HDF5Group parent,
+::WriteHDF5AssignmentContainer(RMF::HDF5::Group parent,
                                const Subset &s,
                                const ParticlesTemp &all_particles,
                                std::string name):
   AssignmentContainer(name), ds_(parent.add_child_index_data_set_2d(name)),
   order_(s, all_particles),
   max_cache_(10000) {
-  RMF::HDF5IndexDataSet2D::Index sz;
+  RMF::HDF5::IndexDataSet2D::Index sz;
   sz[0]=0; sz[1]=s.size();
   ds_.set_size(sz);
 }
 
 
 WriteHDF5AssignmentContainer
-::WriteHDF5AssignmentContainer(RMF::HDF5IndexDataSet2D dataset,
+::WriteHDF5AssignmentContainer(RMF::HDF5::IndexDataSet2D dataset,
                           const Subset &s,
                           const ParticlesTemp &all_particles,
                           std::string name):
@@ -98,7 +96,7 @@ WriteHDF5AssignmentContainer
   order_(s, all_particles),
   max_cache_(10000) {
   if (ds_.get_size()[1] != s.size()) {
-    RMF::HDF5IndexDataSet2D::Index sz;
+    RMF::HDF5::IndexDataSet2D::Index sz;
     sz[0]=0; sz[1]=s.size();
     ds_.set_size(sz);
   }
@@ -116,15 +114,15 @@ Assignment WriteHDF5AssignmentContainer::get_assignment(unsigned int) const {
 
 void WriteHDF5AssignmentContainer::flush() {
   if (cache_.empty()) return;
-  RMF::HDF5IndexDataSet2D::Index size= ds_.get_size();
-  RMF::HDF5IndexDataSet2D::Index nsize=size;
+  RMF::HDF5::IndexDataSet2D::Index size= ds_.get_size();
+  RMF::HDF5::IndexDataSet2D::Index nsize=size;
   int num_items=cache_.size()/order_.size();
-  IMP_LOG(VERBOSE, "Flushing cache of size "
+  IMP_LOG_VERBOSE( "Flushing cache of size "
           << num_items << " to disk"
           << std::endl);
   nsize[0]+= num_items;
   ds_.set_size(nsize);
-  RMF::HDF5IndexDataSet2D::Index write_size;
+  RMF::HDF5::IndexDataSet2D::Index write_size;
   write_size[0]=num_items;
   write_size[1]=order_.size();
   size[1]=0;
@@ -168,7 +166,7 @@ void WriteHDF5AssignmentContainer::add_assignment(const Assignment& a) {
 
 
 ReadHDF5AssignmentContainer
-::ReadHDF5AssignmentContainer(RMF::HDF5IndexConstDataSet2D dataset,
+::ReadHDF5AssignmentContainer(RMF::HDF5::IndexConstDataSet2D dataset,
                           const Subset &s,
                           const ParticlesTemp &all_particles,
                           std::string name):
@@ -183,7 +181,7 @@ unsigned int ReadHDF5AssignmentContainer::get_number_of_assignments() const {
 }
 
 Assignment ReadHDF5AssignmentContainer::get_assignment(unsigned int i) const {
-  RMF::Ints is= ds_.get_row(RMF::HDF5DataSetIndexD<1>(i));
+  RMF::HDF5::Ints is= ds_.get_row(RMF::HDF5::DataSetIndexD<1>(i));
   IMP_USAGE_CHECK(is.size()== order_.size(), "Wrong size assignment");
   return order_.get_subset_ordered(is.begin(), is.end());
 }
@@ -229,15 +227,20 @@ Assignment WriteAssignmentContainer::get_assignment(unsigned int) const {
 }
 
 void WriteAssignmentContainer::flush() {
+  IMP_OBJECT_LOG;
+  IMP_LOG_TERSE( "Flushing " << cache_.size() << " entries" << std::endl);
+  set_was_used(true);
   if (cache_.empty()) return;
   int ret=write(f_, &cache_[0], cache_.size()*sizeof(int));
-  IMP_CHECK_VARIABLE(ret);
+
   IMP_INTERNAL_CHECK(ret == static_cast<int>(cache_.size()*sizeof(int)),
                   "Not everything written: " << ret
                   << " of " << cache_.size()*sizeof(int));
+
+  IMP_CHECK_VARIABLE(ret);
   cache_.clear();
   cache_.reserve(max_cache_);
-#if IMP_BUILD != IMP_FAST
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
   size_t size = lseek(f_, 0, SEEK_CUR);
   IMP_INTERNAL_CHECK(size== number_*order_.size()*sizeof(int),
                      "Wrong number of bytes in file: got "
@@ -258,7 +261,7 @@ void WriteAssignmentContainer::add_assignment(const Assignment& a) {
   Ints ret= order_.get_list_ordered(a);
   cache_.insert(cache_.end(), ret.begin(), ret.end());
   ++number_;
-  IMP_LOG(VERBOSE, "Added " << a << " cache is now " << cache_
+  IMP_LOG_VERBOSE( "Added " << a << " cache is now " << cache_
           << std::endl);
   if (cache_.size() > max_cache_) flush();
 }
@@ -311,7 +314,7 @@ ReadAssignmentContainer
   struct stat data;
   stat(dataset.c_str(), &data);
   size_=data.st_size/sizeof(int)/s.size();
-  IMP_LOG(TERSE, "Opened binary file with " << size_ << "assignments"
+  IMP_LOG_TERSE( "Opened binary file with " << size_ << "assignments"
           << std::endl);
 #ifdef _MSC_VER
   f_=open(dataset.c_str(), O_RDONLY|O_BINARY, 0);
@@ -336,7 +339,7 @@ Assignment ReadAssignmentContainer::get_assignment(unsigned int i) const {
     int rd= read(f_, &cache_[0], max_cache_*sizeof(int));
     cache_.resize(rd/sizeof(int));
     offset_=i;
-    IMP_LOG(TERSE, "Cache is of size " << cache_.size() << " at " << offset_
+    IMP_LOG_TERSE( "Cache is of size " << cache_.size() << " at " << offset_
             << " when reading " << i << " with assignments of size "
             << order_.size() << std::endl);
   }
@@ -446,114 +449,6 @@ void HeapAssignmentContainer::add_assignment(const Assignment& a) {
   // if (d_.size()%1000000 == 0) {
   //   std::cout<<"Current subset size:"<<d_.size()<<" : "<<a<<std::endl;
   // }
-}
-
-//////////// CLUSTERED
-ClusteredAssignmentContainer
-::ClusteredAssignmentContainer(unsigned int k,
-                               Subset s,
-                               ParticleStatesTable *pst):
-  k_(k), s_(s), pst_(pst), r_(0), metrics_(s.size()) {}
-
-
-void ClusteredAssignmentContainer::add_metric(Particle *p,
-                                              statistics::Metric *m) {
-  for (unsigned int i=0; i< s_.size(); ++i) {
-    if (s_[i]==p) {
-      metrics_[i]=m;
-    }
-  }
-}
-
-inline unsigned int
-ClusteredAssignmentContainer::get_number_of_assignments() const {
-  return d_.size();
-}
-
-inline Assignment
-ClusteredAssignmentContainer::get_assignment(unsigned int i) const {
-  IMP_USAGE_CHECK(i < get_number_of_assignments(),
-                  "Invalid assignment requested: " << i);
-  return d_[i];
-}
-
-void ClusteredAssignmentContainer::do_show(std::ostream &out) const {
-  out << "number of assignments: " << get_number_of_assignments();
-  out << ", max size: " << k_ << std::endl;
-}
-
-bool ClusteredAssignmentContainer
-::get_in_cluster(const Assignment &v) const {
-  for (unsigned int i=0; i< d_.size(); ++i) {
-    double dist=get_distance_if_smaller_than(s_, d_[i], v,
-                                             pst_,
-                                             metrics_, r_);
-    if (dist < r_) {
-      IMP_LOG(VERBOSE, v << " is in cluster with center " << d_[i]
-              << " with radius " << r_ << std::endl);
-      return true;
-    }
-  }
-  return false;
-}
-
-double ClusteredAssignmentContainer::get_minimum_distance() const {
-  double md= std::numeric_limits<double>::max();
-  for (unsigned int i=0; i< d_.size(); ++i) {
-    for (unsigned int j=0; j< i; ++j) {
-      double cd= get_distance_if_smaller_than(s_, d_[i],
-                                              d_[j],
-                                              pst_,
-                                              metrics_,
-                                              md);
-      if (cd <md) md=cd;
-    }
-  }
-  return 2*md+.1;
-}
-
-void ClusteredAssignmentContainer::recluster() {
-  IMP_LOG(VERBOSE, "Reclustering from " << d_ << std::endl);
-  base::Vector<Assignment> nd_;
-  std::swap(nd_, d_);
-  for (unsigned int i=0; i< nd_.size(); ++i) {
-    if (!get_in_cluster(nd_[i])) {
-      IMP_LOG(VERBOSE, "Adding state " << nd_[i] << std::endl);
-      d_.push_back(nd_[i]);
-    }
-  }
-  IMP_LOG(VERBOSE, "Reclustered to " << d_ << std::endl);
-}
-
-
-void ClusteredAssignmentContainer::add_assignment(const Assignment& a) {
-  IMP_OBJECT_LOG;
-  if (r_==0) {
-    IMP_LOG(VERBOSE, "Adding state to list" << std::endl);
-    d_.push_back(a);
-  } else {
-    IMP_INTERNAL_CHECK(r_ > 0,
-                       "R is not initialized");
-    if (get_in_cluster(a)) {
-      IMP_LOG(VERBOSE, "State covered by existing cluster with radius " << r_
-              << std::endl);
-      return;
-    } else {
-      IMP_LOG(VERBOSE, "State added to new cluster "
-              << std::endl);
-      // perhaps update search structure
-      d_.push_back(a);
-    }
-  }
-  if (d_.size() >k_) {
-    if (r_==0) {
-      r_= get_minimum_distance();
-      IMP_LOG(VERBOSE, "Initial distance is " << r_ << std::endl);
-    } else {
-      r_*=2;
-    }
-    recluster();
-  }
 }
 
 

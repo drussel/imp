@@ -1,5 +1,5 @@
 /**
- *  \file IMP/core/MoverBase.h    \brief A class to help implement movers.
+ *  \file IMP/core/MoverBase.h    \brief Backwards compatibility.
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
@@ -17,6 +17,9 @@
 #include <vector>
 
 IMPCORE_BEGIN_NAMESPACE
+
+
+#if defined(IMP_DOXYGEN) || IMP_HAS_DEPRECATED
 
 //! A class to help implement movers
 /** This class helps in implementing Movers by allowing changes to be easily
@@ -46,7 +49,7 @@ class IMPCOREEXPORT MoverBase: public Mover
                                                        t,
                                   "Tried to set, but it didn't work.");
     } else {
-      IMP_LOG(TERSE, "Dropping change to unoptimized attribute: "
+      IMP_LOG_TERSE( "Dropping change to unoptimized attribute: "
               << keys_[j] << " of particle "
               << get_model()->get_particle(particles_[i])->get_name()
               << std::endl);
@@ -63,49 +66,47 @@ public:
     return IMP::internal::get_particle(get_model(), particles_);
   }
 
-  IMP_PROTECTED_METHOD(unsigned int, get_number_of_particles, (), const, {
+protected:
+  unsigned int get_number_of_particles() const {
       return particles_.size();
-    });
-  IMP_PROTECTED_METHOD(unsigned int, get_number_of_keys, (), const, {
+  }
+  unsigned int get_number_of_keys() const {
       return keys_.size();
-    });
-  IMP_PROTECTED_METHOD(std::string, get_particle_name, (unsigned int i), const,
-                       {
-                         return get_model()
-                           ->get_particle(particles_[i])->get_name();
-                       });
+  }
+  std::string get_particle_name(unsigned int i) const {
+    return get_model()->get_particle(particles_[i])->get_name();
+  }
 
   //! implement this method to propose a move
   /** See NormalMover for a simple example.
    */
-  IMP_PROTECTED_METHOD(virtual void, do_move, (Float f), =0,);
+  virtual void do_move (Float f) =0;
 
   //! Get the value of a controlled attribute
   /** \param [in] i The index of the particle.
       \param [in] j The index of the attribute.
    */
-  IMP_PROTECTED_METHOD(Float, get_value, (unsigned int i, unsigned int j),
-                       const, {
+  Float get_value (unsigned int i, unsigned int j) const {
     IMP_USAGE_CHECK(j < keys_.size(), "Out of range key");
     IMP_USAGE_CHECK(i < particles_.size(), "Out of range particle");
     return get_model()->get_attribute(keys_[j], particles_[i]);
-                       });
+  }
 
   //! Propose a value
   /** \param[in] i The index of the particle.
       \param[in] j The index of the key
       \param[in] t The value to propose
    */
-  IMP_PROTECTED_METHOD(void, propose_value,(unsigned int i,
-                                            unsigned int j, Float t),, {
-                         do_propose_value(i, j, t);
-                       });
+  void propose_value(unsigned int i, unsigned int j, Float t) {
+    do_propose_value(i, j, t);
+  }
 
-  IMP_PROTECTED_CONSTRUCTOR(MoverBase, (const ParticlesTemp &ps,
-                                        const FloatKeys &keys,
-                                        std::string name), );
-
-  IMP_REF_COUNTED_NONTRIVIAL_DESTRUCTOR(MoverBase);
+MoverBase(const ParticlesTemp &ps,
+          const FloatKeys &keys,
+          std::string name):
+  Mover(IMP::internal::get_model(ps), name),
+  keys_(keys),
+  particles_(IMP::internal::get_index(ps)) {}
 };
 
 
@@ -133,6 +134,7 @@ inline void MoverBase::reset_move()
 }
 
 IMP_OBJECTS(MoverBase, MoverBases);
+#endif
 
 IMPCORE_END_NAMESPACE
 

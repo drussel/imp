@@ -8,7 +8,7 @@ zkey = IMP.FloatKey("z")
 idkey = IMP.IntKey("id")
 radkey = IMP.FloatKey("radius")
 
-class ParticleTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test particles"""
 
     def setup(self):
@@ -44,7 +44,7 @@ class ParticleTests(IMP.test.TestCase):
         (model, particles)= self.setup()
         p1 = particles[0]
         self.assertEqual(p1.get_is_active(), True)
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         del model
         # Particles left over after a model is deleted should act as if
         # they are inactive
@@ -82,7 +82,7 @@ class ParticleTests(IMP.test.TestCase):
         d[p0]=1
         d[p1]=2
         print p0.__hash__()
-        td= IMP._TrivialDecorator.setup_particle(p0)
+        td= IMP.kernel._TrivialDecorator.setup_particle(p0)
         print td.__hash__()
         print td.get_particle().__hash__()
         d[td]=3
@@ -129,7 +129,7 @@ class ParticleTests(IMP.test.TestCase):
         self._test_add_remove(p, IMP.FloatKey("something"), 1.0)
         self._test_add_remove(p, IMP.StringKey("something"), "Hello")
         self._test_add_remove(p, IMP.IntKey("something"), 1)
-        self._test_add_remove(p, IMP.ParticleKey("something"), p)
+        self._test_add_remove(p, IMP.ParticleIndexKey("something"), p)
 
     def test_derivatives(self):
         """Test get/set of derivatives"""
@@ -189,8 +189,8 @@ class ParticleTests(IMP.test.TestCase):
         p0a= particles[0]
         p0b= model.get_particles()[0]
         self.assertEqual(p0a, p0b)
-        td0a= IMP._TrivialDecorator.setup_particle(p0a)
-        td0b= IMP._TrivialDecorator(p0b)
+        td0a= IMP.kernel._TrivialDecorator.setup_particle(p0a)
+        td0b= IMP.kernel._TrivialDecorator(p0b)
         self.assertEqual(td0a, td0b)
         self.assertEqual(td0a, p0a)
     def test_many_particle(self):

@@ -13,62 +13,53 @@
 #include "utility_macros.h"
 #include "log_macros.h"
 #ifdef _OPENMP
+#include <IMP/base/CreateLogContext.h>
 #include <omp.h>
 #endif
 
-IMPBASE_BEGIN_NAMESPACE
-
-#if defined(IMP_DOXYGEN)
+#if defined(IMP_DOXYGEN) || !defined(_OPENMP)
 
 /** Start a new OpenMP task with the next block passing the
     list of passed variables.*/
-#define IMP_TASK(privatev, action)
+#define IMP_TASK(privatev, action, name) action
 
 /** Start a new OpenMP task with the next block passing the
     list of passed variables.*/
-#define IMP_TASK_SHARED(privatev, sharedv, action)
+#define IMP_TASK_SHARED(privatev, sharedv, action, name) action
 
 /** Start a parallel section if one is not already started.
  */
-#define IMP_THREADS(variables, action)
+#define IMP_THREADS(variables, action) action
 
-#elif !defined(IMP_USE_PRAGMA) || !defined(_OPENMP)
-#define IMP_TASK(privatev, action)                                      \
-  action
-
-#define IMP_TASK_SHARED(privatev, sharedv, action)                      \
-  action
-
-
-#define IMP_THREADS(variables, action)                                  \
-  action
+/** Pragma for OpenMP */
+#define IMP_OMP_PRAGMA(x)
 
 #else
 
-#define IMP_TASK(privatev, action)                                      \
+#define IMP_OMP_PRAGMA(x) IMP_PRAGMA(omp x)
+
+#define IMP_TASK(privatev, action, name)                                \
   if (IMP::base::get_number_of_threads() > 1) {                         \
-    IMP_PRAGMA(omp task default(none) firstprivate privatev             \
+    IMP_OMP_PRAGMA(task default(none) firstprivate privatev             \
                if (omp_in_parallel())                                   \
                                                                         \
                )                                                        \
       {                                                                 \
-        IMP_LOG(TERSE, "Beginning task\n");                             \
+        IMP::base::CreateLogContext task_context(name);                 \
         action;                                                         \
-        IMP_LOG(TERSE, "Ending task\n");                                \
       }                                                                 \
   } else {                                                              \
     action;                                                             \
   }
 
-#define IMP_TASK_SHARED(privatev, sharedv, action)                      \
+#define IMP_TASK_SHARED(privatev, sharedv, action, name)                \
   if (IMP::base::get_number_of_threads() > 1) {                         \
-    IMP_PRAGMA(omp task default(none) firstprivate privatev             \
+    IMP_OMP_PRAGMA(task default(none) firstprivate privatev             \
                shared sharedv                                           \
                if (omp_in_parallel()))                                  \
     {                                                                   \
-      IMP_LOG(TERSE, "Beginning task\n");                               \
+      IMP::base::CreateLogContext task_context(name);                   \
       action;                                                           \
-      IMP_LOG(TERSE, "Ending task\n");                                  \
     }                                                                   \
   } else {                                                              \
     action;                                                             \
@@ -77,21 +68,18 @@ IMPBASE_BEGIN_NAMESPACE
 
 #define IMP_THREADS(variables, action)                                  \
   if (IMP::base::get_number_of_threads() > 1) {                         \
-    IMP_PRAGMA(omp parallel firstprivate(sf)                            \
+    IMP_OMP_PRAGMA(parallel shared variables                            \
                num_threads(IMP::base::get_number_of_threads()))         \
       {                                                                 \
         IMP_PRAGMA(omp single)                                          \
           {                                                             \
-            IMP_LOG(TERSE, "Beginning parallel region\n");              \
+            IMP::base::CreateLogContext parallel_context("parallel");   \
             action;                                                     \
-            IMP_LOG(TERSE, "Ending parallel region\n");                 \
           }                                                             \
       }                                                                 \
   } else {                                                              \
     action;                                                             \
   }
 #endif
-
-IMPBASE_END_NAMESPACE
 
 #endif /* IMPBASE_THREAD_MACROS_H */

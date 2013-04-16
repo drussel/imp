@@ -2,12 +2,13 @@
  *  \file test_associations.cpp
  *  \brief A nullptr-initialized pointer to an \imp Object.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 #include <boost/shared_ptr.hpp>
 #include <RMF/FileHandle.h>
 
+namespace {
 struct MyInt {
   int i;
 };
@@ -53,11 +54,17 @@ void test(const char *fname)
   MyInt sintb = c3.get_association<MyInt >();
   assert(sintb.i == sint.i);
 }
+}
 
 int main(int, char *[]) {
-  // don't have tmp file support at this point
-  const char fname[] = "/tmp/assoc.rmf";
-  test(fname);
-  remove(fname);
+  try {
+    // don't have tmp file support at this point
+    const char fname[] = "/tmp/assoc.rmf";
+    test(fname);
+    remove(fname);
+  } catch (const std::exception &e) {
+    std::cerr << "Terminated with error: " << e.what() << std::endl;
+    return 1;
+  }
   return 0;
 }

@@ -1,6 +1,0 @@
-repository="../svn"
-includepath=""
-libpath=""
-path=""
-ldlibpath=""
-build="debug"

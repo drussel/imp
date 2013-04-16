@@ -23,18 +23,12 @@ The input files in the \imp directory are structured as follows:
    - \c examples contains examples, in Python as well as any data needed for examples
    - \c data contains any data files needed by the module
 
-When \imp is built, the \c build directory is created and filled with
-the results of the build. \c build contains a number of
-subdirectories. They are
+When \imp is built, a number of directories are created in the build directory. They are
  - \c include which includes all the headers. The headers for the \c kernel are placed in \c include/IMP and those for module \c name are placed in \c include/IMP/name
  - \c lib where the C++ and Python libraries are placed. Module \c name is built into a C++ library \c lib/libimp_name.so (or \c .dylib on a mac) and a Python library
    with Python files located in \c lib/IMP/name and the binary part in \c lib/_IMP_name.so.
  - \c doc where the html documentation is placed in \c doc/html and the examples in \c doc/examples with a subdirectory for each module
  - \c data where each module gets a subdirectory for its data.
-
-Unfortunately, various intermediate files from the build are scattered throughout the \c module
-and \c kernel hierarchies. This messiness is part of the reason we strongly recommend doing an
-\ref devbuild "out of source build".
 
 When \imp is installed, the structure from the \c build directory is moved over more or less intact except that the C++ and Python libraries are put in the (different) appropriate locations.
 
@@ -130,10 +124,11 @@ the library is found. If the library is optional, instead add
 \code optional_dependencies=["Extern"]
 \endcode
 When writing C++ code that depends on extern, surround it with
-\code #if defined(IMP_MODULENAME_USE_EXTERN)
+```
+\#if defined(IMP_MODULENAME_USE_EXTERN)
 some code using extern
-#endif
-\endcode
+\#endif
+```
 And when writing Python code check if \c IMP.mymodule.use_extern is \c True.
 
 Each module has an auto-generated header called \c modulename_config.h. This header
@@ -164,17 +159,14 @@ The second is logging macros such as:
 - IMP_LOG() which allows controlled display of messages about what the
   code is doing. See \ref log "logging" for more information.
 
-Finally, each module has a set of unit tests. These are Python scripts
-which test the behavior of a particular piece of the module's API. The
-scripts are located in the \c modules/modulename/test directory.
+Finally, each module has a set of unit tests. The
+tests are located in the \c modules/modulename/test directory.
 These tests should try, as much as possible to provide independent
-verification of the correctness of the C++ code. The command
-\command{scons test} or \command{scons modulename-test} run all modules unit
-tests or only those for the module \c modulename, respectively. Any
-file in that directory or a subdirectory whose name matches \c
-test_*.py is considered a test. The Python files are scanned for
-classes which inherit from \c IMP.test.TestCase. For each such class
-found, any method whose name starts with \c test_ is run.
+verification of the correctness of the code. Any
+file in that directory or a subdirectory whose name matches `test_*.{py,cpp}`,
+`medium_test_*.{py,cpp}` or `expensive_test_*.{py,cpp}` is considered a test.
+Normal tests should run in at most a few seconds on a typical machine, medium
+tests in 10 seconds or so and expensive tests in a couple minutes.
 
 Some tests will require input files or temporary files. Input files
 should be placed in a directory called \c input in the \c test
@@ -254,7 +246,7 @@ characters.
 
     See the names section of the \ref conventions "IMP conventions" page.
     In addition, developers should be aware that
-    - all preprocessor symbols (things created by \#define) must begin with \c IMP
+    - all preprocessor symbols (things created by `#define`) must begin with \c IMP
       and no \imp code should depend on preprocessor symbols which do not
       start with IMP.
     - names of files that implement a single class should be named for that
@@ -352,11 +344,11 @@ Python code should provide Python doc strings.
 All headers not in internal directories are parsed through \doxygen. Any function that
 you do not want documented (for %example, because it is not well tested), hide by surrounding
 with
-\code
-#ifndef IMP_DOXYGEN
+```
+\#ifndef IMP_DOXYGEN
 void messy_poorly_thought_out_function();
-#endif
-\endcode
+\#endif
+```
 
 We provide a number of extra Doxygen commands to aid in producing nice
 \imp documentation. The commands are used by writing \c \\commandname{args}
@@ -468,7 +460,7 @@ When writing examples, one should try (as appropriate) to do the following:
 -# define a function \c analyze_conformations to perform some sort of clustering and analysis of the resulting conformations
 -# finally do the actual work of calling the \c create_representation and \c create_restraints functions and performing samping and analysis and displaying the solutions.
 
-Obvious, not all examples need all of the above parts. See \ref modules/kernel/examples/nup84_cg.py "Nup84 CG" for an canonical example.
+Obvious, not all examples need all of the above parts. See \ref examples/kernel/nup84.py "Nup84" for an canonical example.
 
 The example should have enough comments that the reasoning behind each line of code is clear to someone who roughly understands how \imp in general works.
 
@@ -552,8 +544,7 @@ The first set of questions to answer are
 
 - Should the functionality be written in C++ or Python? In general, we
   suggest C++ if you are comfortable programming in that language as
-  that makes the functionality available to more people. See
-  \ref cpppythondifferences "Python/C++ differences" for more considerations.
+  that makes the functionality available to more people.
 
 You are encouraged to post to the
 \impdev to find help
@@ -627,7 +618,7 @@ platforms for code that is part of the \imp SVN repository.
 In order to make it more likely that your code works on all the supported platforms:
 - use the headers and classes in IMP::compatibility when appropriate
 - avoid the use of \c and and \c or in C++ code, use \c && and \c || instead.
-- avoid \c friend declarations involving templates, use \c #if blocks
+- avoid \c friend declarations involving templates, use \c \#if blocks
   on \c SWIG and \c IMP_DOXYGEN to hide code as needed instead.
 
 \subsection cxx11 C++ 11
@@ -768,7 +759,7 @@ file (see modules/example/pyext/swig.i-in). The key bits are
 - then there should be a number of \c %include lines, one per header file
   in the module which exports a class or function to Python. The header files
   must be in order such that no class is used before a declaration for it
-  is encountered (SWIG does not search \c #include files for the \c %include headers)
+  is encountered (SWIG does not search \c \#include files for the \c %include headers)
 - finally, any templates that are to be exported to SWIG must have a
   \c %template call. It should look something like
   \code
@@ -778,14 +769,6 @@ file (see modules/example/pyext/swig.i-in). The key bits are
     }
   }
   \endcode
-
-Access control works differently in Python than in C++. In the former it is a convention (methods starting with an \c _ are internal), in the latter it
-is enforced by the compiler. For this reason you should think hard about
-having C++ class members that are protected. As a general rule, \c protected:
-should probably only be used when implementing the non-virtual interface idiom or
-when one wants to ensure that a base class is never constructed along. When you
- do need protected methods or constructors as part of the API use the
-IMP_PROTECTED_METHOD() and IMP_PROTECTED_CONSTRUCTOR() macros.
 
 \section profiling Profiling your code
 
@@ -806,6 +789,5 @@ cxxflags="-g"
 At some point you may want to understand how some aspect of \imp works under the hood. These pages explain various aspects of how \imp works.
 
 - \ref dependencies "Dependencies"
-- \ref close_pairs "Grid based close pair finding"
 
 */

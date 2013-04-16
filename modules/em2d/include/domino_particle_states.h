@@ -1,5 +1,5 @@
 /**
- *  \file ProjectionStates.h
+ *  \file domino_particle_states.h
  *  \brief Particles states for a rigid body that is going to be projected
  *
  *  Copyright 2007-2013 IMP Inventors. All rights reserved.
@@ -26,7 +26,6 @@ IMPEM2D_BEGIN_NAMESPACE
 /*! States that a set of Particles can have according to their positions
     and orientations in a grid. The orientations also determine the orientation
     of the projections of the particles.
-  \param[in]
 */
 class IMPEM2DEXPORT GridStates: public domino::ParticleStates {
 

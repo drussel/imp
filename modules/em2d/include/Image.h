@@ -153,7 +153,6 @@ public:
    * @param writer The image writer to use
    */
   void write(const String &filename, const ImageReaderWriter *writer) {
-    Pointer<const ImageReaderWriter> ptr(writer);
     update_header(); // adjust the header to guarantee consistence
     writer->write(filename,header_,data_);
   }
@@ -169,10 +168,10 @@ public:
 
   //! Define the basic things needed by any Object
 //  IMP_OBJECT_METHODS(Image)
-  IMP_OBJECT_METHODS(Image)
+  IMP_OBJECT_METHODS(Image);
 
   void destroyed_msg() {
-    IMP_LOG(TERSE, "Image destroyed " << this->name_ << std::endl);
+    IMP_LOG_TERSE( "Image destroyed " << this->name_ << std::endl);
   }
 
   /**

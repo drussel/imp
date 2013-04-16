@@ -11,9 +11,17 @@
 
 #include <IMP/base/base_config.h>
 #include "exception.h"
+#include "compiler_macros.h"
 #include <iostream>
 #include <cmath>
 
+#if !defined(IMP_HAS_CHECKS)
+#error "IMP_HAS_CHECKS is not defined, compilation is broken"
+#endif
+
+#if !defined(IMP_NONE)
+#error "IMP_NONE is not defined, compilation is broken"
+#endif
 
 /** Catch any IMP exception thrown by expr and terminate with an
     error message. Use this for basic error handling in main functions
@@ -97,7 +105,7 @@
 
    For example:
     \code
-    IMP_CHECK_CODE(CHECK_USAGE) {
+    IMP_IF_CHECK(USAGE) {
         base::Vector<Particle*> testp(input.begin(), input.end());
         std::sort(testp.begin(), testp.end());
         IMP_USAGE_CHECK(std::unique(testp.begin(), testp.end()) == testp.end(),
@@ -107,11 +115,6 @@
 */
 #define IMP_IF_CHECK(level)
 
-/** \copydoc IMP_IF_CHECK
-
-    Do the check with a given probability.
- */
-#define IMP_IF_CHECK_PROBABILISTIC(level, probability)
 
 //! Only compile the code if checks are enabled
 /** For example
@@ -189,25 +192,65 @@
 */
 #define IMP_USAGE_CHECK_FLOAT_EQUAL(expra, exprb, message)
 
+#ifndef IMP_DOXYGEN
+/** Mark a variable as one that is only used in checks. This disables
+    unused variable warnings on it in fast mode.
+*/
+#define IMP_CHECK_VARIABLE(variable)
+#endif
+
+/** Mark a variable as one that is only used in checks. This disables
+    unused variable warnings on it in fast mode.
+*/
+#define IMP_USAGE_CHECK_VARIABLE(variable)
+
+/** Mark a variable as one that is only used in checks. This disables
+    unused variable warnings on it in fast mode.
+*/
+#define IMP_INTERNAL_CHECK_VARIABLE(variable)
+
 
 #else // IMP_DOXYGEN
 
 
+#if IMP_HAS_CHECKS == IMP_INTERNAL
+#define IMP_CHECK_VARIABLE(variable)
+#define IMP_USAGE_CHECK_VARIABLE(variable)
+#define IMP_INTERNAL_CHECK_VARIABLE(variable)
+#elif IMP_HAS_CHECKS == IMP_USAGE
+#define IMP_CHECK_VARIABLE(variable)
+#define IMP_USAGE_CHECK_VARIABLE(variable)
+#define IMP_INTERNAL_CHECK_VARIABLE(variable) IMP_UNUSED(variable)
+#else
+#define IMP_CHECK_VARIABLE(variable) IMP_UNUSED(variable)
+#define IMP_USAGE_CHECK_VARIABLE(variable) IMP_UNUSED(variable)
+#define IMP_INTERNAL_CHECK_VARIABLE(variable) IMP_UNUSED(variable)
+#endif
 
-#if IMP_BUILD < IMP_FAST
+
+#if IMP_HAS_CHECKS > IMP_NONE
 #define IMP_IF_CHECK(level)                      \
   using IMP::base::NONE;                         \
   using IMP::base::USAGE;                        \
   using IMP::base::USAGE_AND_INTERNAL;           \
   if (level <= ::IMP::base::get_check_level())
 
-#define IMP_IF_CHECK_PROBABILISTIC(level, prob) \
-  if (level <= ::IMP::base::get_check_level() \
-      && boost::uniform_real<>(0,1)(IMP::base::random_number_generator) < prob)
-
-
 #define IMP_CHECK_CODE(expr) expr
 
+#if IMP_BASE_HAS_LOG4CXX
+#define IMP_BASE_CONTEXT
+#else
+#define IMP_BASE_CONTEXT << IMP::base::get_context_message()
+#endif
+
+
+
+#else // IMP_HAS_CHECKS == IMP_NONE
+#define IMP_IF_CHECK(level) if (0)
+#define IMP_CHECK_CODE(expr)
+#endif // IMP_HAS_CHECKS
+
+#if IMP_HAS_CHECKS >= IMP_INTERNAL
 #define IMP_INTERNAL_CHECK(expr, message)                               \
   do {                                                                  \
     if (IMP::base::get_check_level()                                    \
@@ -215,7 +258,7 @@
       std::ostringstream imp_check_oss;                                 \
       imp_check_oss << "Internal check failure: " << message << std::endl \
                    << "  File \"" << __FILE__ << "\", line " << __LINE__ \
-                   << IMP::base::get_context_message()                  \
+        IMP_BASE_CONTEXT                                                \
                    << std::endl;                                        \
       IMP::base::handle_error(imp_check_oss.str().c_str());              \
       throw IMP::base::InternalException(imp_check_oss.str().c_str());   \
@@ -227,14 +270,18 @@
                      .1*std::abs((expra)+(exprb))+.1,                   \
                      (expra) << " != " << (exprb)                       \
                      << " - " << message)
+#else
+#define IMP_INTERNAL_CHECK(expr, message)
+#define IMP_INTERNAL_CHECK_FLOAT_EQUAL(expra, exprb, message)
+#endif
 
-
+#if IMP_HAS_CHECKS >= IMP_USAGE
 #define IMP_USAGE_CHECK(expr, message)                                  \
   do {                                                                  \
     if (IMP::base::get_check_level() >= IMP::base::USAGE && !(expr)) {  \
       std::ostringstream imp_check_oss;                                 \
       imp_check_oss << "Usage check failure: " << message               \
-                    << IMP::base::get_context_message()                 \
+        IMP_BASE_CONTEXT                                                \
                     << std::endl;                                       \
       IMP::base::handle_error(imp_check_oss.str().c_str());             \
       throw IMP::base::UsageException(imp_check_oss.str().c_str());     \
@@ -245,27 +292,21 @@
                   < .1*std::abs((expra)+(exprb))+.1,                    \
                   expra << " != " << exprb                              \
                   <<" - " <<  message)
-
-#else // IMP_BUILD < IMP_FAST
-#define IMP_IF_CHECK(level) if (0)
-#define IMP_IF_CHECK_PROBABILISTIC(level, prob) if (0)
-#define IMP_CHECK_CODE(expr)
-#define IMP_INTERNAL_CHECK(expr, message)
-#define IMP_INTERNAL_CHECK_FLOAT_EQUAL(expra, exprb, message)
+#else
 #define IMP_USAGE_CHECK(expr, message)
 #define IMP_USAGE_CHECK_FLOAT_EQUAL(expra, exprb, message)
-#endif // IMP_BUILD < IMP_FAST
-
-
+#endif
 
 #endif // IMP_DOXYGEN
 
-#if defined(IMP_DOXYGEN) || IMP_BUILD == IMP_FAST
+#if defined(IMP_DOXYGEN) || IMP_HAS_CHECKS == IMP_NONE
 //! Perform some basic validity checks on the object for memory debugging
-#define IMP_CHECK_OBJECT(obj)
-#define IMP_CHECK_OBJECT_IF_NOT_nullptr(obj)
+#define IMP_CHECK_OBJECT(obj) IMP_UNUSED(obj)
+#define IMP_CHECK_OBJECT_IF_NOT_nullptr(obj) IMP_UNUSED(obj)
 #else
+
 #define IMP_CHECK_OBJECT(obj) do {                                      \
+    IMP_UNUSED(obj);                                                    \
     IMP_INTERNAL_CHECK((obj), "nullptr object");                           \
     IMP_INTERNAL_CHECK((obj)->get_is_valid(), "Check object "           \
                        << static_cast<const void*>(obj)                 \

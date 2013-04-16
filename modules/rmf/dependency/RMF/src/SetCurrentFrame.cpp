@@ -2,11 +2,15 @@
  *  \file RMF/Category.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
 #include <RMF/SetCurrentFrame.h>
+
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DEF(SetCurrentFrame);
 
 namespace RMF {
 SetCurrentFrame::SetCurrentFrame(FileConstHandle file,
@@ -24,3 +28,5 @@ SetCurrentFrame::~SetCurrentFrame() {
   old_frame_.set_as_current_frame();
 }
 }
+
+RMF_DISABLE_WARNINGS

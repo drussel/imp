@@ -4,13 +4,13 @@ import IMP.core
 import IMP.algebra
 import random
 
-class TestREFCover(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Tests for RefinerCover"""
 
     def test_it(self):
         """Test centroid of refined decorator"""
         m= IMP.Model()
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         n= random.randrange(1,10)
         ps=IMP.core.create_xyzr_particles(m, 10, 1)
         fpr= IMP.core.FixedRefiner(ps)

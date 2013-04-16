@@ -13,7 +13,7 @@
 #include <boost/graph/graph_utility.hpp>
 #include <IMP/multifit/multifit_config.h>
 #include <IMP/atom/Hierarchy.h>
-#include <IMP/compatibility/map.h>
+#include <IMP/base/map.h>
 #include <boost/graph/kruskal_min_spanning_tree.hpp>
 #include <boost/graph/prim_minimum_spanning_tree.hpp>
 
@@ -26,8 +26,8 @@ namespace MTU {
   typedef boost::graph_traits<DependencyGraph>::edge_descriptor DGEdge;
   typedef DependencyGraph::edge_property_type DGWeight;
   typedef boost::graph_traits<DependencyGraph>::vertex_descriptor DGVertex;
-  typedef compatibility::map<Particle *, DGVertex> PVMAP;
-  typedef compatibility::map<DGVertex,Particle *> VPMAP;
+  typedef base::map<Particle *, DGVertex> PVMAP;
+  typedef base::map<DGVertex,Particle *> VPMAP;
 };
 
 class IMPMULTIFITEXPORT DummyRestraint : public Restraint {
@@ -85,7 +85,7 @@ public:
     out << std::endl;
     out << "edges:";
     boost::graph_traits<MTU::DependencyGraph>::edge_iterator ei, ei_end;
-    for (tie(ei, ei_end) = edges(g_); ei != ei_end; ++ei)
+    for (boost::tie(ei, ei_end) = edges(g_); ei != ei_end; ++ei)
       out << "(" << node2mol_.find(source(*ei, g_))->second->get_name()
           << "," << node2mol_.find(target(*ei, g_))->second->get_name()
           << ","<<boost::get(boost::edge_weight_t(),g_,*ei)<<")"<<std::endl;

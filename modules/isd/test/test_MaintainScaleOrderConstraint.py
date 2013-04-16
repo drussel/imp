@@ -14,12 +14,12 @@ from IMP.isd import Scale,JeffreysRestraint,MaintainScaleOrderConstraint
 #unit testing framework
 import IMP.test
 
-class TestMaintainScaleOrderConstraint(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         self.m = IMP.Model()
         self.n_sigmas = 20
         self.lower=0.1

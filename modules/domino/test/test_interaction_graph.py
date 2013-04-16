@@ -10,14 +10,14 @@ class NullStates(IMP.domino.ParticleStates):
         IMP.domino.ParticleStates.__init__(self)
     def get_number_of_particle_states(self):
         return 1
-class DOMINOTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def test_global_min2(self):
         """Test that more involved graphs are fine"""
         m= IMP.Model()
         aps=[]
         rbs=[]
         for i in range(3):
-            ps= IMP._create_particles_from_pdb(self.get_input_file_name("small_protein.pdb"), m)
+            ps= IMP.kernel._create_particles_from_pdb(self.get_input_file_name("small_protein.pdb"), m)
             p= IMP.Particle(m)
             p.set_name("protein"+str(i))
             aps.extend(ps)
@@ -38,7 +38,7 @@ class DOMINOTests(IMP.test.TestCase):
         del w
         print "done"
         vs= g.get_vertices()
-        IMP.show_graphviz(g)
+        #IMP.show_graphviz(g)
         for v in vs:
             print v
             l= g.get_vertex_name(v)
@@ -49,8 +49,8 @@ class DOMINOTests(IMP.test.TestCase):
     def test_global_min3(self):
         """Test that showing interaction graphs is fine"""
         m= IMP.Model()
-        IMP.set_log_level(IMP.SILENT)
-        ps= IMP._create_particles_from_pdb(self.get_input_file_name("small_protein.pdb"), m)
+        IMP.base.set_log_level(IMP.base.SILENT)
+        ps= IMP.kernel._create_particles_from_pdb(self.get_input_file_name("small_protein.pdb"), m)
         #print "radius is ", IMP.core.XYZR(IMP.atom.get_leaves(p)[0]).get_radius()
         #exit(1)
         #sp= IMP.atom.get_simplified_by_residue(p, 1)
@@ -80,8 +80,8 @@ class DOMINOTests(IMP.test.TestCase):
         """Test that simple interaction graphs are fine"""
         m= IMP.Model()
         ps=[]
-        IMP.set_log_level(IMP.VERBOSE)
-        m.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.base.SILENT)
+        m.set_log_level(IMP.base.SILENT)
         for i in range(3):
             p = IMP.Particle(m)
             d= IMP.core.XYZ.setup_particle(p)
@@ -104,7 +104,7 @@ class DOMINOTests(IMP.test.TestCase):
         del w
         print g
         vs= g.get_vertices()
-        IMP.show_graphviz(g)
+        #IMP.show_graphviz(g)
         for v in vs:
             print v
             l= g.get_vertex_name(v)

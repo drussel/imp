@@ -10,6 +10,7 @@
 #define IMPEM2D_TIFF_IMAGE_READER_WRITER_H
 
 #include "IMP/em2d/ImageReaderWriter.h"
+#include <boost/filesystem.hpp>
 
 IMPEM2D_BEGIN_NAMESPACE
 
@@ -47,7 +48,7 @@ public:
   */
   void read_from_ints(const String &filename,
                           em::ImageHeader &header,cv::Mat &data) const {
-    IMP_LOG(VERBOSE,"reading with TIFFImageReaderWriter" << std::endl);
+    IMP_LOG_VERBOSE("reading with TIFFImageReaderWriter" << std::endl);
     // read
     cv::Mat temp= cv::imread(filename,0);
     if(temp.empty()) {
@@ -75,7 +76,7 @@ public:
                   "discards image header " << std::endl);
     // check extension
     String ext=boost::filesystem::extension(filename);
-    IMP_LOG(VERBOSE,"TIFFImageReaderWriter writting to "
+    IMP_LOG_VERBOSE("TIFFImageReaderWriter writting to "
             << filename <<std::endl);
     if(ext!=".tiff" && ext!=".tif") {
       IMP_THROW("TIFFImageReaderWriter: The filename extension is not .tiff "

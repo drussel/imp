@@ -20,8 +20,8 @@
 #include <IMP/Restraint.h>
 #include <IMP/base/log.h>
 
-#ifdef IMP_DOMINO_USE_RMF
-#include <RMF/HDF5Group.h>
+#if IMP_DOMINO_HAS_RMF
+#include <RMF/HDF5/Group.h>
 #endif
 
 
@@ -45,9 +45,9 @@ class IMPDOMINOEXPORT RestraintCache: public base::Object {
   IMP_NAMED_TUPLE_2(SetData, SetDatas, RestraintSetDatas, members,
                     double, max,);
   class Generator {
-    typedef compatibility::map<Restraint*, RestraintData> RMap;
+    typedef base::map<Restraint*, RestraintData> RMap;
     RMap rmap_;
-    typedef compatibility::map<Restraint*, SetData> SMap;
+    typedef base::map<Restraint*, SetData> SMap;
     SMap sets_;
     OwnerPointer<ParticleStatesTable> pst_;
    public:
@@ -66,7 +66,7 @@ class IMPDOMINOEXPORT RestraintCache: public base::Object {
           e= it->second.get_scoring_function()->evaluate_if_below(false,
                                               it->second.get_max());
         }
-        IMP_LOG(TERSE, "Restraint " << Showable(k.get_restraint())
+        IMP_LOG_TERSE( "Restraint " << Showable(k.get_restraint())
                 << " evaluated to " << e << " on " << k.get_assignment()
                 << " vs " << it->second.get_max() << std::endl);
         // prob can go away with ScoreFunction change
@@ -88,7 +88,7 @@ class IMPDOMINOEXPORT RestraintCache: public base::Object {
             break;
           }
         }
-        IMP_LOG(TERSE, "Restraint " << Showable(k.get_restraint())
+        IMP_LOG_TERSE( "Restraint " << Showable(k.get_restraint())
                   << " evaluated to " << total << " on " << k.get_assignment()
                   << " with max " << it->second.get_max() << std::endl);
         if (total>= it->second.get_max()) {
@@ -126,7 +126,7 @@ class IMPDOMINOEXPORT RestraintCache: public base::Object {
       return std::abs(a-b) < .1*(a+b)+.1;
     }
   };
-  typedef compatibility::map<Particle*, ParticlesTemp> DepMap;
+  typedef base::map<Particle*, ParticlesTemp> DepMap;
   void add_restraint_internal(Restraint *r,
                               unsigned int index,
                               RestraintSet *parent,
@@ -147,10 +147,10 @@ class IMPDOMINOEXPORT RestraintCache: public base::Object {
                     const DepMap &dependencies) const;
   typedef base::LRUCache<Generator, ApproximatelyEqual> Cache;
   Cache cache_;
-  typedef compatibility::map<Pointer<Restraint>, Subset> KnownRestraints;
+  typedef base::map<Pointer<Restraint>, Subset> KnownRestraints;
   KnownRestraints known_restraints_;
   // assign a unique index to each restraint for use with I/O
-  typedef compatibility::map<Pointer<Restraint>, int> RestraintIndex;
+  typedef base::map<Pointer<Restraint>, int> RestraintIndex;
   RestraintIndex restraint_index_;
   unsigned int next_index_;
 public:
@@ -191,7 +191,7 @@ public:
 
   RestraintsTemp get_restraints() const;
 
-#if defined(IMP_DOMINO_USE_RMF) || defined(IMP_DOXYGEN)
+#if IMP_DOMINO_HAS_RMF || defined(IMP_DOXYGEN)
   /** This assumes that restraints are always added to the cache
       in the same order.
       \param[in] particle_ordering An ordering for the particles.
@@ -202,10 +202,10 @@ public:
   */
   void save_cache(const ParticlesTemp &particle_ordering,
                   const RestraintsTemp &restraints,
-                  RMF::HDF5Group group,
+                  RMF::HDF5::Group group,
                   unsigned int max_entries);
   void load_cache(const ParticlesTemp &ps,
-                  RMF::HDF5ConstGroup group);
+                  RMF::HDF5::ConstGroup group);
 #endif
 
   /** Return the slice for that restraint given the subset. */

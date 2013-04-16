@@ -19,12 +19,12 @@ from IMP.isd.FileBasedGrid import FileBasedGrid
 from IMP.isd.hosts import create_host_list
 import IMP.isd.shared_functions as sf
 
-class TestCommunication(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
 
     def setUp(self):
         IMP.test.TestCase.setUp(self)
-        #IMP.set_log_level(IMP.MEMORY)
-        IMP.set_log_level(0)
+        #IMP.base.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(0)
         #setup host list
         self.hostlist = ['localhost']
         self.tmpdir = '/tmp'
@@ -36,7 +36,7 @@ class TestCommunication(IMP.test.TestCase):
         self.window_size = '80x25'
         self.hosts=create_host_list(self.hostlist, self.tmpdir)
         imppy=os.path.abspath(
-        os.path.join(os.getenv('IMP_ISD_DATA'),'../../tools/imppy.sh'))
+        os.path.join(os.getenv('IMP_DATA'),'../../tools/imppy.sh'))
         for host in self.hosts:
             host.init_cmd = imppy + ' !'
 

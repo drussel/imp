@@ -2,7 +2,7 @@ import IMP
 import IMP.multifit
 import IMP.test
 import sys
-class MolCoarseningTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     def setUp(self):
         IMP.test.TestCase.setUp(self)
         self.mdl=IMP.Model()
@@ -14,7 +14,7 @@ class MolCoarseningTests(IMP.test.TestCase):
             self.get_input_file_name("1z5s_B.pdb"),
             self.mdl))
 
-        IMP.set_log_level(IMP.SILENT)
+        IMP.base.set_log_level(IMP.base.SILENT)
     def test_coarsening(self):
         cmhs=IMP.multifit.create_coarse_molecules_from_molecules(
             self.mhs,30,self.mdl,5)

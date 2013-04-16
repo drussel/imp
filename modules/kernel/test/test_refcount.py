@@ -2,7 +2,7 @@ import IMP
 import IMP.test
 import sys
 
-class RefCountTests(IMP.test.TestCase):
+class Tests(IMP.test.TestCase):
     """Test refcounting of particles"""
 
     def test_simple(self):
@@ -21,7 +21,7 @@ class RefCountTests(IMP.test.TestCase):
 
     def test_delete_model_accessor(self):
         "Python Particles from vector accessors should survive model deletion"
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         refcnt = IMP.test.RefCountChecker(self)
         m= IMP.Model("test model")
         IMP.Particle(m)
@@ -50,10 +50,10 @@ class RefCountTests(IMP.test.TestCase):
 
     def test_delete_model_accessor_restraint(self):
         "Python restraints from vector accessors should survive model deletion"
-        IMP.set_log_level(IMP.MEMORY)
+        IMP.base.set_log_level(IMP.MEMORY)
         refcnt = IMP.test.RefCountChecker(self)
         m= IMP.Model("test model")
-        r=IMP._ConstRestraint(1)
+        r=IMP.kernel._ConstRestraint(1)
         print "adding"
         m.add_restraint(r)
         print r
@@ -129,21 +129,31 @@ class RefCountTests(IMP.test.TestCase):
     def test_simple_rest(self):
         """Check reference counting of restraints"""
         refcnt = IMP.test.RefCountChecker(self)
-        m= IMP.Model("ref counted restraints")
-        r= IMP._ConstRestraint(1)
-        s= IMP.RestraintSet()
+        IMP.base.set_log_level(IMP.base.MEMORY)
+        m= IMP.Model("M")
+        r= IMP.kernel._ConstRestraint(1)
+        r.set_name("R")
+        s= IMP.RestraintSet("S")
+        print "add s to m"
         m.add_restraint(s)
+        print "add r to m"
         m.add_restraint(r)
+        print "add r to s"
         s.add_restraint(r)
-        m.evaluate(False)
+        """m.evaluate(False)
         refcnt.assert_number(3)
         # Model should hold a ref to restraints, so nothing should be freed
         # until it is
+"""
+        print r.get_ref_count(), s.get_ref_count(), m.get_ref_count()
         del r
         refcnt.assert_number(3)
+        print s.get_ref_count(), m.get_ref_count()
         del s
         refcnt.assert_number(3)
+        print m.get_ref_count()
         del m
+        print "check"
         refcnt.assert_number(0)
 
     def test_delete_model_iterator(self):
@@ -213,7 +223,7 @@ class RefCountTests(IMP.test.TestCase):
         m= IMP.Model("sequence ref counting")
         p= IMP.Particle(m)
         ps= m.get_particles()
-        print IMP._take_particles(ps)
+        print IMP.kernel._take_particles(ps)
         del m
         del ps
         del p

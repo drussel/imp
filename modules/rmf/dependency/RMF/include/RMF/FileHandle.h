@@ -2,7 +2,7 @@
  *  \file RMF/FileHandle.h
  *  \brief Handle read/write of Model data from/to files.
  *
- *  Copyright 2007-2012 IMP Inventors. All rights reserved.
+ *  Copyright 2007-2013 IMP Inventors. All rights reserved.
  *
  */
 
@@ -16,9 +16,11 @@
 #include "NodeHandle.h"
 #include "FrameHandle.h"
 
+RMF_ENABLE_WARNINGS
+
+RMF_VECTOR_DECL(FileHandle);
 
 namespace RMF {
-class HDF5Group;
 
 //! A handle for an RMF file
 /** Use this handle to perform operations relevant to the
@@ -110,8 +112,6 @@ public:
   void flush();
 };
 
-typedef vector<FileHandle> FileHandles;
-
 /**
    Create an RMF from a file system path.
 
@@ -139,5 +139,7 @@ RMFEXPORT FileHandle open_rmf_file(std::string path);
 
 
 } /* namespace RMF */
+
+RMF_DISABLE_WARNINGS
 
 #endif /* RMF_FILE_HANDLE_H */
