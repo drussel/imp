@@ -91,11 +91,11 @@ protected:
   // delta for value
   double delta_;
 
+ public:
   IMP_SHOWABLE_INLINE(DirectionalDOF, {
       out << "(direction dof from " << endpoint1_ << " to " << endpoint2_
           << " ; step number " << current_step_number_ << ")";
     });
-
 
 };
 

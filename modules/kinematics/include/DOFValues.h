@@ -45,6 +45,7 @@ public:
     return sqrt(distance2(other_dof_values));
   }
 
+ public:
   IMP_SHOWABLE_INLINE(DOFValues,
                       {
                         out << "[";
