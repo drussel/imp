@@ -79,7 +79,6 @@ target_link_libraries(_IMP_kinematics
     imp_kinematics
     ${IMP_BASE_LIBRARY}
 ${IMP_CGAL_LIBRARY}
-${IMP_TEST_LIBRARY}
 ${IMP_ALGEBRA_LIBRARY}
 ${IMP_KERNEL_LIBRARY}
 ${IMP_DISPLAY_LIBRARY}

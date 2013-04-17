@@ -116,7 +116,6 @@ foreach (test ${cpp_tests})
    target_link_libraries("kinematics.${name}"     imp_kinematics
     ${IMP_BASE_LIBRARY}
 ${IMP_CGAL_LIBRARY}
-${IMP_TEST_LIBRARY}
 ${IMP_ALGEBRA_LIBRARY}
 ${IMP_KERNEL_LIBRARY}
 ${IMP_DISPLAY_LIBRARY}
@@ -156,7 +155,6 @@ foreach (test ${mdcpp_tests})
    target_link_libraries("kinematics.${name}"     imp_kinematics
     ${IMP_BASE_LIBRARY}
 ${IMP_CGAL_LIBRARY}
-${IMP_TEST_LIBRARY}
 ${IMP_ALGEBRA_LIBRARY}
 ${IMP_KERNEL_LIBRARY}
 ${IMP_DISPLAY_LIBRARY}
@@ -195,7 +193,6 @@ foreach (test ${excpp_tests})
    target_link_libraries("kinematics.${name}"     imp_kinematics
     ${IMP_BASE_LIBRARY}
 ${IMP_CGAL_LIBRARY}
-${IMP_TEST_LIBRARY}
 ${IMP_ALGEBRA_LIBRARY}
 ${IMP_KERNEL_LIBRARY}
 ${IMP_DISPLAY_LIBRARY}

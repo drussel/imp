@@ -45,7 +45,22 @@ public:
     return sqrt(distance2(other_dof_values));
   }
 
+  IMP_SHOWABLE_INLINE(DOFValues,
+                      {
+                        out << "[";
+                        if(size()>0) {
+                          out << operator[](0);
+                        }
+                        for(unsigned int i=1 ; i < size(); i++) {
+                          out << "," << operator[](i);
+                        }
+                        out << "]";
+                      }
+                      );
+
 };
+
+IMP_VALUES(DOFValues, DOFValuesList);
 
 IMPKINEMATICS_END_NAMESPACE
 
